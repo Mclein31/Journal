@@ -99,3 +99,6 @@ The user explicitly rejected coded sticker art and requested ChatGPT generation,
 
 ## 2026-11-05 — Git scope and author attribution
 User explicitly requested commit and push with no co-author trailer. The project had no Git metadata or remote. Initialize at the project root, track application source, generated public art, tests and `.brain`, and exclude `MyJournal/assets/` (private source media) plus `MyLittleWorld/` (Obsidian vault). A repository URL is required to select the push destination; do not invent one or publish to a new public repository.
+
+## 2026-11-05 — Repository destination and focused commits
+The user supplied `https://github.com/Mclein31/Journal.git` and explicitly requested multiple focused commits with no co-author attribution. `origin` uses that URL; `main` tracks `origin/main`. The empty destination accepted the five local commits without rewriting remote history. Keep future implementation, assets, tests and documentation in appropriate focused commits.

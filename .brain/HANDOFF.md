@@ -62,7 +62,7 @@ Phase 1 files: `src/book/{Book,layout,flip,Tabs,PageView,SectionManager}.ts`, `s
 - TypeScript 7 is the native compiler. If an option errors, use the modern equivalent instead of downgrading.
 - Tear tool (Phase 6): use the `polygon-clipping` npm package for the polygon split. Don't hand-roll it.
 - Only `VITE_*` env vars reach the browser. Never prefix a secret with `VITE_`. `.env` values are empty until Phase 10.
-- User explicitly authorized Git initialization as needed, committing and pushing on 2026-11-05. Use no co-author trailers. A push destination must be supplied before publishing; none was configured at the time of this update.
+- User explicitly authorized Git initialization as needed, committing and pushing on 2026-11-05. Use no co-author trailers. The user supplied `https://github.com/Mclein31/Journal.git`; `origin` now uses that URL and `main` tracks `origin/main`.
 
 ## Keep the brain current
 After each phase: tick it in `.brain/TODO.md`, add a line to `.brain/CHANGELOG.md`, and log any new
@@ -105,4 +105,4 @@ decision in `.brain/DECISIONS.md`. Update this HANDOFF.md if you stop mid-phase.
 - PNG originals are transparent 1254×1254; the full collection totals 43,644,990 bytes. The original images remain unmodified. Preview: `validation/generated-sticker-preview.png`; generation records: `validation/sticker-generation.json`.
 - `vite.config.ts` raises the Workbox per-file limit to 3 MiB so three larger images do not break production builds. All 30 URLs are confirmed in `dist/sw.js`; do not lower this limit without checking asset sizes. Full first-install precache is about 42 MiB.
 - Current verification: 81 tests pass, TypeScript passes, production/PWA build passes. Each raster has editing/persistence workflow coverage and real decoded-alpha checks. Tests simulate DOM/geometry/native APIs; actual browser/touch/install/offline execution remains pending under the Chrome access restriction.
-- User authorized commit/push and required no co-author attribution. Root Git initialization is now authorized; no destination remote was supplied. Root ignore rules exclude env, source photos, Obsidian vault, dependencies, generated builds and tool screenshots.
+- Git is initialized at the project root. The user supplied `https://github.com/Mclein31/Journal.git`; `origin` is configured and the five focused implementation/test/documentation commits were pushed to `main`. Use multiple focused commits and no co-author attribution. Root ignore rules exclude env, source photos, Obsidian vault, dependencies, generated builds and tool screenshots.

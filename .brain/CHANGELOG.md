@@ -127,3 +127,7 @@ last_updated: 2026-11-04
 - Fixed the production PWA build's 2 MiB per-file limit for three larger images; the limit is now 3 MiB. Confirmed all 30 PNGs appear in the built service-worker precache manifest (57 entries, about 42 MiB total). Actual offline execution still needs browser QA.
 - Validation: TypeScript and production/PWA build pass; all 81 automated checks pass, including every sticker's placement, cross-spine drag, resize/rotation, duplicate, effects, delete/undo and IndexedDB reload. Independent review found no additional integration blocker. Real browser/device rendering and native behavior remain unverified because computer-use access was denied.
 - User requested commit/push without co-author attribution. Initialize Git at project root, excluding env files, private source media, the Obsidian vault, dependencies and build outputs. No remote destination exists; repository URL requested from user before pushing.
+
+## 2026-11-05 — GitHub repository connected
+- Replaced the initial combined local commit with five focused commits: legacy/setup, journal editor, generated stickers/offline caching, tests, and documentation. Final application files are identical; the intermediate editor commit also passes its production/PWA build. No co-author trailers.
+- Configured `origin` as `https://github.com/Mclein31/Journal.git`, confirmed it had no existing branches, and pushed `main` with upstream tracking.

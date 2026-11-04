@@ -73,4 +73,4 @@ last_updated: 2026-11-05
 - [x] All 81 automated checks, TypeScript, production/PWA build, all 30 assets present in precache manifest
 - [x] Visually review all 30 generated assets in the contact sheet
 - [ ] Real browser/device rendering, touch, native install and offline runtime QA (Chrome access denied)
-- [ ] Push authorized commit after user provides a destination repository URL
+- [x] Push focused commits to `https://github.com/Mclein31/Journal.git` (`main` tracks `origin/main`)

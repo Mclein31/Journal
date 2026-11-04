@@ -1,0 +1,11 @@
+{
+  "name": "My Little World",
+  "short_name": "Little World",
+  "description": "A cozy journal, schedule, and photo gallery — just for you.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdf0ee",
+  "theme_color": "#f2879e",
+  "orientation": "any",
+  "icons": []
+}

@@ -1,0 +1,14 @@
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.dev.vars*
+node_modules/
+dist/
+coverage/
+.vite/
+.wrangler/
+.playwright-mcp/
+MyJournal/assets/
+MyLittleWorld/

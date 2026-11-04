@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A cozy journal, schedule, and photo gallery — just for you."
+    />
+    <meta name="theme-color" content="#f2879e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <title>✿ My Little World ✿</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Noto+Sans+KR:wght@400;500;700&family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- HEADER -->
+      <header class="header">
+        <h1>✿ My Little World ✿</h1>
+        <p class="header-sub">a cozy corner, just for you ♡</p>
+        <p class="header-clock" id="clock"></p>
+        <p
+          class="save-status"
+          id="save-status"
+          data-state="saved"
+          aria-live="polite"
+        >
+          All changes saved
+        </p>
+      </header>
+
+      <div class="install-banner" id="install-banner" hidden>
+        <span>Install My Little World on your device for quick access</span>
+        <button
+          type="button"
+          class="btn btn-p btn-sm"
+          onclick="promptInstall()"
+        >
+          Install
+        </button>
+        <button
+          type="button"
+          class="banner-close"
+          onclick="hideInstallBanner()"
+          aria-label="Dismiss"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- NAV -->
+      <nav class="nav" role="navigation" aria-label="Main">
+        <button
+          type="button"
+          class="nb active"
+          onclick="switchTab('schedule', this)"
+          aria-current="page"
+        >
+          <span>📅</span><span class="nav-label">Schedule</span>
+          <span class="nb-badge" id="bs">0</span>
+        </button>
+        <button type="button" class="nb" onclick="switchTab('journal', this)">
+          <span>📖</span><span class="nav-label">Journal</span>
+          <span class="nb-badge" id="bj">0</span>
+        </button>
+        <button type="button" class="nb" onclick="switchTab('gallery', this)">
+          <span>🎞️</span><span class="nav-label">Gallery</span>
+          <span class="nb-badge" id="bg">0</span>
+        </button>
+      </nav>
+
+      <!-- ═══════ SCHEDULE TAB ═══════ -->
+      <div class="tab active" id="tab-schedule">
+        <div class="quote-box">
+          <p id="qt"></p>
+          <span id="qa"></span>
+        </div>
+        <div class="sec-hd">
+          <h2>My <span>Schedule</span> ✨</h2>
+          <button class="btn btn-p btn-sm" onclick="openTask()">
+            ＋ Add Task
+          </button>
+        </div>
+
+        <!-- Stats / Progress Rings -->
+        <div class="stats-strip">
+          <div class="sc">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 36 36" width="54" height="54">
+                <circle class="ring-bg" cx="18" cy="18" r="15" />
+                <circle
+                  class="ring-fg"
+                  id="ring-tot"
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  stroke-dasharray="94.2"
+                  stroke-dashoffset="94.2"
+                />
+              </svg>
+              <div class="ring-label" id="sTot">0</div>
+            </div>
+            <div class="sl">Total</div>
+          </div>
+          <div class="sc">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 36 36" width="54" height="54">
+                <circle class="ring-bg" cx="18" cy="18" r="15" />
+                <circle
+                  class="ring-fg"
+                  id="ring-done"
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  stroke-dasharray="94.2"
+                  stroke-dashoffset="94.2"
+                  style="stroke: var(--a3)"
+                />
+              </svg>
+              <div class="ring-label" id="sDone" style="color: var(--a3)">
+                0
+              </div>
+            </div>
+            <div class="sl">Done</div>
+          </div>
+          <div class="sc">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 36 36" width="54" height="54">
+                <circle class="ring-bg" cx="18" cy="18" r="15" />
+                <circle
+                  class="ring-fg"
+                  id="ring-today"
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  stroke-dasharray="94.2"
+                  stroke-dashoffset="94.2"
+                  style="stroke: var(--a4)"
+                />
+              </svg>
+              <div class="ring-label" id="sToday" style="color: var(--a4)">
+                0
+              </div>
+            </div>
+            <div class="sl">Today</div>
+          </div>
+        </div>
+
+        <!-- Mini Calendar -->
+        <div class="cal-wrap">
+          <div class="cal-head">
+            <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+            <h3 id="cal-title"></h3>
+            <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <span class="s-icon">🔍</span>
+          <input
+            type="text"
+            id="search-in"
+            class="font-body"
+            placeholder="Search tasks by title or notes…"
+            oninput="onSearch(this.value)"
+            autocomplete="off"
+          />
+          <button
+            class="s-clear"
+            id="s-clear"
+            onclick="clearSearch()"
+            style="display: none"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-row">
+          <button class="chip active" onclick="setF('all', this)">All</button>
+          <button class="chip" onclick="setF('personal', this)">
+            🌸 Personal
+          </button>
+          <button class="chip" onclick="setF('work', this)">💼 Work</button>
+          <button class="chip" onclick="setF('health', this)">🌿 Health</button>
+          <button class="chip" onclick="setF('creative', this)">
+            🎨 Creative
+          </button>
+          <button class="chip" onclick="setF('study', this)">📚 Study</button>
+          <button class="chip" onclick="setF('social', this)">💬 Social</button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <select class="sSort" onchange="setSort(this.value)">
+            <option value="date">Sort by Date</option>
+            <option value="priority">Sort by Priority</option>
+            <option value="category">Sort by Category</option>
+            <option value="az">A → Z</option>
+          </select>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--tl)"
+              >Show completed</span
+            >
+            <div class="tog on" id="sdTog" onclick="toggleShowDone()"></div>
+          </div>
+        </div>
+
+        <div class="task-list" id="task-list"></div>
+      </div>
+
+      <!-- ═══════ JOURNAL TAB ═══════ -->
+      <div class="tab" id="tab-journal">
+        <div class="j-layout">
+          <div class="j-top">
+            <h2
+              style="
+                font-family: var(--fd);
+                font-size: 1.5rem;
+                font-style: italic;
+                color: var(--text);
+              "
+            >
+              My <span style="color: var(--a2)">Journal</span> 📖
+            </h2>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button class="btn btn-g btn-sm" onclick="toggleIdx()">
+                ☰ Entries
+              </button>
+              <button class="btn btn-p btn-sm" onclick="openJournal()">
+                ✒️ New Entry
+              </button>
+            </div>
+          </div>
+
+          <!-- Entry Index Panel -->
+          <div class="j-idx" id="j-idx" style="display: none">
+            <div class="j-idx-hd">
+              <span>All Entries</span>
+              <button
+                class="iBtn"
+                onclick="toggleIdx()"
+                style="width: 26px; height: 26px; font-size: 0.78rem"
+              >
+                ✕
+              </button>
+            </div>
+            <div id="idx-list"></div>
+            <div
+              id="idx-empty"
+              style="
+                padding: 18px;
+                text-align: center;
+                color: var(--txl);
+                font-family: var(--fb);
+                font-size: 0.98rem;
+                display: none;
+              "
+            >
+              No entries yet ♡
+            </div>
+          </div>
+
+          <!-- Book -->
+          <div class="book-scene">
+            <div class="book" id="the-book">
+              <div class="b-lines"></div>
+              <div class="b-margin"></div>
+              <div class="b-ribbon"></div>
+              <div class="b-content" id="b-content"></div>
+              <div class="b-fold"></div>
+              <div class="p-foot">
+                <span class="p-num" id="pnum"></span>
+                <div class="p-acts" id="pacts"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Journal Nav -->
+          <div class="j-nav">
+            <button class="btn btn-g btn-sm" onclick="goPage(-1)">
+              ← Prev
+            </button>
+            <span class="plabel" id="plabel">—</span>
+            <button class="btn btn-g btn-sm" onclick="goPage(1)">Next →</button>
+          </div>
+
+          <!-- Journal Search -->
+          <div class="search-wrap" style="width: 100%; max-width: 720px">
+            <span class="s-icon">🔍</span>
+            <input
+              type="text"
+              id="j-search"
+              class="font-body"
+              placeholder="Search journal entries…"
+              oninput="onJSearch(this.value)"
+              autocomplete="off"
+            />
+            <button
+              class="s-clear"
+              id="js-clear"
+              onclick="clearJSearch()"
+              style="display: none"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Journal Meta Bar (word count, chars, date) -->
+          <div class="j-meta-bar" id="j-meta-bar"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ GALLERY TAB ═══════ -->
+      <div class="tab" id="tab-gallery">
+        <div class="sec-hd">
+          <h2>My <span>Gallery</span> 🎞️</h2>
+          <div
+            style="
+              display: flex;
+              gap: 8px;
+              flex-wrap: wrap;
+              align-items: center;
+            "
+          >
+            <button class="vtBtn on" id="vCL" onclick="setGV('clothesline')">
+              🧺 Line
+            </button>
+            <button class="vtBtn" id="vGR" onclick="setGV('grid')">
+              ⊞ Grid
+            </button>
+            <button
+              class="btn btn-p btn-sm"
+              onclick="document.getElementById('fi').click()"
+            >
+              ＋ Photos
+            </button>
+          </div>
+        </div>
+
+        <!-- Clothesline View -->
+        <div id="cl-view">
+          <div class="clothesline-scene">
+            <div class="clothesline-inner">
+              <div class="photos-track" id="photos-track"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <div class="gg" id="gv"></div>
+
+        <!-- Upload Zone -->
+        <div
+          class="upload-z"
+          id="upz"
+          onclick="document.getElementById('fi').click()"
+          ondragover="
+            event.preventDefault();
+            this.classList.add('drag');
+          "
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)"
+        >
+          <div class="ui">📷</div>
+          <p>
+            <strong>Click to upload</strong> or drag & drop your photos<br />Hang
+            them on the line like memories ♡
+          </p>
+        </div>
+        <input
+          type="file"
+          id="fi"
+          accept="image/*"
+          multiple
+          style="display: none"
+          onchange="handleUpload(event)"
+        />
+
+        <div class="empty-st" id="gEmpty" style="display: none">
+          <div class="ei">🖼️</div>
+          <h3>Your clothesline is empty…</h3>
+          <p>Upload photos to hang your memories!</p>
+        </div>
+      </div>
+    </div>
+    <!-- /app -->
+
+    <!-- Settings FAB Group -->
+    <div class="fab-group">
+      <button
+        class="fab-sm fab-kb"
+        onclick="toggleKB()"
+        title="Keyboard shortcuts"
+      >
+        ⌨️
+      </button>
+      <button
+        class="fab fab-main"
+        onclick="openModal('set-modal')"
+        title="Settings"
+      >
+        ⚙️
+      </button>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="tc" id="tc"></div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Welcome Splash -->
+    <div class="splash" id="splash">
+      <h1>✿ My Little World ✿</h1>
+      <p>Loading your cozy corner…</p>
+      <div class="splash-dots">
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Panel -->
+    <div class="kbPanel" id="kb-panel">
+      <h4>⌨️ Keyboard Shortcuts</h4>
+      <div class="kb-row">
+        <span>Add new task</span><kbd class="kb-key">N</kbd>
+      </div>
+      <div class="kb-row">
+        <span>New journal entry</span><kbd class="kb-key">J</kbd>
+      </div>
+      <div class="kb-row">
+        <span>Open settings</span><kbd class="kb-key">S</kbd>
+      </div>
+      <div class="kb-row">
+        <span>Switch to Schedule</span><kbd class="kb-key">1</kbd>
+      </div>
+      <div class="kb-row">
+        <span>Switch to Journal</span><kbd class="kb-key">2</kbd>
+      </div>
+      <div class="kb-row">
+        <span>Switch to Gallery</span><kbd class="kb-key">3</kbd>
+      </div>
+      <div class="kb-row">
+        <span>Close modal / panel</span><kbd class="kb-key">Esc</kbd>
+      </div>
+    </div>
+
+    <!-- ═══════ MODALS ═══════ -->
+
+    <!-- Task Modal -->
+    <div
+      class="ov"
+      id="task-modal"
+      onclick="oClick(event, 'task-modal')"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tmH"
+    >
+      <div class="modal">
+        <div class="modal-hd">
+          <h2 id="tmH">✦ Add New Task</h2>
+          <button class="mClose" onclick="closeModal('task-modal')">✕</button>
+        </div>
+        <div class="fg">
+          <label>Task Title *</label>
+          <input
+            type="text"
+            id="tT"
+            class="font-header"
+            placeholder="What do you need to do?"
+            autocomplete="off"
+          />
+        </div>
+        <div class="frow">
+          <div class="fg"><label>Date</label><input type="date" id="tD" /></div>
+          <div class="fg">
+            <label>Time</label><input type="time" id="tTm" />
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fg">
+            <label>Category</label>
+            <select id="tCat" class="font-body">
+              <option value="personal">🌸 Personal</option>
+              <option value="work">💼 Work</option>
+              <option value="health">🌿 Health</option>
+              <option value="creative">🎨 Creative</option>
+              <option value="study">📚 Study</option>
+              <option value="social">💬 Social</option>
+              <option value="other">✦ Other</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Priority</label>
+            <select id="tPri" class="font-body">
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Notes (optional)</label>
+          <textarea
+            id="tN"
+            class="font-body"
+            placeholder="Any extra details…"
+          ></textarea>
+        </div>
+        <div class="mFoot">
+          <button class="btn btn-g" onclick="closeModal('task-modal')">
+            Cancel
+          </button>
+          <button class="btn btn-p" onclick="saveTask()">Save ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Journal Modal -->
+    <div class="ov" id="j-modal" onclick="oClick(event, 'j-modal')">
+      <div class="modal">
+        <div class="modal-hd">
+          <h2 id="jmH">✦ New Entry</h2>
+          <button class="mClose" onclick="closeModal('j-modal')">✕</button>
+        </div>
+        <div class="fg">
+          <label>Page Title</label>
+          <input
+            type="text"
+            id="jT"
+            class="font-header j-title"
+            placeholder="Page title in English → Korean on save"
+            autocomplete="off"
+          />
+        </div>
+        <div class="fg">
+          <label>Today's Mood</label>
+          <div class="mood-grid" id="mood-grid">
+            <span class="mood-c" onclick="pickMood(this)">😊 Happy</span>
+            <span class="mood-c" onclick="pickMood(this)">😌 Calm</span>
+            <span class="mood-c" onclick="pickMood(this)">😔 Sad</span>
+            <span class="mood-c" onclick="pickMood(this)">😤 Frustrated</span>
+            <span class="mood-c" onclick="pickMood(this)">✨ Grateful</span>
+            <span class="mood-c" onclick="pickMood(this)">🌙 Reflective</span>
+            <span class="mood-c" onclick="pickMood(this)">🌸 Loved</span>
+            <span class="mood-c" onclick="pickMood(this)">⚡ Energized</span>
+            <span class="mood-c" onclick="pickMood(this)">🎉 Excited</span>
+            <span class="mood-c" onclick="pickMood(this)">🤔 Pensive</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Your Thoughts</label>
+          <textarea
+            id="jC"
+            class="font-body j-thoughts"
+            inputmode="text"
+            placeholder="Write your thoughts here (stays in English, body font)…"
+            oninput="updateWC()"
+          ></textarea>
+          <p class="j-hint">
+            <strong>Title</strong> uses header font → Korean on save.
+            <strong>Thoughts</strong> use body font and stay as you type. Fonts
+            update live from Settings.
+          </p>
+          <div class="wc-bar">
+            <span class="wc-text" id="wc-label">0 words</span>
+            <div class="wc-progress">
+              <div class="wc-fill" id="wc-fill" style="width: 0%"></div>
+            </div>
+            <span class="wc-text" id="wc-goal">Goal: 200</span>
+          </div>
+        </div>
+        <div class="mFoot">
+          <button class="btn btn-g" onclick="closeModal('j-modal')">
+            Cancel
+          </button>
+          <button class="btn btn-p" onclick="saveEntry()">Write It ✒️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="ov" id="set-modal" onclick="oClick(event, 'set-modal')">
+      <div class="modal" style="max-width: 460px">
+        <div class="modal-hd">
+          <h2>✦ Settings & Style</h2>
+          <button class="mClose" onclick="closeModal('set-modal')">✕</button>
+        </div>
+
+        <div class="set-sec">
+          <h3>Color Theme</h3>
+          <div class="swatches">
+            <div
+              class="sw sw-blossom"
+              title="Blossom"
+              onclick="applyTheme('pink', this)"
+            ></div>
+            <div
+              class="sw sw-mint"
+              title="Mint"
+              onclick="applyTheme('mint', this)"
+            ></div>
+            <div
+              class="sw sw-lav"
+              title="Lavender"
+              onclick="applyTheme('lavender', this)"
+            ></div>
+            <div
+              class="sw sw-peach"
+              title="Peach"
+              onclick="applyTheme('peach', this)"
+            ></div>
+            <div
+              class="sw sw-sky"
+              title="Sky"
+              onclick="applyTheme('sky', this)"
+            ></div>
+            <div
+              class="sw sw-dark"
+              title="Dark Night"
+              onclick="applyTheme('dark', this)"
+            ></div>
+          </div>
+        </div>
+
+        <div class="set-sec">
+          <h3>Background</h3>
+          <div class="swatches" style="flex-wrap: wrap; gap: 10px">
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                cursor: pointer;
+              "
+              onclick="applyBg('none', this)"
+            >
+              <div
+                class="bg-swatch bg-none on"
+                id="bgsw-none"
+                title="None"
+              ></div>
+              <span
+                style="
+                  font-family: var(--fb);
+                  font-size: 0.72rem;
+                  color: var(--tl);
+                "
+                >None</span
+              >
+            </div>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                cursor: pointer;
+              "
+              onclick="applyBg('empanada', this)"
+            >
+              <div
+                class="bg-swatch bg-empanada"
+                id="bgsw-empanada"
+                title="Empanada"
+              >
+                🥟
+              </div>
+              <span
+                style="
+                  font-family: var(--fb);
+                  font-size: 0.72rem;
+                  color: var(--tl);
+                "
+                >Empanada</span
+              >
+            </div>
+          </div>
+          <!-- Referenced by app.js applyBg / previewEmpanada / loadEmpanada -->
+          <p id="empanada-hint" style="display:none;font-family:var(--fb);font-size:.8rem;color:var(--tl);margin-top:6px"></p>
+          <div id="empanada-input-row" style="display:none;gap:6px;margin-top:6px;align-items:center">
+            <input id="empanada-url" type="text" class="font-body" placeholder="Paste image URL…"
+              style="flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem"
+              oninput="previewEmpanada(this.value)" />
+            <label class="btn btn-g btn-sm" style="cursor:pointer">Upload
+              <input type="file" accept="image/*" hidden onchange="loadEmpanada(event)" />
+            </label>
+          </div>
+        </div>
+
+        <div class="set-sec">
+          <h3>Header Font</h3>
+          <div class="font-pills" id="hfont-pills">
+            <button
+              class="fp on"
+              style="
+                font-family: &quot;Gaegu&quot;, cursive;
+                font-size: 1.05rem;
+              "
+              onclick="applyHFont('Gaegu', this)"
+            >
+              가 Gaegu
+            </button>
+            <button
+              class="fp"
+              style="font-family: &quot;Caveat&quot;, cursive"
+              onclick="applyHFont('Caveat', this)"
+            >
+              Caveat
+            </button>
+            <button
+              class="fp"
+              style="
+                font-family: &quot;Playfair Display&quot;, serif;
+                font-style: italic;
+              "
+              onclick="applyHFont('Playfair Display', this)"
+            >
+              Playfair
+            </button>
+            <button
+              class="fp"
+              style="font-family: &quot;Lora&quot;, serif"
+              onclick="applyHFont('Lora', this)"
+            >
+              Lora
+            </button>
+            <button
+              class="fp"
+              style="font-family: &quot;Nunito&quot;, sans-serif"
+              onclick="applyHFont('Nunito', this)"
+            >
+              Nunito
+            </button>
+          </div>
+        </div>
+
+        <div class="set-sec">
+          <h3>Body Font</h3>
+          <div class="font-pills" id="bfont-pills">
+            <button
+              class="fp on"
+              style="font-family: &quot;Caveat&quot;, cursive"
+              onclick="applyBFont('Caveat', this)"
+            >
+              Caveat
+            </button>
+            <button
+              class="fp"
+              style="font-family: &quot;Nunito&quot;, sans-serif"
+              onclick="applyBFont('Nunito', this)"
+            >
+              Nunito
+            </button>
+            <button
+              class="fp"
+              style="font-family: &quot;Lora&quot;, serif"
+              onclick="applyBFont('Lora', this)"
+            >
+              Lora
+            </button>
+            <button
+              class="fp"
+              style="
+                font-family: &quot;Gaegu&quot;, cursive;
+                font-size: 1.05rem;
+              "
+              onclick="applyBFont('Gaegu', this)"
+            >
+              가 Gaegu
+            </button>
+          </div>
+        </div>
+
+        <div class="set-sec">
+          <h3>Your Data</h3>
+          <p class="set-hint" id="storage-info">Checking storage…</p>
+          <div class="data-actions">
+            <button
+              type="button"
+              class="btn btn-g btn-sm"
+              onclick="exportBackup()"
+            >
+              📦 Export backup
+            </button>
+            <label class="btn btn-g btn-sm import-label">
+              📥 Import backup
+              <input
+                type="file"
+                accept="application/json,.json"
+                onchange="
+                  importBackup(this.files[0]);
+                  this.value = '';
+                "
+                hidden
+              />
+            </label>
+          </div>
+        </div>
+
+        <div class="set-sec">
+          <h3>Preferences</h3>
+          <div class="tr">
+            <div class="tl2">
+              <strong>🌙 Dark Mode</strong><span>Switch to night theme</span>
+            </div>
+            <div class="tog" id="dkTog" onclick="toggleDark()"></div>
+          </div>
+          <div class="tr">
+            <div class="tl2">
+              <strong>📋 Group tasks by date</strong
+              ><span>Organise schedule by day</span>
+            </div>
+            <div class="tog on" id="grpTog" onclick="toggleGroup()"></div>
+          </div>
+          <div class="tr">
+            <div class="tl2">
+              <strong>⚠️ Show overdue banner</strong
+              ><span>Highlight past-due tasks</span>
+            </div>
+            <div class="tog on" id="ovTog" onclick="toggleOverdue()"></div>
+          </div>
+          <div class="tr">
+            <div class="tl2">
+              <strong>🇰🇷 Title → Korean on save</strong
+              ><span>Only the page title is translated (needs internet)</span>
+            </div>
+            <div class="tog on" id="koTog" onclick="toggleAutoKo()"></div>
+          </div>
+        </div>
+
+        <div class="mFoot">
+          <button
+            class="btn btn-g"
+            style="color: #c0392b"
+            onclick="if (confirm('Erase ALL data?')) clearAll();"
+          >
+            🗑️ Clear All
+          </button>
+          <button class="btn btn-p" onclick="closeModal('set-modal')">
+            Done ✓
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Lightbox -->
+    <div
+      class="ov"
+      id="lightbox"
+      onclick="closeModal('lightbox')"
+      style="z-index: 400"
+    >
+      <div
+        style="max-width: 90vw; max-height: 90vh; position: relative"
+        onclick="event.stopPropagation()"
+      >
+        <img
+          id="lbImg"
+          src=""
+          style="
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          "
+        />
+        <button
+          class="mClose"
+          onclick="closeModal('lightbox')"
+          style="
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #fff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+          "
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="utils.js"></script>
+    <script src="korean-convert.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

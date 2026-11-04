@@ -1,0 +1,62 @@
+/* Stickers (Phase 7) */
+.sticker-img { display: block; width: 100%; height: auto; pointer-events: none; }
+.sticker-img[data-effect='none'] { filter: drop-shadow(0 1px 2px rgba(40, 20, 20, 0.22)); }
+/* die-cut: white border hugging the sticker's shape */
+.sticker-img[data-effect='outline'],
+.sticker-img[data-effect='glossy'],
+.sticker-img[data-effect='glitter'] {
+  --cut: drop-shadow(1.6px 0 0 #fff) drop-shadow(-1.6px 0 0 #fff) drop-shadow(0 1.6px 0 #fff) drop-shadow(0 -1.6px 0 #fff);
+  filter: var(--cut) drop-shadow(0 2px 3px rgba(40, 20, 20, 0.25));
+}
+.sticker-img[data-effect='glossy'] { filter: saturate(1.25) contrast(1.06) var(--cut) drop-shadow(0 3px 5px rgba(40, 20, 20, 0.3)); }
+.sticker-img[data-effect='glitter'] { animation: glitter 1.8s ease-in-out infinite; }
+@keyframes glitter {
+  0%, 100% { filter: var(--cut) drop-shadow(0 0 2px rgba(255, 230, 150, 0.6)) brightness(1); }
+  50% { filter: var(--cut) drop-shadow(0 0 7px rgba(255, 220, 120, 0.95)) brightness(1.15) saturate(1.35); }
+}
+@media (prefers-reduced-motion: reduce) { .sticker-img[data-effect='glitter'] { animation: none; } }
+
+/* tray */
+.st-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-cat {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-weight: 700;
+  background: #fff;
+}
+.st-cat[aria-pressed='true'] { border-color: var(--text); background: var(--surface-2); }
+.st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+.st-item {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 8px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--border);
+  transition: transform 140ms var(--ease-out);
+}
+.st-item:active { transform: scale(0.92); }
+.st-item img { max-width: 100%; max-height: 100%; pointer-events: none; }
+.st-upload { position: relative; min-width: 0; }
+.st-upload .st-item { width: 100%; }
+.st-upload .st-item:disabled { opacity: .55; }
+.st-remove { position: absolute; top: -3px; right: -3px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #ddc8d0; border-radius: 9px; background: #fff8f6; color: #8d3656; box-shadow: 0 2px 5px #45333f19; }
+.st-remove .ui-icon { width: 16px; height: 16px; }
+.st-upload-tools { display: grid; gap: 8px; }
+.st-upload-tools .field-help { margin: 0; }
+.st-upload-tools .btn-soft { justify-self: start; font-size: 11px; box-shadow: none; border: 1px solid var(--border); }
+.sticker-sheet .panel-inner { grid-template-rows: none !important; }
+.st-library-count { margin: 7px 0 0; font-size: 11px; font-weight: 500; line-height: 1.5; color: var(--text-soft); }
+.st-search { margin-top: 3px; }
+.st-results { margin: -6px 0 0; font-size: 11px; line-height: 1.5; color: var(--text-soft); }
+.sticker-sheet .st-cats { gap: 7px; }
+.sticker-sheet .st-cat { min-height: 34px; padding: 0 10px; font-size: 11px; }
+/* The studio drawer presents delicate botanical art at a more useful scale. */
+.st-studio-grid { grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 12px; }
+.st-item.st-studio { padding: 10px; background: radial-gradient(ellipse at 45% 35%, #fffdf8, #eee9df); box-shadow: inset 0 0 0 1px #b9ac962b, 0 2px 6px #54463506; border-radius: 8px; }
+.st-item.st-studio img { filter: drop-shadow(0 2px 2px #4e483a12); }
+.sticker-img[data-effect='none'] { filter: drop-shadow(0 1px 1.5px #3d35221c); }

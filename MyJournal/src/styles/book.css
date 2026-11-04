@@ -1,0 +1,718 @@
+/* ── Desk + book body ───────────────────────────────────── */
+.desk {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 70, 40, 0.05) 0 2px, transparent 2px 11px),
+    linear-gradient(180deg, #ecd5bc, #d8b58f);
+}
+
+.book-wrap {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: calc(64px + env(safe-area-inset-top)) calc(72px + env(safe-area-inset-right)) 8px calc(72px + env(safe-area-inset-left));
+  min-height: 0;
+}
+
+.book {
+  /* fits height (minus toolbar + nav), width (minus tabs), and caps on huge monitors */
+  --page-h: min(calc(100dvh - 170px), calc((100vw - 220px - env(safe-area-inset-left) - env(safe-area-inset-right)) / 2 / 0.72), 1100px);
+  --page-w: calc(var(--page-h) * 0.72);
+  --edge-l: min(12px, calc(var(--behind, 0) * 0.6px));
+  --edge-r: min(12px, calc(var(--ahead, 0) * 0.6px));
+  --paper: var(--paper-cream);
+  position: relative;
+  width: calc(var(--page-w) * 2);
+  height: var(--page-h);
+}
+.book[data-mode='single'] {
+  /* phones: fill the width, taller page than desktop */
+  /* --peek: decorative strip of the left page so a single page still reads as an open book */
+  --peek: clamp(14px, 5.5vw, 30px);
+  --page-w: min(calc(100vw - 84px - var(--peek) - env(safe-area-inset-left) - env(safe-area-inset-right)), calc((100dvh - 190px) * 0.8), 820px);
+  --page-h: min(calc(100dvh - 190px), calc(var(--page-w) / 0.56));
+  --edge-l: min(8px, calc(var(--behind, 0) * 0.5px));
+  width: var(--page-w);
+  margin-left: var(--peek);
+}
+.book[data-mode='single'] .cover-board { left: calc(-14px - var(--edge-l) - var(--peek)); }
+.book[data-mode='single'] .edge-left { right: calc(100% + var(--peek)); }
+
+.cover-board {
+  position: absolute;
+  inset: -12px calc(-14px - var(--edge-r)) -12px calc(-14px - var(--edge-l));
+  border-radius: 10px;
+  background-color: var(--cover, #d98a9f);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.12),
+    0 24px 50px -12px var(--shadow),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+/* spine crease between the two pages */
+.book[data-mode='spread'] .cover-board::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 calc(50% + (var(--edge-l) - var(--edge-r)) / 2 - 10px);
+  width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.22) 50%, transparent);
+}
+
+/* ── Stage + static pages ───────────────────────────────── */
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* above resting tabs, so they tuck behind the paper */
+  touch-action: pan-y;
+}
+.slot {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+}
+.slot-left { left: 0; }
+.slot-right { left: 50%; }
+.book[data-mode='single'] .slot-left {
+  left: calc(-1 * var(--peek));
+  width: var(--peek);
+  overflow: hidden;
+  pointer-events: none;
+}
+/* full-size page, right-aligned, so only its gutter edge shows (lines line up with the main page) */
+.book[data-mode='single'] .slot-left .page { inset: 0 0 0 auto; width: var(--page-w); }
+.book[data-mode='single'] .slot-left .page-empty { background: color-mix(in srgb, var(--cover, #d98a9f) 70%, #fff); }
+.book[data-mode='single'] .slot-right { left: 0; width: 100%; }
+
+.page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+  background-color: var(--paper);
+}
+.page-left { border-radius: 4px 0 0 4px; }
+.page-right { border-radius: 0 4px 4px 0; }
+.book[data-mode='single'] .page-right { border-radius: 0 4px 4px 0; }
+/* gutter shadow toward the spine */
+.page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.page-left::after { background: linear-gradient(to left, rgba(60, 30, 20, 0.16), transparent 9%); }
+.page-right::after { background: linear-gradient(to right, rgba(60, 30, 20, 0.16), transparent 9%); }
+.book[data-mode='single'] .page-right::after { background: linear-gradient(to right, rgba(60, 30, 20, 0.18), transparent 7%); }
+
+/* ── Turning leaves (flip.ts) ───────────────────────────── */
+.leaf {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+}
+.book[data-mode='single'] .leaf { left: 0; width: 100%; }
+.leaf-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.leaf-back { transform: rotateY(180deg); }
+.leaf-shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(40, 20, 10, 0.55), transparent 70%);
+}
+.leaf-back .leaf-shade { background: linear-gradient(to right, rgba(40, 20, 10, 0.55), transparent 70%); }
+
+/* ── Page edges (thickness = pages behind / ahead) ──────── */
+.edge {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  background: repeating-linear-gradient(90deg, #e9dfcf 0 1px, #fffaf1 1px 2px);
+}
+.edge-left { right: 100%; width: var(--edge-l); border-radius: 3px 0 0 3px; }
+.edge-right { left: 100%; width: var(--edge-r); border-radius: 0 3px 3px 0; }
+
+/* ── Nav bar ────────────────────────────────────────────── */
+.book-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
+}
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  background: var(--surface);
+  box-shadow: 0 3px 10px var(--shadow);
+  transition: transform 160ms var(--ease-out), opacity 160ms;
+}
+.nav-btn:active { transform: scale(0.94); }
+.nav-btn:disabled { opacity: 0.35; cursor: default; }
+.nav-label {
+  min-width: 12ch;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+/* ── Paper tint + patterns (on .page-sheet so cq units resolve to the page) ── */
+.book[data-tint='white'] { --paper: var(--paper-white); }
+.book[data-tint='kraft'] { --paper: var(--paper-kraft); }
+.book[data-tint='pink'] { --paper: var(--paper-pink); }
+.book[data-tint='mint'] { --paper: var(--paper-mint); }
+.book[data-tint='lavender'] { --paper: var(--paper-lavender); }
+
+.page-sheet {
+  --line: 4.4cqh;
+  --dot: rgba(110, 120, 160, 0.42);
+  position: absolute;
+  inset: 0;
+  border-top: 0.7cqh solid var(--section, transparent);
+}
+[data-paper='lined'] > .page-sheet {
+  background:
+    linear-gradient(90deg, transparent 12cqw, var(--margin-rule) 12cqw, var(--margin-rule) calc(12cqw + 1px), transparent 0),
+    repeating-linear-gradient(transparent 0 calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px) var(--line));
+  background-position: 0 0, 0 9cqh;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% calc(100% - 15cqh);
+}
+[data-paper='dotted'] > .page-sheet {
+  background: radial-gradient(circle, var(--dot) 0.9px, transparent 1.4px) 0 0 / var(--line) var(--line);
+}
+[data-paper='grid'] > .page-sheet {
+  background:
+    linear-gradient(var(--rule) 1px, transparent 1px) 0 0 / var(--line) var(--line),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0 / var(--line) var(--line);
+}
+
+.page-foot {
+  position: absolute;
+  bottom: 2.6cqh;
+  font-size: 1.9cqh;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+.page-right .page-foot { right: 6cqw; }
+.page-left .page-foot { left: 6cqw; }
+
+/* ── Page elements ──────────────────────────────────────── */
+.el {
+  position: absolute;
+  transform-origin: center;
+}
+.el-text {
+  font-family: var(--font-hand);
+  font-size: calc(var(--line) * 0.78);
+  line-height: var(--line);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+/* ── Pull tabs ──────────────────────────────────────────── */
+.tabs {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 44px;
+  z-index: 0;
+}
+.tabs-right { left: calc(100% + var(--edge-r)); }
+.tabs-left { right: calc(100% + var(--edge-l)); }
+
+.tab {
+  --tab-h: min(96px, calc(92% / var(--slots) - 6px));
+  position: absolute;
+  top: calc(3% + var(--slot) * (var(--tab-h) + 6px));
+  width: 40px;
+  height: var(--tab-h);
+  padding: 8px 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  color: #3d2d3a;
+  background: var(--tab-color);
+  box-shadow: 0 2px 6px rgba(60, 30, 40, 0.22), inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+  transition: transform 220ms var(--ease-out), filter 220ms;
+}
+.tabs-right .tab { left: 0; border-radius: 0 10px 10px 0; transform: translateX(-8px); }
+.tabs-left .tab { right: 0; border-radius: 10px 0 0 10px; transform: translateX(8px); }
+/* the "pull" — tab slides out under the finger/cursor */
+@media (hover: hover) {
+  .tabs-right .tab:hover { transform: translateX(-2px); }
+  .tabs-left .tab:hover { transform: translateX(2px); }
+}
+.tabs-right .tab:active { transform: translateX(0); }
+.tabs-left .tab:active { transform: translateX(0); }
+.tab.is-current { filter: saturate(1.25) brightness(1.04); z-index: 1; }
+.tabs-right .tab.is-current { transform: translateX(0); }
+.tabs-left .tab.is-current { transform: translateX(0); }
+
+.tab-icon { font-size: 15px; line-height: 1; }
+.tab-label {
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  min-height: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tabs-left .tab-label { transform: rotate(180deg); }
+
+
+
+/* ── Front cover (open animation) ───────────────────────── */
+.cover-face {
+  container-type: inline-size;
+  position: absolute;
+  inset: -12px -14px -12px 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0 10px 10px 0;
+  background-color: var(--cover, #d98a9f);
+  box-shadow: inset 6px 0 10px -6px rgba(0, 0, 0, 0.3);
+}
+.cover-inside {
+  inset: -12px 0 -12px -14px;
+  border-radius: 10px 0 0 10px;
+  background-color: color-mix(in srgb, var(--cover, #d98a9f) 70%, #fff);
+  box-shadow: inset -6px 0 10px -6px rgba(0, 0, 0, 0.25);
+}
+.cover-title {
+  padding: 0.4em 1em;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4cqw + 1rem, 2.6rem);
+  font-weight: 700;
+  color: #fff8f6;
+  background: rgba(255, 255, 255, 0.14);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* ── Desk tools + panels ────────────────────────────────── */
+.desk-tools {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+}
+.tool-btn,
+.btn-soft {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  background: var(--surface);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: transform 160ms var(--ease-out);
+}
+.tool-btn:active,
+.btn-soft:active { transform: scale(0.96); }
+
+.panel {
+  width: min(460px, calc(100vw - 24px));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(40, 20, 30, 0.35);
+}
+.panel::backdrop { background: rgba(40, 25, 30, 0.35); }
+.panel-inner { display: grid; gap: 14px; padding: 18px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; }
+.panel-head h2 { margin: 0; font-family: var(--font-display); font-size: 1.5rem; }
+.sec-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sec-row { display: grid; grid-template-columns: 40px 1fr 40px repeat(3, 34px); gap: 6px; align-items: center; }
+.sec-row input {
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: #fff;
+}
+.sec-icon { text-align: center; }
+.sec-color { padding: 2px !important; }
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+.icon-btn:hover { background: var(--surface-2); }
+.icon-btn:disabled { opacity: 0.3; cursor: default; }
+.icon-btn.danger:hover { background: #fde2e2; }
+
+/* ── Closed book ────────────────────────────────────────── */
+.desk {
+  --open-ms: 1000ms; /* must match OPEN_MS in Book.ts */
+  --open-ease: cubic-bezier(0.45, 0, 0.25, 1); /* ≈ the cover leaf's accelerate→decelerate */
+}
+.book { transition: transform var(--open-ms) var(--open-ease); }
+/* the board's left half unfolds/folds with the cover instead of fading */
+.cover-board {
+  clip-path: inset(-80px);
+  transition: clip-path var(--open-ms) var(--open-ease);
+}
+.desk:is([data-closed='true'], [data-closing='true']) .book[data-mode='spread'] .cover-board {
+  clip-path: inset(-80px -80px -80px 50%);
+}
+/* phones: closed board folds back to the page so the peek strip disappears with it */
+.desk:is([data-closed='true'], [data-closing='true']) .book[data-mode='single'] .cover-board {
+  clip-path: inset(-80px -80px -80px calc(var(--peek) + var(--edge-l)));
+}
+.closed-cover { display: none; }
+.desk[data-closed='true'] .closed-cover {
+  position: absolute;
+  z-index: 3;
+  top: -12px;
+  bottom: -12px;
+  left: 50%;
+  right: calc(-14px - var(--edge-r));
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  border: 0;
+  border-radius: 0 10px 10px 0;
+  background-color: var(--cover, #d98a9f);
+  /* drop shadow comes from .cover-board underneath, so nothing changes when the leaf takes over */
+  box-shadow: inset 6px 0 10px -6px rgba(0, 0, 0, 0.3);
+  container-type: inline-size;
+  transition: transform 220ms var(--ease-out);
+}
+.book[data-mode='single'] .closed-cover { left: -14px; border-radius: 10px; }
+@media (hover: hover) {
+  .desk[data-closed='true'] .closed-cover:hover { transform: perspective(1600px) rotateY(-6deg); transform-origin: left center; }
+}
+.cover-hint {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 246, 0.85);
+  animation: hint-pulse 2.4s ease-in-out infinite;
+}
+@keyframes hint-pulse { 50% { opacity: 0.45; } }
+
+/* closed (and closing) spread-mode book slides so the cover sits centered */
+.desk:is([data-closed='true'], [data-closing='true']) .book[data-mode='spread'] { transform: translateX(calc(var(--page-w) * -0.5)); }
+.desk[data-closed='true'] .stage,
+.desk[data-closed='true'] .edge-left,
+.desk[data-closed='true'] .tabs-left { opacity: 0; visibility: hidden; }
+/* toolbar + nav fade (visibility flips after the fade so hidden buttons aren't focusable) */
+.book-nav,
+.desk-tools .tool-btn { transition: opacity 280ms ease, visibility 0s linear 0s, transform 160ms var(--ease-out); }
+.desk[data-closed='true'] .book-nav,
+.desk[data-closed='true'] .desk-tools .tool-btn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 280ms ease, visibility 0s linear 280ms;
+}
+.tabs { transition: opacity 260ms ease; }
+/* tabs ride on top of the cover while it turns, so hide them mid-animation */
+.desk[data-opening='true'] .tabs,
+.desk[data-closing='true'] .tabs { opacity: 0; transition: opacity 150ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .book, .cover-board { transition: none; }
+  .cover-hint { animation: none; }
+}
+/* closed: tabs peek out from under the cover's overhang */
+.desk[data-closed='true'] .tabs-right { left: calc(100% + var(--edge-r) + 14px); }
+/* sound toggle stays reachable on the closed book */
+.desk[data-closed='true'] .desk-tools .sound-btn { visibility: visible; opacity: 1; }
+.sound-btn { width: 40px; padding: 0; }
+/* install stays reachable on the closed book */
+.desk[data-closed='true'] .desk-tools .install-btn { visibility: visible; opacity: 1; }
+.install-btn { background: var(--accent); color: #fff; }
+.ios-steps { margin: 0; padding-left: 1.2em; display: grid; gap: 10px; line-height: 1.45; }
+
+/* ── Responsive ─────────────────────────────────────────── */
+/* single page: leave room on the right for the tabs so book + tabs center together */
+.book[data-mode='single'] { margin-right: 36px; }
+
+@media (max-width: 719px) {
+  .book-wrap { padding: 64px calc(6px + env(safe-area-inset-right)) 4px calc(6px + env(safe-area-inset-left)); }
+  .tab { width: 34px; padding: 6px 0; gap: 2px; }
+  .tab-label { font-size: 10.5px; letter-spacing: 0; }
+}
+@media (max-width: 360px) {
+  .tab { width: 30px; }
+  .book[data-mode='single'] { margin-right: 30px; }
+}
+
+/* small or short screens: icon-only toolbar */
+@media (max-width: 600px), (max-height: 520px) {
+  .tool-label { display: none; }
+  .desk-tools { gap: 6px; right: calc(10px + env(safe-area-inset-right)); }
+  .desk-tools .tool-btn { width: 40px; padding: 0; }
+}
+
+/* phones sideways: nav buttons in the bottom corners, toolbar stacked on the right, icon tabs */
+@media (max-height: 520px) and (min-aspect-ratio: 1/1) {
+  .book {
+    --page-h: min(calc(100dvh - 64px), calc((100vw - 260px - env(safe-area-inset-left) - env(safe-area-inset-right)) / 2 / 0.72));
+  }
+  .book-wrap { padding: 26px calc(70px + env(safe-area-inset-right)) 22px calc(70px + env(safe-area-inset-left)); }
+  .desk-tools { flex-direction: column; top: calc(10px + env(safe-area-inset-top)); }
+  .book-nav {
+    position: absolute;
+    inset: auto 0 0 0;
+    justify-content: space-between;
+    padding: 0 calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+    pointer-events: none;
+  }
+  .nav-btn { pointer-events: auto; }
+  .nav-label { display: none; }
+  .tab { --tab-h: min(48px, calc(86% / var(--slots) - 6px)); }
+  .tab-label { display: none; }
+}
+
+/* app-like touch behaviour */
+body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.panel input { user-select: text; -webkit-user-select: text; }
+
+/* tablets / large windows held upright: big single page, slimmer side padding */
+@media (min-width: 720px) and (max-aspect-ratio: 1/1) {
+  .book-wrap { padding: 72px calc(24px + env(safe-area-inset-right)) 8px calc(24px + env(safe-area-inset-left)); }
+  .book[data-mode='single'] {
+    --page-w: min(calc(100vw - 140px - var(--peek) - env(safe-area-inset-left) - env(safe-area-inset-right)), calc((100dvh - 200px) * 0.8), 820px);
+    --page-h: min(calc(100dvh - 200px), calc(var(--page-w) / 0.62));
+  }
+}
+/* set by fitTabs() when labels would be cut off */
+.book.tabs-compact .tab-label { display: none; }
+.book.tabs-compact .tab { justify-content: center; }
+
+/* ── Customize sheet (Phase 2) ──────────────────────────── */
+.desk[data-closed='true'] .desk-tools .style-btn { visibility: visible; opacity: 1; }
+.panel.sheet {
+  width: min(360px, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  border-radius: var(--radius) 0 0 var(--radius);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.panel.sheet::backdrop { background: transparent; } /* keep the book visible for live preview */
+@media (max-width: 600px) {
+  .panel.sheet {
+    width: 100vw;
+    height: auto;
+    max-height: 60dvh;
+    margin: auto 0 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+.cz-sec h3 {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+.cz-row { display: flex; flex-wrap: wrap; gap: 9px; }
+.cz-swatch {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  transition: transform 140ms var(--ease-out);
+}
+.cz-swatch:active { transform: scale(0.94); }
+.cz-swatch[aria-pressed='true'] { outline: 2.5px solid var(--text); outline-offset: 3px; }
+.cz-color, .cz-picker, .cz-tint {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.cz-picker {
+  display: grid;
+  overflow: hidden;
+  cursor: pointer;
+  background: conic-gradient(#f66, #fd6, #6d8, #6cf, #96f, #f6c, #f66);
+}
+.cz-picker input { width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.cz-tex, .cz-paper { display: grid; justify-items: center; gap: 4px; width: 58px; padding: 4px 0; }
+.tex-swatch {
+  width: 44px;
+  height: 58px;
+  border-radius: 3px 7px 7px 3px;
+  box-shadow: 0 2px 6px var(--shadow), inset 4px 0 5px -3px rgba(0, 0, 0, 0.35);
+}
+.paper-swatch.page {
+  position: relative;
+  inset: auto;
+  width: 44px;
+  height: 58px;
+  border-radius: 3px;
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.cz-cap { font-size: 0.72rem; font-weight: 700; color: var(--text-soft); }
+.cz-title {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  background: #fff;
+}
+/* bigger pattern spacing in the tiny previews so dots/grid read clearly */
+.paper-swatch .page-sheet { --line: 11cqh; border-top: 0; }
+/* while customizing, the book moves out from under the sheet */
+.book-wrap { transition: transform 420ms var(--ease-out); }
+@media (min-width: 901px) {
+  body.customizing .book-wrap { transform: translateX(-180px) scale(0.8); }
+}
+@media (max-width: 600px) {
+  /* scale from the top so the book sits between the toolbar and the bottom sheet */
+  body.customizing .book-wrap { transform-origin: 50% 0; transform: translateY(-10px) scale(0.48); }
+}
+@media (prefers-reduced-motion: reduce) { .book-wrap { transition: none; } }
+
+/* ── Desk section (Phase 3) ─────────────────────────────── */
+.cz-sub { margin-top: 12px !important; }
+.cz-desk { display: grid; justify-items: center; gap: 4px; width: 62px; padding: 4px 0; }
+.desk-swatch {
+  display: block;
+  width: 56px;
+  height: 40px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 4px var(--shadow);
+}
+.cz-up { position: relative; }
+.cz-del {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  color: #fff;
+  background: rgba(61, 45, 58, 0.85);
+}
+.cz-add {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  width: 62px;
+  height: 58px;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-soft);
+}
+.cz-add:hover { border-color: var(--accent); color: var(--accent); }
+.cz-fit { margin-top: 10px; }
+.cz-pill {
+  min-height: 34px;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+  background: var(--surface-2) !important;
+}
+
+/* ── Ribbon bookmark (Phase 8) ──────────────────────────── */
+.ribbon {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  width: 18px;
+  height: calc(100% + 54px);
+  padding: 0;
+  border: 0;
+  background: linear-gradient(90deg, #b8324f, #d94c69 45%, #b8324f);
+  /* forked tail */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 12px), 0 100%);
+  box-shadow: 0 2px 4px rgba(60, 10, 20, 0.3);
+  cursor: pointer;
+  transition: opacity 200ms;
+}
+.ribbon[hidden] { display: none; }
+.ribbon.rb-on.rb-right { left: calc(50% + var(--page-w) * 0.74); }
+.ribbon.rb-on.rb-left { left: calc(var(--page-w) * 0.2); }
+.book[data-mode='single'] .ribbon.rb-on { left: 74%; }
+/* bookmark is elsewhere: only the tail peeks out below the book */
+.ribbon.rb-tail { top: auto; bottom: -50px; height: 62px; }
+.ribbon.rb-tail.rb-right { left: calc(100% - 46px); }
+.ribbon.rb-tail.rb-left { left: 28px; }
+.ribbon.rb-closed { top: auto; bottom: -50px; height: 62px; left: calc(50% + var(--page-w) * 0.74); }
+.book[data-mode='single'] .ribbon.rb-closed { left: 74%; }
+.desk[data-closed='true'] .ribbon { z-index: 2; }
+.bookmark-btn[aria-pressed='true'] { background: #fde2ea; }
+
+/* ── Toast ─────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  z-index: 90;
+  top: calc(64px + env(safe-area-inset-top));
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(61, 45, 58, 0.92);
+  box-shadow: 0 8px 24px rgba(40, 20, 30, 0.3);
+  transform: translateX(-50%);
+  animation: toast-in 260ms var(--ease-out);
+}
+.toast-out { opacity: 0; transform: translate(-50%, -8px); transition: opacity 260ms, transform 260ms; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, -8px); } }
+
+@media (max-width: 360px) {
+  .desk-tools { gap: 4px; }
+  .desk-tools .tool-btn { width: 36px; min-height: 36px; }
+}

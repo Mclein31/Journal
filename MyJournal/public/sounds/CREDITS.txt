@@ -1,0 +1,3 @@
+Page and book sounds: "RPG Audio" by Kenney (www.kenney.nl)
+License: Creative Commons Zero (CC0) — https://creativecommons.org/publicdomain/zero/1.0/
+Source files: bookFlip1-3.ogg, bookOpen.ogg, bookClose.ogg (converted to mono MP3, 96 kbps)

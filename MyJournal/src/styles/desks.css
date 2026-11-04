@@ -1,0 +1,75 @@
+/* Desk backgrounds (Phase 3) — CSS-only presets. Generic [data-bg] selectors so the same rules
+   paint the real desk and the little swatches in the Style sheet. Uploads use inline background-image. */
+
+[data-bg='wood'] {
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 70, 40, 0.05) 0 2px, transparent 2px 11px),
+    linear-gradient(180deg, #ecd5bc, #d8b58f);
+}
+[data-bg='walnut'] {
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg, #8a5a3c, #5e3b26);
+}
+[data-bg='pastel'] {
+  background:
+    radial-gradient(60% 50% at 20% 20%, #ffd9e2, transparent 70%),
+    radial-gradient(55% 50% at 85% 30%, #d8ecff, transparent 70%),
+    radial-gradient(60% 60% at 50% 100%, #e0f5e6, transparent 70%),
+    #fbf1f4;
+}
+[data-bg='picnic'] {
+  background:
+    linear-gradient(90deg, rgba(240, 120, 145, 0.32) 50%, transparent 0) 0 0 / 44px 44px,
+    linear-gradient(rgba(240, 120, 145, 0.32) 50%, transparent 0) 0 0 / 44px 44px,
+    #fff7f5;
+}
+[data-bg='linen'] {
+  background:
+    repeating-linear-gradient(0deg, rgba(150, 120, 90, 0.08) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(150, 120, 90, 0.08) 0 1px, transparent 1px 4px),
+    #f4ece1;
+}
+[data-bg='night'] {
+  background:
+    radial-gradient(1.5px 1.5px at 30px 40px, #fff, transparent),
+    radial-gradient(1px 1px at 120px 90px, #ffeec2, transparent),
+    radial-gradient(1.5px 1.5px at 190px 20px, #fff, transparent),
+    radial-gradient(1px 1px at 80px 160px, #cfe3ff, transparent),
+    radial-gradient(1.2px 1.2px at 170px 140px, #fff, transparent),
+    linear-gradient(180deg, #1d2140, #3a2d58);
+  background-size: 220px 190px, 220px 190px, 220px 190px, 220px 190px, 220px 190px, 100% 100%;
+}
+[data-bg='cozy'] {
+  /* blurred fairy lights */
+  background:
+    radial-gradient(40px 40px at 12% 18%, rgba(255, 210, 140, 0.55), transparent),
+    radial-gradient(60px 60px at 78% 12%, rgba(255, 180, 120, 0.45), transparent),
+    radial-gradient(50px 50px at 30% 80%, rgba(255, 220, 160, 0.4), transparent),
+    radial-gradient(70px 70px at 90% 75%, rgba(255, 170, 140, 0.4), transparent),
+    radial-gradient(35px 35px at 55% 45%, rgba(255, 235, 180, 0.35), transparent),
+    linear-gradient(180deg, #4a3433, #2e2224);
+}
+[data-bg='blush'] { background: #f7dfe2; }
+[data-bg='sage'] { background: #dfe8dc; }
+
+/* uploaded photo: fill or tile */
+.desk[data-bg='upload'] { background-color: #e9dccd; background-position: center; }
+.desk[data-bg='upload'][data-fit='cover'] { background-size: cover; background-repeat: no-repeat; }
+.desk[data-bg='upload'][data-fit='tile'] { background-size: 320px auto; background-repeat: repeat; }
+
+/* the page label must stay readable on any background */
+.nav-label {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 250, 247, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Filipino empanadas, scattered (original SVG) */
+[data-bg='empanada'] {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cdefs%3E%3Cg id='e'%3E%3Cpath d='M-34 6 A34 34 0 0 1 34 6 Z' fill='%23e9a94f' stroke='%23b9732a' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M-28 2 A28 28 0 0 1 28 2' fill='none' stroke='%23c98436' stroke-width='5' stroke-dasharray='2 5' stroke-linecap='round'/%3E%3Cpath d='M-14 -14 Q0 -22 14 -14' fill='none' stroke='%23f7d08a' stroke-width='4' stroke-linecap='round' opacity='.8'/%3E%3Ccircle cx='-6' cy='-6' r='1.6' fill='%23b9732a'/%3E%3Ccircle cx='5' cy='-9' r='1.4' fill='%23b9732a'/%3E%3Ccircle cx='12' cy='-3' r='1.5' fill='%23b9732a'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23e' transform='translate%2850 52%29 rotate%28-18%29 scale%281.0%29'/%3E%3Cuse href='%23e' transform='translate%28178 40%29 rotate%2824%29 scale%280.85%29'/%3E%3Cuse href='%23e' transform='translate%28120 130%29 rotate%288%29 scale%281.1%29'/%3E%3Cuse href='%23e' transform='translate%2832 188%29 rotate%2840%29 scale%280.8%29'/%3E%3Cuse href='%23e' transform='translate%28206 170%29 rotate%28-30%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28150 226%29 rotate%28-8%29 scale%280.7%29'/%3E%3C/svg%3E") 0 0 / 240px 240px,
+    radial-gradient(circle at 30% 20%, #fff8ec, #fbe6c8);
+}

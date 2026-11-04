@@ -1,7 +1,8 @@
 import { STUDIO_STICKERS } from './studioPacks';
 import { EXTRA_STICKERS } from './extraPacks';
+import { GENERATED_STICKERS } from './generatedPacks';
 
-/* Original SVG catalog for the local-first journal editor. */
+/* Generated artwork is the visible catalog. Earlier SVGs remain private for saved pages and recents. */
 
 interface StickerBase {
   id: string;
@@ -60,7 +61,7 @@ const LEGACY_STICKERS: StickerDef[] = [
 
 LEGACY_STICKERS.push(...EXTRA_STICKERS, ...STUDIO_STICKERS);
 
-export const STICKERS: StickerDef[] = LEGACY_STICKERS;
+export const STICKERS: StickerDef[] = GENERATED_STICKERS;
 
 export const CATEGORIES: { id: StickerDef['cat']; label: string }[] = [
   { id: 'studio', label: 'Studio' },

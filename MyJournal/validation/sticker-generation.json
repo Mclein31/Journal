@@ -1,0 +1,156 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "transparent_background": true,
+  "assets": [
+    {
+      "name": "white-roses",
+      "source": "exec-818acd47-9cff-41f5-9a3f-e04a738dd070.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: white-roses. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "white-lilies",
+      "source": "exec-38568764-a6d0-416a-b83f-143bb86943d4.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: white-lilies. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "white-orchids",
+      "source": "exec-4e3ca949-e011-4289-a9e4-7f7d682ae150.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: white-orchids. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "chamomile",
+      "source": "exec-07735844-501f-4c31-909c-e02742e19b0b.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: chamomile. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "eucalyptus",
+      "source": "exec-70a75ff7-9868-4ecb-9980-9ba0f1d817eb.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: eucalyptus. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "lavender",
+      "source": "exec-e1390f89-2a63-4e60-9dd6-e3af9dd5deb3.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: lavender. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "linen-ribbon",
+      "source": "exec-1b9a99eb-ccf8-4ec1-88eb-fb516e1ca168.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: linen-ribbon. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "blush-peonies",
+      "source": "exec-a8699290-4d5d-469d-aed5-caaef6d87bae.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: blush-peonies. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "butterfly",
+      "source": "exec-d65945a6-b47a-46df-bba1-d5b52ddad4e7.png",
+      "prompt": "Detailed photographic botanical/material cutout blended with subtle watercolor-paper texture on transparent alpha; centered complete subject, no vector/cartoon, no heavy border, no text. Subject: butterfly. White lilies were reframed through image_gen editing to include all petals; ribbon regenerated as a single bow without flowers."
+    },
+    {
+      "name": "coffee",
+      "source": "exec-f6a49a13-b2d4-41ef-9b83-629bc21a5a88.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. A handmade ivory ceramic coffee cup and simple saucer, warm espresso visible, small natural handle, slightly imperfect pottery glaze, very faint delicate steam. Three-quarter elevated view, authentic ceramic texture. No flowers, food, cutlery, labels, or table."
+    },
+    {
+      "name": "camera",
+      "source": "exec-4f18d819-a96e-4b9a-9a7c-3a346f187cf0.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One vintage compact silver and charcoal analog camera with a brown leather wrist strap loosely curled beside it as part of the same object. Intricate realistic lens glass and brushed metal, worn leather grain, no brand names or legible lettering. Soft editorial cutout."
+    },
+    {
+      "name": "headphones",
+      "source": "exec-8308e2f5-ca03-4124-bed6-cc8d024d853d.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One pair of over-ear studio headphones, warm charcoal padded ear cups, brushed muted-silver hinges, a short relaxed curling audio cable. Real fabric and leather texture, understated design, elegant natural three-quarter view. No logos, no music symbols."
+    },
+    {
+      "name": "books",
+      "source": "exec-63639462-4f82-4cf5-adaa-1f9b22a93044.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. A small stack of three well-read clothbound books with muted olive, warm cream and charcoal spines, one narrow oatmeal linen bookmark tail. Real aged page edges and cloth grain, slightly imperfect arrangement, no readable text or lettering."
+    },
+    {
+      "name": "backpack",
+      "source": "exec-11bb251c-7ebc-4aa4-8103-75d73eb773c3.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One sturdy olive-green canvas daypack with warm tan leather tabs and dark brass buckles, natural creases and visible woven canvas grain. Classic unbranded adventure backpack in a three-quarter view. No patches or text."
+    },
+    {
+      "name": "sneakers",
+      "source": "exec-2eaf2ca3-e25e-4082-8c01-eae5d32babcb.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. A pair of casually placed off-white canvas low-top sneakers with charcoal details and ivory rubber soles, fine stitching, naturally loosened cotton laces, slightly worn texture. Refined everyday lifestyle cutout. No logos, no people or feet."
+    },
+    {
+      "name": "ramen",
+      "source": "exec-c8029cc2-2354-4590-ad33-cbae1ce07669.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One artisan ceramic bowl of ramen with noodles, two halves of soft boiled egg, scallions, mushrooms and a small dark nori sheet, a simple pair of wooden chopsticks resting diagonally across the bowl. Appetizing realistic texture and gentle steam, muted earthy pottery, elevated three-quarter view. No text, no table."
+    },
+    {
+      "name": "moon",
+      "source": "exec-6f3fc9ff-9da1-4257-a2b1-d016a1f6490f.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One isolated natural crescent moon, warm ivory and softly shaded slate-gray lunar surface with intricate subtle realistic craters, a calm celestial specimen. No face, no stars or surrounding sky, no words, entire crescent fully visible on transparency."
+    },
+    {
+      "name": "mountains",
+      "source": "exec-0815b340-18a8-4f4e-9efa-98fe4fc99c75.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One irregular torn-edge paper photograph of quiet layered alpine mountains, evergreen forest and a still lake under a pale misty sky. Beautiful moody fine-art landscape photography printed on matte aged paper, naturally rough torn silhouette, muted slate/olive/sand colors, no text or tape, transparent outside the photo's irregular edge."
+    },
+    {
+      "name": "mushrooms",
+      "source": "exec-61176ae1-537f-445b-b6aa-77da9602e05c.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. A small natural cluster of three woodland mushrooms of different heights, warm tawny and cream caps, intricate gills and slender stems, with just a tiny tuft of moss at their base. Realistic delicate forest specimen, fine watercolor-paper texture, no faces or whimsical decorations."
+    },
+    {
+      "name": "fern",
+      "source": "exec-d9aaab4f-f208-43d7-a24c-05a120f6f030.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One long graceful woodland fern frond, intricately divided green leaflets with delicate veins and a slender naturally curved stem, mature muted botanical watercolor photography, elegant airy silhouette. No pot or other foliage."
+    },
+    {
+      "name": "seashell",
+      "source": "exec-987d59fe-bf79-4233-b3fb-49ef548b39cb.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One beautiful cream and warm taupe scallop seashell, fine radial ribs, delicately worn edges, subtle pearlescent interior and natural sandy markings, softly lit realistic natural-history specimen viewed slightly from above. No sand, no beach, no text."
+    },
+    {
+      "name": "compass",
+      "source": "exec-b474efcb-7c20-4eb1-a7fe-6d1e2952420b.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One vintage round brass pocket compass with a small hinged loop and slightly patinated metal, realistic glass reflections, fine dark compass needle and subtle tick marks without readable text or numbers, overhead editorial specimen cutout."
+    },
+    {
+      "name": "vinyl",
+      "source": "exec-44d7b9b4-7907-476d-aeaa-be63bddf4f63.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One charcoal black vinyl record partly emerging from an aged warm cream paper sleeve, a simple blank muted olive center label, subtle circular grooves and gently worn paper corners. Sophisticated analog music aesthetic, no typography or brand."
+    },
+    {
+      "name": "paper-collage",
+      "source": "exec-3683da76-0d6b-47e7-880f-8d3dcf03f8b1.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One tasteful compact collage embellishment made of three overlapping irregular torn scraps: warm cream handmade paper with visible fibers, a smaller muted sage paper layer, and one thin translucent oatmeal tissue layer held by a small plain beige washi strip. Detailed real torn paper texture, no writing, no words, no drawings, no flowers, no scissors. Transparent surrounding the irregular outer silhouette."
+    },
+    {
+      "name": "notebook",
+      "source": "exec-cb1c2e6a-9742-4955-8660-fc9c836731bf.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One closed olive-gray linen field notebook with a narrow elastic band, a plain natural wood pencil resting diagonally on top, and a short cream bookmark ribbon. Rich realistic woven fabric and paper-edge texture, quiet editorial stationery aesthetic, no lettering or branding."
+    },
+    {
+      "name": "campfire",
+      "source": "exec-00a51b5d-ba13-43b4-a967-04554234e481.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One compact realistic outdoor campfire of a few weathered wood logs and soft warm amber flames with delicate glowing embers. Natural irregular cutout silhouette, tactile detail and restrained colors, no people, no tent, no scene background, no rocks or ground."
+    },
+    {
+      "name": "bicycle",
+      "source": "exec-f1d82f53-f4cf-483e-95bf-1180a080cc44.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One classic understated city bicycle in muted forest green, tan saddle and cork handlebar grips, slim charcoal tires, fine spokes and a small empty silver rear rack. Side view with the whole bicycle and both wheels visible. Realistic fine details with soft watercolor-paper texture, no rider, no basket of flowers, no brand or text."
+    },
+    {
+      "name": "croissant",
+      "source": "exec-e13863ea-92e4-4e63-b712-b763b5c62f17.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One freshly baked butter croissant, richly layered flaky golden crust, subtle buttery highlights, tiny crumbs kept close to the pastry, elegant food photography with delicate watercolor-paper texture. No plate, no coffee, no cutlery, no face."
+    },
+    {
+      "name": "art-supplies",
+      "source": "exec-4b24ef93-c594-489d-924c-35e27c48f87b.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One small cohesive arrangement of three well-used natural wood paintbrushes, a graphite pencil and a simple folded cream paint-stained linen rag tied loosely together with thin cotton twine. Fine bristle detail, restrained olive/ochre/charcoal pigment stains, tactile artist-studio materials, no jars, no flowers, no readable labels."
+    },
+    {
+      "name": "cat",
+      "source": "exec-b0801a01-2bdf-4012-99c8-6708d5f3f168.png",
+      "prompt": "Create ONE premium aesthetic scrapbook sticker as finely detailed RASTER artwork on a genuinely TRANSPARENT ALPHA BACKGROUND. A sophisticated blend of natural-light product/nature photography and subtle watercolor pigment on textured paper. Realistic materials, nuanced light, organic edges, gentle tonal depth, soft analog grain. Balanced palette of charcoal, olive/sage, warm sand, ivory, sepia and muted earth colors. Not a vector, not an icon, not flat clipart, no cartoon proportions, no anthropomorphic face, no text/logo/watermark, no thick white outline, no sheet background, no ground plane or rectangular shadow. One isolated cohesive subject per square image, fully visible within the CENTRAL 75%, with at least 12% clean transparent padding at every edge. Never cut off any part. This is an elegant neutral journal embellishment for adults. One peacefully sleeping realistic warm-gray tabby cat curled in a relaxed oval with its tail wrapped near its paws, softly closed eyes, finely detailed fur and natural cat proportions. Understated naturalistic animal portrait cutout with subtle watercolor-paper texture. No collar, no clothing, no pillow, no symbols, not cartoon, not kawaii."
+    }
+  ]
+}

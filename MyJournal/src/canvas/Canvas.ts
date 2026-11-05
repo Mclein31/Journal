@@ -175,7 +175,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   let tapStart: { x: number; y: number; t: number } | null = null;
   let lastTap: { x: number; y: number; t: number } | null = null;
 
-  const clampW = (w: number, _id: string) => Math.max(.08, Math.min(stage.closest<HTMLElement>('.book')?.dataset.mode === 'spread' ? 2 : 1.4, w));
+  const clampW = (w: number, id: string) => model(id)?.type === 'text' ? 1 : Math.max(.08, Math.min(stage.closest<HTMLElement>('.book')?.dataset.mode === 'spread' ? 2 : 1.4, w));
   const deg = (r: number) => (r * 180) / Math.PI;
   const sizeOf = (id: string) => model(id)?.data.text?.size ?? 1;
   function applyXform(node: HTMLElement, rot: number, w: number, size: number) {
@@ -252,7 +252,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
       pinch.rot = pinch.rot0 + deg(Math.atan2(b.y - a.y, b.x - a.x)) - pinch.a0;
       const factor = Math.hypot(b.x - a.x, b.y - a.y) / pinch.d0;
       pinch.w = clampW(pinch.w0 * factor, pinch.id);
-      pinch.size = pinch.size0 * (pinch.w / pinch.w0);
+      pinch.size = pinch.size0 * (model(pinch.id)?.type === 'text' ? Math.max(.05, factor) : pinch.w / pinch.w0);
       applyXform(pinch.node, pinch.rot, pinch.w, pinch.size);
       positionUI();
       return;
@@ -273,7 +273,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
       g.rot = rot;
       const factor = Math.hypot(e.clientX - g.cx, e.clientY - g.cy) / g.d0;
       g.w = clampW(g.w0 * factor, g.id);
-      g.size = g.size0 * (g.w / g.w0);
+      g.size = g.size0 * (model(g.id)?.type === 'text' ? Math.max(.05, factor) : g.w / g.w0);
       g.changed = true;
       applyXform(g.node, g.rot, g.w, g.size);
       positionUI();

@@ -44,7 +44,7 @@ export function addSticker(pageId: string, stickerId: string, aspect = 1, at = {
 }
 
 export function addText(pageId: string, at = { x: 0.5, y: 0.2 }, content = ''): string {
-  return add(pageId, 'text', { text: { content, size: 1, font: lastFont() } }, at, 0.6);
+  return add(pageId, 'text', { text: { content, size: 1, font: lastFont() } }, at, 1);
 }
 
 /** undoable=false merges into the previous undo step (e.g. first text typed into a just-added box). */

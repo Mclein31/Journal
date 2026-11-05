@@ -51,7 +51,7 @@ function renderElement(e: PageElement, offset = 0): HTMLElement {
   if (offset) node.dataset.ghost = String(offset); // the carried-over half on the facing page
   node.style.left = `${(e.x + offset) * 100}%`;
   node.style.top = `${e.y * 100}%`;
-  node.style.width = `${e.w * 100}%`;
+  node.style.width = `${(e.type === 'text' ? 1 : e.w) * 100}%`;
   if (e.h !== undefined) node.style.height = `${e.h * 100}%`;
   node.style.transform = `rotate(${e.rot}deg)`;
   node.style.zIndex = String(e.z);
@@ -87,7 +87,7 @@ export function renderSpreadCanvas(doc: BookDoc, layout: Layout, left: number | 
     node.dataset.canvasOffset = String(offset);
     node.dataset.canvasScale = '0.5';
     node.style.left = `${(e.x + offset) * 50}%`;
-    node.style.width = `${e.w * 50}%`;
+    node.style.width = `${(e.type === 'text' ? 1 : e.w) * 50}%`;
     surface.appendChild(node);
   }
   const crease = document.createElement('div');

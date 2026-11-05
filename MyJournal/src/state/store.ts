@@ -20,10 +20,11 @@ let saveTimer: number | undefined;
 let saving: Promise<void> | null = null;
 
 export function initStore(initial: BookDoc, opts: { dirty?: boolean } = {}): void {
-  doc = initial;
+  const oldTextWidths = initial.elements.some((el) => el.type === 'text' && el.w !== 1);
+  doc = oldTextWidths ? { ...initial, elements: initial.elements.map((el) => el.type === 'text' ? { ...el, w: 1 } : el) } : initial;
   lastSaved = initial;
   savedRevision = initial.book.revision ?? 0;
-  hasSaved = initial.book.revision !== undefined && !opts.dirty;
+  hasSaved = initial.book.revision !== undefined && !opts.dirty && !oldTextWidths;
   undoStack.length = redoStack.length = 0;
   emit('init');
 }
@@ -47,6 +48,7 @@ export function update(reason: string, mutate: (draft: BookDoc) => void, opts: {
   redoStack.length = 0;
   const draft = structuredClone(current);
   mutate(draft);
+  for (const el of draft.elements) if (el.type === 'text') el.w = 1;
   doc = draft;
   scheduleSave();
   emit(reason);

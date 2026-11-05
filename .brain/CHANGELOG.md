@@ -131,3 +131,14 @@ last_updated: 2026-11-04
 ## 2026-11-05 — GitHub repository connected
 - Replaced the initial combined local commit with five focused commits: legacy/setup, journal editor, generated stickers/offline caching, tests, and documentation. Final application files are identical; the intermediate editor commit also passes its production/PWA build. No co-author trailers.
 - Configured `origin` as `https://github.com/Mclein31/Journal.git`, confirmed it had no existing branches, and pushed `main` with upstream tracking.
+
+## 2026-11-05 — Functional QA, conflict-safe saves and tactile stationery
+- Completed a second actual-module QA pass, expanding automated coverage from 81 to 128 checks. Reproductions, fixes, coverage and explicit browser/device limits are in `QA_REPORT.md`.
+- Fixed page identity after section reorder, active-page layout changes and bookmarks, reorder focus, active-edit Undo ordering, unsupported/mixed file drops and physical-page ownership across spanning artwork.
+- Fixed deleted-page import races, partial background batches and caption loss on lifecycle events. Caption editor focus and Undo/recovery now survive ordinary saves and a simulated failed save.
+- Added atomic per-book revision checks, snapshot-consistent reads, clean-save skipping, conflict export/reload UI and base-content-aware text/caption recovery. Conflicting recovered words are quarantined for download. Valid recovery is saved through the real boot path. No IndexedDB schema-version change is needed.
+- User's Safari screenshot identified outer-edge overflow: the shared canvas now clips at the book rectangle while retaining continuous spine crossing. Added imperfect underline/strike strokes, highlight fibers and subtle page/frame/sticker grain. Original sticker PNGs remain unchanged; uploaded sticker grain follows loaded alpha masks.
+- Validation: all 128 tests, TypeScript, production/PWA build and local production HTTP asset checks pass. All 30 PNGs remain in precache. Audit: 0 high/critical, 2 low/4 moderate transitive build-tool findings. Static artwork preview inspected at `MyJournal/validation/tactile-preview.png`; not a browser screenshot.
+- Browser host remained unavailable and Chrome computer use was denied. Native rendering, device gestures/install/offline and full accessibility remain open; login/backend/migration/deployment phases remain pending.
+
+- Final user follow-ups: every text box stays one page wide regardless of corner/pinch scale (including legacy normalization), with one existing handle; Delete/Backspace and Undo/Redo work for placed stickers with the tray open while search fields and other dialogs retain keyboard ownership. Dedicated regression coverage added.

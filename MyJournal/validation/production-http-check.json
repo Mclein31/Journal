@@ -1,0 +1,170 @@
+{
+  "checkedAt": "2026-11-05T02:45:58.980Z",
+  "method": "HTTP requests to local Vite production preview; no browser/runtime/offline verification",
+  "appShell": 200,
+  "serviceWorker": 200,
+  "manifestDisplay": "standalone",
+  "clientAssets": [
+    {
+      "file": "/assets/index-VDcInecy.js",
+      "status": 200
+    },
+    {
+      "file": "/assets/index-Dt1ervql.css",
+      "status": 200
+    }
+  ],
+  "stickerAssets": [
+    {
+      "file": "art-supplies.png",
+      "status": 200,
+      "bytes": 1205655
+    },
+    {
+      "file": "backpack.png",
+      "status": 200,
+      "bytes": 2187038
+    },
+    {
+      "file": "bicycle.png",
+      "status": 200,
+      "bytes": 1490495
+    },
+    {
+      "file": "blush-peonies.png",
+      "status": 200,
+      "bytes": 1401260
+    },
+    {
+      "file": "books.png",
+      "status": 200,
+      "bytes": 1996434
+    },
+    {
+      "file": "butterfly.png",
+      "status": 200,
+      "bytes": 1370157
+    },
+    {
+      "file": "camera.png",
+      "status": 200,
+      "bytes": 1675617
+    },
+    {
+      "file": "campfire.png",
+      "status": 200,
+      "bytes": 1269956
+    },
+    {
+      "file": "cat.png",
+      "status": 200,
+      "bytes": 1864442
+    },
+    {
+      "file": "chamomile.png",
+      "status": 200,
+      "bytes": 876824
+    },
+    {
+      "file": "coffee.png",
+      "status": 200,
+      "bytes": 1333907
+    },
+    {
+      "file": "compass.png",
+      "status": 200,
+      "bytes": 1427701
+    },
+    {
+      "file": "croissant.png",
+      "status": 200,
+      "bytes": 1216166
+    },
+    {
+      "file": "eucalyptus.png",
+      "status": 200,
+      "bytes": 782904
+    },
+    {
+      "file": "fern.png",
+      "status": 200,
+      "bytes": 1100212
+    },
+    {
+      "file": "headphones.png",
+      "status": 200,
+      "bytes": 1290430
+    },
+    {
+      "file": "lavender.png",
+      "status": 200,
+      "bytes": 696823
+    },
+    {
+      "file": "linen-ribbon.png",
+      "status": 200,
+      "bytes": 1121571
+    },
+    {
+      "file": "moon.png",
+      "status": 200,
+      "bytes": 787567
+    },
+    {
+      "file": "mountains.png",
+      "status": 200,
+      "bytes": 2176026
+    },
+    {
+      "file": "mushrooms.png",
+      "status": 200,
+      "bytes": 1223168
+    },
+    {
+      "file": "notebook.png",
+      "status": 200,
+      "bytes": 2103553
+    },
+    {
+      "file": "paper-collage.png",
+      "status": 200,
+      "bytes": 1739005
+    },
+    {
+      "file": "ramen.png",
+      "status": 200,
+      "bytes": 1858909
+    },
+    {
+      "file": "seashell.png",
+      "status": 200,
+      "bytes": 1513785
+    },
+    {
+      "file": "sneakers.png",
+      "status": 200,
+      "bytes": 1546057
+    },
+    {
+      "file": "vinyl.png",
+      "status": 200,
+      "bytes": 1922723
+    },
+    {
+      "file": "white-lilies.png",
+      "status": 200,
+      "bytes": 1346686
+    },
+    {
+      "file": "white-orchids.png",
+      "status": 200,
+      "bytes": 1444172
+    },
+    {
+      "file": "white-roses.png",
+      "status": 200,
+      "bytes": 1675747
+    }
+  ],
+  "all30InPrecache": true
+}

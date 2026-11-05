@@ -102,3 +102,14 @@ User explicitly requested commit and push with no co-author trailer. The project
 
 ## 2026-11-05 — Repository destination and focused commits
 The user supplied `https://github.com/Mclein31/Journal.git` and explicitly requested multiple focused commits with no co-author attribution. `origin` uses that URL; `main` tracks `origin/main`. The empty destination accepted the five local commits without rewriting remote history. Keep future implementation, assets, tests and documentation in appropriate focused commits.
+
+## 2026-11-05 — Reject stale writers and preserve conflicting recovery
+Books have optional local `revision` metadata (legacy absence = 0). `saveDoc` checks the expected revision and writes the next revision in the same read/write transaction; the store owns the latest expected revision and does not claim revisions for unchanged documents. Reads use one transaction. This rejects conflicting edits rather than attempting collaborative document merging.
+Text and caption recovery share the existing `drafts` metadata and `mlw:text-drafts` localStorage key. Reserved `__draftBases` tracks original field content; `__draftConflicts` preserves older words separately when another writer changed that field. Unrelated changes do not block valid recovery. Undo/Redo updates active recovery intent, including after save failure. Recovered boot data explicitly initializes the store dirty. Conflict UI offers JSON export; it is a recovery copy with local asset references, not a full media export/import feature.
+
+## 2026-11-05 — Clip outer edges, keep the spine continuous
+The user requested outer-book clipping after a Safari screenshot showed rotated art outside the paper. Apply `overflow:hidden` to the shared spread canvas, not separately to its page halves. Selection controls remain stage siblings. Deterministic SVG pen marks/highlighter fibers and subtle CSS paper grain provide the requested texture; original generated PNG artwork stays intact. Sticker overlays mask to the loaded artwork alpha, and forced-colors mode falls back to native text decoration.
+
+## 2026-11-05 — Text width and sticker-tray shortcuts
+The user's final clarification supersedes the earlier free-width proposal: every text box must be exactly one page wide at any font scale. Use one existing corner handle and pinch to change lettering size/rotation; do not add a second width handle or width field. New text uses `w=1`, legacy text is normalized on initialization and saved, updates enforce the invariant, and rendering uses 100% of a page or 50% of a spread. Moving a box across the spine remains supported.
+The sticker tray permits Delete/Backspace only for the selected placed sticker, plus global Undo/Redo shortcuts. Search/content-editable inputs retain native editing and other open modals retain keyboard ownership. The test harness preserves the originating focused control for global-key events rather than allowing the event bus to retarget them.

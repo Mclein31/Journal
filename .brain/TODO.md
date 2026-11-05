@@ -40,7 +40,7 @@ last_updated: 2026-11-05
 
 ## Backlog
 - Up to 3 extra colored bookmark flags (Phase 8 optional)
-- Per-page/section paper override UI
+- Per-section paper override UI (per-page controls already implemented)
 - "Shuffle desk from my uploads" each visit (Phase 3 optional)
 - Voice memos on pages · page templates · export a page as image/PDF · shared books
 
@@ -74,3 +74,16 @@ last_updated: 2026-11-05
 - [x] Visually review all 30 generated assets in the contact sheet
 - [ ] Real browser/device rendering, touch, native install and offline runtime QA (Chrome access denied)
 - [x] Push focused commits to `https://github.com/Mclein31/Journal.git` (`main` tracks `origin/main`)
+
+## QA continuation and tactile refinements (2026-11-05)
+- [x] Reproduced and fixed navigation/bookmark/section focus, drop handling/ownership, async upload and background-batch bugs
+- [x] Caption lifecycle recovery, connected editors and Undo after successful/failed saves
+- [x] Reject stale/simultaneous writers atomically; preserve conflicting recovered words for download; validate actual boot recovery
+- [x] Clip artwork at the outer book boundary while preserving spine crossing (user screenshot)
+- [x] Natural underline/strikethrough pressure variation, textured marker ink, page/frame/sticker grain
+- [x] 128 automated checks, TypeScript, production/PWA build, HTTP checks of shell/manifest/worker/all 30 PNGs
+- [x] Professional QA matrix and findings recorded in `QA_REPORT.md`
+- [ ] Native browser/device/installation/offline and full accessibility sign-off — see report; denied Chrome access prevents completion here
+- [ ] Complete keyboard-only canvas manipulation and tear-tool alternatives before accessibility sign-off
+
+- [x] Final user follow-ups: every text box stays one page wide regardless of corner/pinch scale (including legacy normalization), with one existing handle; Delete/Backspace and Undo/Redo work for placed stickers with the tray open while search fields and other dialogs retain keyboard ownership. Dedicated regression coverage added.

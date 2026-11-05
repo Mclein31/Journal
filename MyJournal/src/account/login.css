@@ -80,7 +80,8 @@
 @media (max-width:1099px) and (min-width:901px){.auth-screen{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}}
 @media (min-width:901px) and (max-height:720px){.auth-pitch p:not(.auth-statement){display:none}}
 @media (max-width:900px){
-  .auth-screen{grid-template-columns:1fr;height:auto}
+  /* body never scrolls (the book owns the screen), so the login scrolls itself on small screens */
+  .auth-screen{grid-template-columns:1fr;grid-template-rows:max-content max-content;align-content:start;height:100dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .auth-scene{grid-template-rows:auto auto auto;padding:20px 20px 0;gap:12px}
   .auth-statement{font-size:26px}
   .auth-stage{--bw:clamp(150px,36vw,270px);--cw:clamp(140px,33vw,250px);padding:8px 0 16px;grid-template-areas:'book chibi' 'edit edit';row-gap:12px}

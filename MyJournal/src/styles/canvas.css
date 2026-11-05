@@ -129,14 +129,19 @@
 .font-menu .fo-list { max-height: min(210px, 25dvh); }
 
 /* One continuous resting canvas spans both pages; only turning leaves use clipped copies. */
-.spread-canvas { position: absolute; inset: 0; z-index: 2; container-type: size; --line: 4.4cqh; pointer-events: none; isolation: isolate; }
+.spread-canvas { position: absolute; inset: 0; z-index: 2; container-type: size; --line: 4.4cqh; pointer-events: none; isolation: isolate; overflow: hidden; }
 .spread-canvas > .el { pointer-events: auto; }
 .stage[data-turning='true'] > .spread-canvas { visibility: hidden; }
 .spread-crease { position: absolute; z-index: 2147483647; top: 0; bottom: 0; left: 50%; width: clamp(16px, 2.6%, 28px); transform: translateX(-50%); pointer-events: none; background: linear-gradient(90deg, transparent 0%, #49342506 13%, #49342514 30%, #33221735 44%, #21140f52 49%, #fff6e738 52%, #fff9ed18 60%, #4934250c 78%, transparent 100%); }
 .spread-crease::after { content: ''; position: absolute; top: 0; bottom: 0; left: 49%; width: 1px; background: #4a30282b; box-shadow: 1px 0 0 #fff7e52b; }
 .book[data-mode='spread'] .stage:not([data-turning='true']) .slot .page::after { opacity: .4; }
-.el-text-body[data-highlight='true'] { background-size: 100% 1.06em; background-position: 0 58%; background-repeat: no-repeat; padding: 0 .035em; border-radius: 0; }
+.el-text-body[data-highlight='true'], .el-text-body[data-pen-marks='true'] { background-size: 100% 1.18em, 100% 1.06em; background-position: 0 50%, 0 58%; background-repeat: no-repeat; padding: 0 .035em; border-radius: 0; }
+.el-text-body[data-pen-marks='true'] { text-decoration-color: transparent; }
+@media (forced-colors: active) {
+  .el-text-body[data-pen-marks='true'] { text-decoration-color: currentColor; background-image: none !important; }
+}
 
 /* The section stripe must not shift page coordinates during a turn. */
 .page-sheet { border-top: 0; }
 .page-sheet::before { content: ''; position: absolute; inset: 0 0 auto; height: .7cqh; background: var(--section, transparent); pointer-events: none; }
+.page-sheet::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background-image: var(--grain), var(--fibers); background-size: 180px 180px, 220px 220px; mix-blend-mode: multiply; opacity: .13; }

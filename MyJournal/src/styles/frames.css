@@ -2,6 +2,7 @@
 .frame { position: relative; --frame-color: #fff; }
 .frame-caption { display: none; }
 .photo-img { filter: drop-shadow(0 0 0 transparent); }
+.frame:is([data-frame='polaroid'], [data-frame='instant'], [data-frame='instant-wide'], [data-frame='photocard'], [data-frame='scallop']) { background-image: var(--grain); background-size: 180px 180px; }
 
 /* plain: soft shadow only */
 [data-frame='none'] .photo-img { box-shadow: 0 3px 10px rgba(40, 20, 20, 0.28); border-radius: 2px; }

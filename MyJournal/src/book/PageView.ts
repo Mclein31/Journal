@@ -5,7 +5,7 @@ import { bindAssetImage } from '../sync/assetUrls';
 import { frameDef } from '../frames/frames';
 import { stickerDef, stickerUri } from '../stickers/packs';
 import { fontDef, fontStack } from '../fonts/fonts';
-import { markerBackground } from '../fonts/highlight';
+import { markerBackground, penMarksBackground } from '../fonts/highlight';
 
 export function renderPage(doc: BookDoc, layout: Layout, index: number | undefined, side: 'left' | 'right', withElements = true): HTMLElement {
   const el = document.createElement('div');
@@ -60,7 +60,9 @@ function renderElement(e: PageElement, offset = 0): HTMLElement {
     const body = document.createElement('div');
     body.className = 'el-text-body';
     body.textContent = t.content;
-    if (t.highlight) { body.style.backgroundImage = markerBackground(t.highlight, e.id); body.dataset.highlight = 'true'; }
+    if (t.highlight) body.dataset.highlight = 'true';
+    if (t.underline || t.strikethrough) body.dataset.penMarks = 'true';
+    if (t.highlight || t.underline || t.strikethrough) body.style.backgroundImage = `${penMarksBackground(t, e.id)}, ${t.highlight ? markerBackground(t.highlight, e.id) : 'none'}`;
     body.style.textDecorationLine = [t.underline ? 'underline' : '', t.strikethrough ? 'line-through' : ''].filter(Boolean).join(' ') || 'none';
     node.style.setProperty('--size', String(t.size ?? 1));
     node.style.fontFamily = fontStack(t.font);
@@ -124,20 +126,29 @@ function renderPhoto(p: NonNullable<PageElement['data']['photo']>): HTMLElement 
 }
 
 function renderSticker(st: NonNullable<PageElement['data']['sticker']>): HTMLElement {
+  const paper = document.createElement('div');
+  paper.className = 'sticker-paper';
   const img = document.createElement('img');
   img.className = 'sticker-img';
   img.alt = '';
   img.draggable = false;
   img.style.aspectRatio = String(st.aspect ?? 1);
   img.dataset.effect = st.effect ?? 'outline';
+  const texture = () => {
+    if (!img.src) return;
+    paper.style.setProperty('--sticker-mask', `url("${img.src}")`);
+    paper.classList.add('has-texture');
+  };
+  img.addEventListener('load', texture);
   if (st.stickerId.startsWith('asset:')) {
     img.dataset.assetId = st.stickerId.slice(6);
     bindAssetImage(img, img.dataset.assetId);
   } else {
     const def = stickerDef(st.stickerId);
-    if (def) img.src = stickerUri(def);
+    if (def) { img.src = stickerUri(def); texture(); }
   }
-  return img;
+  paper.appendChild(img);
+  return paper;
 }
 
 /** Blank paper for the in-between leaves of a riffle. */

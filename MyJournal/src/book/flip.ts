@@ -101,6 +101,8 @@ export interface DragLeaf {
   resize(): void;
   destroy(): void;
   set(progress: number, pullY?: number): void;
+  /** live finger tracking: at most one paint per frame, eased toward the pointer (paper has a little weight) */
+  follow(progress: number, pullY?: number): void;
   hold(): { progress: number; pullY: number };
   finish(complete: boolean, fullDurationMs?: number, velocity?: number, delayMs?: number): Promise<boolean>;
 }
@@ -122,16 +124,25 @@ function copyPage(source: HTMLElement): HTMLElement {
   return copy;
 }
 
-interface Tile { face: HTMLElement; content: HTMLElement; light: HTMLElement; col: number; row: number; back: boolean; second: boolean }
+interface Tile { face: HTMLElement; content: HTMLElement; col: number; row: number; back: boolean; second: boolean }
 function sizeTile(tile: Tile, width: number, height: number, cols: number, rows: number) {
   const b = TILE_BLEED, w = width / cols, h = height / rows, fw = w + 2 * b, fh = h + 2 * b;
   Object.assign(tile.face.style, { inset: 'auto', left: `${-b}px`, top: `${-b}px`, width: `${fw}px`, height: `${fh}px` });
   const points = tile.second ? [[fw, -2 * b * h / w], [fw, fh], [-2 * b * w / h, fh]] : [[0, 0], [fw + 2 * b * w / h, 0], [0, fh + 2 * b * h / w]];
   tile.face.style.clipPath = `polygon(${points.map(([x, y]) => `${tile.back ? fw - x : x}px ${y}px`).join(',')})`;
   const sourceCol = tile.back ? cols - 1 - tile.col : tile.col;
-  for (const node of [tile.content, tile.light]) Object.assign(node.style, {
+  for (const node of [tile.content]) Object.assign(node.style, {
     inset: 'auto', left: `${b - sourceCol * w}px`, top: `${b - tile.row * h}px`, width: `${width}px`, height: `${height}px`,
   });
+}
+
+/** Lambert-style brightness for a strip normal; flat (facing the viewer) = exactly 1. */
+const LIGHT = (() => { const l = Math.hypot(-.35, -.25, 1); return { x: -.35 / l, y: -.25 / l, z: 1 / l }; })();
+function lightFor(nx: number, ny: number, nz: number): string {
+  if (nz < 0) { nx = -nx; ny = -ny; nz = -nz; } // the back face is the side being seen
+  const dot = nx * LIGHT.x + ny * LIGHT.y + nz * LIGHT.z;
+  const b = Math.max(.62, Math.min(1.07, .6 + .4 * (dot / LIGHT.z)));
+  return b > .995 && b < 1.005 ? '' : `brightness(${b.toFixed(2)})`;
 }
 
 function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 'in' | 'out' | undefined, options: PaperOptions) {
@@ -143,9 +154,11 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
   let width = Math.max(1, leaf.offsetWidth), height = Math.max(1, leaf.offsetHeight);
   const grab = { x: unit(options.grab?.x ?? .92), y: unit(options.grab?.y ?? .5) };
   leaf.dataset.grabX = String(grab.x); leaf.dataset.grabY = String(grab.y);
-  const cols = options.riffle ? 4 : 6, rows = options.riffle ? 2 : 3;
-  const facets: { node: HTMLElement; col: number; row: number; second: boolean }[] = [];
-  const lights: HTMLElement[] = [];
+  // Smoothness: full-height strips. The bend runs across the page, so 8 columns keep the curl while
+  // cutting page copies/compositor layers from 72 to 32 (riffle leaves: 16). Each strip is still two
+  // exact affine triangles, so twisted (pulled) poses meet without cracks.
+  const cols = options.riffle ? 4 : 8, rows = 1;
+  const facets: { node: HTMLElement; col: number; row: number; second: boolean; faces: HTMLElement[]; lit: string }[] = [];
   const faceEls: HTMLElement[] = [];
   const tiles: Tile[] = [];
   let shadow: HTMLElement | undefined;
@@ -161,31 +174,32 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
       const facet = document.createElement('div');
       facet.className = 'leaf-facet';
       facet.style.width = `${width / cols}px`; facet.style.height = `${height / rows}px`;
+      const pair: HTMLElement[] = [];
       for (const back of [false, true]) {
         const face = document.createElement('div');
         face.className = `leaf-face leaf-facet-face ${back ? 'leaf-back' : 'leaf-front'}`;
         face.style.transform = back ? 'rotateY(180deg) translateZ(.025px)' : 'translateZ(.025px)';
         const content = copyPage(back ? faces.back : faces.front);
-        const light = shade();
-        light.style.setProperty('--grab-x', `${(back ? 1 - grab.x : grab.x) * 100}%`);
-        const tile = { face, content, light, col, row, back, second };
+        const tile = { face, content, col, row, back, second };
         sizeTile(tile, width, height, cols, rows); tiles.push(tile);
-        face.append(content, light); facet.appendChild(face);
-        faceEls.push(face); lights.push(light);
+        face.append(content); facet.appendChild(face);
+        faceEls.push(face); pair.push(face);
       }
-      leaf.appendChild(facet); facets.push({ node: facet, col, row, second });
+      leaf.appendChild(facet); facets.push({ node: facet, col, row, second, faces: pair, lit: '' });
     }
   } else {
     faceEls.push(...leaf.querySelectorAll<HTMLElement>('.leaf-face'));
     leaf.querySelector<HTMLElement>('.leaf-back')!.style.display = 'none';
   }
-  let lastProgress = 0, lastPull = 0;
+  let lastProgress = 0, lastPull = 0, lastZ = '', lastOpacity = '';
   const paint = (progress: number, pullY: number) => {
     lastProgress = progress; lastPull = pullY;
     const p = unit(progress), flex = Math.sin(p * Math.PI);
     const stack = options.stackIndex ?? 0;
     leaf.dataset.progress = String(p);
-    leaf.style.zIndex = String(p < .5 ? 50 - stack : 100 + stack);
+    // only touch what changed: every style write costs a style/compositor update per frame
+    const z = String(p < .5 ? 50 - stack : 100 + stack);
+    if (z !== lastZ) { leaf.style.zIndex = z; lastZ = z; }
     if (reduced) {
       leaf.style.transform = 'none';
       leaf.querySelector<HTMLElement>('.leaf-front')!.style.opacity = String(dir === 1 ? 1 - p : p);
@@ -196,12 +210,17 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
     for (const facet of facets) {
       const { col, row } = facet;
       const matrix = facetMatrix([grid[row][col], grid[row][col + 1], grid[row + 1][col], grid[row + 1][col + 1]], facet.second, width / cols, height / rows);
-      facet.node.style.transform = `matrix3d(${matrix.map((n) => n.toFixed(7)).join(',')})`;
+      facet.node.style.transform = `matrix3d(${matrix.map((n) => n.toFixed(5)).join(',')})`;
+      // paper lighting from the strip's own angle (light from upper-left): turning-away strips
+      // darken, the curl's crest catches a little highlight. Filter on the face = no repaint.
+      const lit = lightFor(matrix[8], matrix[9], matrix[10]);
+      if (lit !== facet.lit) { facet.lit = lit; for (const f of facet.faces) f.style.filter = lit; }
     }
-    for (const light of lights) light.style.opacity = String(.38 * flex);
     if (shadow) { shadow.style.opacity = String(.24 * flex); shadow.style.transform = `scaleX(${.3 + .7 * flex})`; }
-    const opacity = fade === 'out' ? 1 - unit((p - .75) / .25) : fade === 'in' ? unit(p / .2) : 1;
-    for (const face of faceEls) face.style.opacity = String(opacity);
+    if (fade) {
+      const opacity = (fade === 'out' ? 1 - unit((p - .75) / .25) : unit(p / .2)).toFixed(3);
+      if (opacity !== lastOpacity) { lastOpacity = opacity; for (const face of faceEls) face.style.opacity = opacity; }
+    }
   };
   const resize = () => {
     const nextWidth = Math.max(1, leaf.offsetWidth), nextHeight = Math.max(1, leaf.offsetHeight);
@@ -220,9 +239,27 @@ export function dragLeaf(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade
   const renderer = paperRenderer(stage, faces, dir, fade, options);
   let p = 0, pull = 0;
   let settling: { frame: number; resolve: (finished: boolean) => void } | null = null;
+  // follow(): pointer events can arrive several times per frame (120Hz trackpads, 1000Hz mice).
+  // They only move the target; one rAF loop eases the drawn page toward it.
+  const FOLLOW_TAU = .045; // seconds: smooths jitter, still feels attached to the finger
+  let target = { p: 0, pull: 0 };
+  let followFrame = 0, followLast = 0;
+  const stopFollow = () => { if (followFrame) cancelAnimationFrame(followFrame); followFrame = 0; followLast = 0; };
+  const stopSettle = () => { if (settling) { cancelAnimationFrame(settling.frame); settling.resolve(false); settling = null; } };
   const hold = () => {
-    if (settling) { cancelAnimationFrame(settling.frame); settling.resolve(false); settling = null; }
+    stopSettle();
+    stopFollow();
     return { progress: p, pullY: pull };
+  };
+  const followStep = (now: number) => {
+    const dt = followLast ? Math.min(.05, (now - followLast) / 1000) : 1 / 60;
+    followLast = now;
+    const k = 1 - Math.exp(-dt / FOLLOW_TAU);
+    const np = p + (target.p - p) * k, npull = pull + (target.pull - pull) * k;
+    const done = Math.abs(target.p - np) < .0004 && Math.abs(target.pull - npull) < .0004;
+    paint(done ? target.p : np, done ? target.pull : npull);
+    followFrame = done ? 0 : requestAnimationFrame(followStep);
+    if (done) followLast = 0;
   };
   const paint = (progress: number, pullY: number) => { p = unit(progress); pull = Math.max(-.35, Math.min(.35, pullY)); renderer.paint(p, pull); };
   paint(0, 0);
@@ -232,6 +269,11 @@ export function dragLeaf(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade
     destroy() { hold(); renderer.destroy(); },
     hold,
     set(progress, pullY = 0) { hold(); paint(progress, pullY); },
+    follow(progress, pullY = 0) {
+      stopSettle();
+      target = { p: unit(progress), pull: Math.max(-.35, Math.min(.35, pullY)) };
+      if (!followFrame) followFrame = requestAnimationFrame(followStep);
+    },
     finish(complete, fullDurationMs = 700, velocity = 0, delayMs = 0) {
       hold();
       const start = p, startPull = pull, end = complete ? 1 : 0;

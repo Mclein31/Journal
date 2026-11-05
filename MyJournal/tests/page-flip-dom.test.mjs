@@ -46,7 +46,7 @@ test('actual normalized grab height changes facet matrices and endpoint cleanup 
   const bottom = h.flip.dragLeaf(stage, faces(h), 1, undefined, { grab: { x: .8, y: .9 } });
   bottom.set(.4, .12);
   assert.notEqual(stage.querySelector('.leaf-facet').style.transform, topMatrix);
-  assert.equal(stage.querySelectorAll('.leaf-facet').length, 36);
+  assert.equal(stage.querySelectorAll('.leaf-facet').length, 16); // 8 full-height strips × 2 triangles
   const finishing = bottom.finish(true);
   await drain(h);
   assert.equal(await finishing, true);
@@ -65,14 +65,15 @@ test('front and back crop full-size page copies using mirrored source columns', 
     const m = facet.style.transform.slice('matrix3d('.length, -1).split(',').map(Number);
     return { x: m[0] * x + m[4] * y + m[12], y: m[1] * x + m[5] * y + m[13] };
   };
-  for (const [index, col, row] of [[0, 0, 0], [10, 5, 0], [24, 0, 2]]) {
+  // 8 full-height strips × 2 triangles: facet index = col * 2 (+1 for the second triangle)
+  for (const [index, col, row] of [[0, 0, 0], [6, 3, 0], [14, 7, 0]]) {
     const front = facets[index].querySelector('.leaf-front .page');
     const back = facets[index].querySelector('.leaf-back .page');
-    const w = 400 / 6, height = 600 / 3;
+    const w = 400 / 8, height = 600;
     assert.equal(front.style.width, '400px'); assert.equal(front.style.height, '600px');
     assert.equal(back.style.width, '400px'); assert.equal(back.style.height, '600px');
     close(pixels(front, 'left'), .45 - col * w);
-    close(pixels(back, 'left'), .45 - (5 - col) * w);
+    close(pixels(back, 'left'), .45 - (7 - col) * w);
     close(pixels(front, 'top'), .45 - row * height);
     close(pixels(back, 'top'), .45 - row * height);
     for (const face of [front.parentElement, back.parentElement]) {
@@ -87,9 +88,9 @@ test('front and back crop full-size page copies using mirrored source columns', 
     assert.equal(front.textContent, 'FRONT'); assert.equal(back.textContent, 'BACK');
   }
   ctl.set(1);
-  for (const [index, col, row] of [[0, 0, 0], [10, 5, 0], [24, 0, 2]]) {
+  for (const [index, col, row] of [[0, 0, 0], [6, 3, 0], [14, 7, 0]]) {
     const back = facets[index].querySelector('.leaf-back .page'), face = back.parentElement;
-    const sourceX = (5 - col + .37) * 400 / 6, sourceY = (row + .42) * 600 / 3;
+    const sourceX = (7 - col + .37) * 400 / 8, sourceY = (row + .42) * 600;
     // rotateY(180deg) about the expanded face's center must keep the source aligned.
     const localX = pixels(face, 'left') + pixels(face, 'width') - (pixels(back, 'left') + sourceX);
     const localY = pixels(face, 'top') + pixels(back, 'top') + sourceY;
@@ -109,7 +110,7 @@ test('cloned unresolved uploaded images acquire blob URLs and sticker alpha-mask
   const image = h.document.createElement('img'); image.dataset.assetId = id; paper.append(image); source.front.append(paper);
   h.flip.dragLeaf(stage, source, 1);
   const copies = [...stage.querySelectorAll('.leaf-front img[data-asset-id]')];
-  assert.equal(copies.length, 36);
+  assert.equal(copies.length, 16);
   await h.settle();
   for (const copy of copies) {
     assert.match(copy.getAttribute('src'), /^blob:/);
@@ -229,14 +230,14 @@ test('resizing a held paper refreshes mesh dimensions without changing its curre
   ctl.set(.4, .12);
   const leaf = stage.querySelector('.leaf'), first = leaf.querySelector('.leaf-facet');
   const before = first.style.transform;
-  assert.equal(Number.parseFloat(first.style.width), 400 / 6);
+  assert.equal(Number.parseFloat(first.style.width), 400 / 8);
   Object.defineProperty(leaf, 'offsetWidth', { get: () => 200 });
   Object.defineProperty(leaf, 'offsetHeight', { get: () => 300 });
   ctl.resize();
   assert.equal(ctl.hold().progress, .4);
   assert.equal(ctl.hold().pullY, .12);
-  assert.equal(Number.parseFloat(first.style.width), 200 / 6);
-  assert.equal(Number.parseFloat(first.style.height), 100);
+  assert.equal(Number.parseFloat(first.style.width), 200 / 8);
+  assert.equal(Number.parseFloat(first.style.height), 300);
   assert.notEqual(first.style.transform, before);
   for (const content of leaf.querySelectorAll('.leaf-facet-face .page')) {
     assert.equal(content.style.width, '200px');
@@ -245,8 +246,8 @@ test('resizing a held paper refreshes mesh dimensions without changing its curre
   ctl.set(0);
   const last = [...leaf.querySelectorAll('.leaf-facet')].at(-1);
   const matrix = last.style.transform.slice('matrix3d('.length, -1).split(',').map(Number);
-  const x = matrix[0] * (200 / 6) + matrix[4] * 100 + matrix[12];
-  const y = matrix[1] * (200 / 6) + matrix[5] * 100 + matrix[13];
+  const x = matrix[0] * (200 / 8) + matrix[4] * 300 + matrix[12];
+  const y = matrix[1] * (200 / 8) + matrix[5] * 300 + matrix[13];
   assert.ok(Math.abs(x - 200) < 1e-6, `resized right edge must be 200px, received ${x}`);
   assert.ok(Math.abs(y - 300) < 1e-6, `resized bottom edge must be 300px, received ${y}`);
   ctl.destroy();

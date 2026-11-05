@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "deploy:check": "npm run build && wrangler deploy --dry-run",
     "deploy": "npm run build && wrangler deploy",
-    "typecheck": "tsc --noEmit && tsc --project tsconfig.api.json --noEmit",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.api.json --noEmit && tsc --project tsconfig.sw.json --noEmit",
     "test": "node --experimental-vm-modules --test tests/*.test.mjs",
     "db:plan": "tsx scripts/migrate.ts",
     "db:migrate": "tsx scripts/migrate.ts --apply",

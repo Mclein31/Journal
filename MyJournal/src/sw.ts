@@ -36,7 +36,7 @@ self.addEventListener('install', (event) => {
         await cache.put(url, response);
       }
     };
-    await Promise.all(Array.from({ length: 6 }, save));
+    await Promise.all(Array.from({ length: 24 }, save));
   })());
 });
 

@@ -12,8 +12,8 @@ export default defineConfig({
       includeAssets: ['icons/*.png', 'icons/icon.svg', 'sounds/*.mp3', 'sounds/CREDITS.txt'],
       manifest: {
         id: '/',
-        name: 'My Little World',
-        short_name: 'Little World',
+        name: 'Dear Days',
+        short_name: 'Dear Days',
         description: 'A customizable 3D journal — write, paste photos, tear, and decorate.',
         start_url: '/',
         scope: '/',
@@ -34,7 +34,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,svg,png,mp3,txt}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,mp3,txt,woff2}'],
         // Keep the complete high-resolution sticker collection available offline.
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },

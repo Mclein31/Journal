@@ -1,5 +1,5 @@
 /* Text fonts. Each text box stores a font id, so one page can mix many fonts.
-   Families load lazily from Google Fonts: only fonts in use at boot, the rest when the picker opens.
+   All files are bundled under /fonts on the app's own origin; no font CDN requests.
    `scale` evens out very different x-heights so every font sits nicely on the lines. */
 
 export type FontCat = 'hand' | 'cursive' | 'korean' | 'clean';
@@ -10,8 +10,6 @@ export interface FontDef {
   label: string;
   cat: FontCat;
   scale?: number;
-  /** Google Fonts axis spec, if the default 400 isn't right */
-  spec?: string;
 }
 
 export const FONT_CATS: { id: FontCat; label: string }[] = [
@@ -55,8 +53,8 @@ export const FONTS: FontDef[] = [
   { id: 'dongle', family: 'Dongle', label: '동글', cat: 'korean', scale: 1.45 },
   // clean
   { id: 'nunito', family: 'Nunito', label: 'Nunito', cat: 'clean', scale: 0.82 },
-  { id: 'lora', family: 'Lora', label: 'Lora', cat: 'clean', scale: 0.82, spec: 'ital,wght@0,400;1,400' },
-  { id: 'playfair', family: 'Playfair Display', label: 'Playfair', cat: 'clean', scale: 0.82, spec: 'ital,wght@0,400;1,400' },
+  { id: 'lora', family: 'Lora', label: 'Lora', cat: 'clean', scale: 0.82 },
+  { id: 'playfair', family: 'Playfair Display', label: 'Playfair', cat: 'clean', scale: 0.82 },
   { id: 'courier', family: 'Courier Prime', label: 'Courier Prime', cat: 'clean', scale: 0.82 },
   { id: 'typewriter', family: 'Special Elite', label: 'Typewriter', cat: 'clean', scale: 0.84 },
 ];
@@ -77,18 +75,20 @@ export function fontStack(id?: string): string {
 export const lastFont = (): string => { try { return localStorage.getItem(LAST_KEY) ?? DEFAULT_FONT; } catch { return DEFAULT_FONT; } };
 export const rememberFont = (id: string): void => { try { localStorage.setItem(LAST_KEY, id); } catch { /* The font is still saved on its text element. */ } };
 
-const loaded = new Set<string>(['Caveat', 'Gaegu', 'Nunito']); // already in index.html
+const loaded = new Set<string>(['Caveat', 'Gaegu', 'Nunito', 'Noto Sans KR']); // local core stylesheets in index.html
 
-/** Inject one Google Fonts stylesheet for any families not loaded yet. Files download only when used. */
+/** Load each family's local stylesheet once; unused glyph subsets need not render/download yet. */
 export function loadFonts(ids: Iterable<string>): void {
   const need = [...new Set([...ids].map((id) => fontDef(id)))].filter((f) => !loaded.has(f.family));
   if (!need.length) return;
   need.forEach((f) => loaded.add(f.family));
-  const families = need.map((f) => `family=${f.family.replace(/ /g, '+')}${f.spec ? `:${f.spec}` : ''}`).join('&');
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
-  document.head.appendChild(link);
+  for (const font of need) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `/fonts/${font.family.toLowerCase().replace(/\s+/g, '-')}/index.css`;
+    link.addEventListener('error', () => { loaded.delete(font.family); link.remove(); }, { once: true });
+    document.head.appendChild(link);
+  }
 }
 
 export const loadAllFonts = () => loadFonts(FONTS.map((f) => f.id));

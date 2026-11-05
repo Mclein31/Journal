@@ -42,7 +42,7 @@ export function openCustomizePanel(pageId?: string): void {
   dlg.innerHTML = `
     <form method="dialog" class="panel-inner">
       <header class="panel-head"><div><span class="eyebrow">A LITTLE MORE YOU</span><h2>Make it yours</h2></div><button class="icon-btn" value="close" aria-label="Close">${icon('x')}</button></header>
-      <p class="panel-intro">Your own little world, down to the paper.</p>
+      <p class="panel-intro">Make these pages yours, down to the paper.</p>
       <div class="cz-tabs" role="tablist" aria-label="Customization category">
         <button type="button" role="tab" id="cz-tab-cover" aria-controls="cz-cover" aria-selected="true" data-category="cover">Cover</button>
         <button type="button" role="tab" id="cz-tab-paper" aria-controls="cz-paper" aria-selected="false" tabindex="-1" data-category="paper">Paper</button>
@@ -213,7 +213,7 @@ export function openCustomizePanel(pageId?: string): void {
   }
 
   dlg.querySelector<HTMLInputElement>('.cz-title')!.addEventListener('change', (e) => {
-    commit({ title: (e.target as HTMLInputElement).value.trim() || 'My Little World' });
+    commit({ title: (e.target as HTMLInputElement).value.trim() || 'Dear Days' });
   });
 
   dlg.querySelector('.panel-inner')!.addEventListener('keydown', (e) => { const key = e as KeyboardEvent; if (key.key === 'Enter' && key.target instanceof HTMLInputElement) { key.preventDefault(); key.target.blur(); } });

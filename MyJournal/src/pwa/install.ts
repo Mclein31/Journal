@@ -53,7 +53,7 @@ function showIOSSteps() {
       <ol class="ios-steps">
         <li>Tap the <strong>Share</strong> button <span aria-hidden="true">(square with an arrow ↑)</span> in Safari.</li>
         <li>Scroll and tap <strong>Add to Home Screen</strong>.</li>
-        <li>Tap <strong>Add</strong>. My Little World opens like an app — even offline.</li>
+        <li>Tap <strong>Add</strong>. Dear Days opens like an app — even offline.</li>
       </ol>
       <button class="btn-soft" value="close">Got it</button>
     </form>`;

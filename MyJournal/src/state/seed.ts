@@ -26,13 +26,13 @@ export function createSeedBook(): BookDoc {
     w: 0.8,
     rot: 0,
     z: 1,
-    data: { text: { content: 'Hello, little world ♡\nPull a tab to visit a section, or flip the page.' } },
+    data: { text: { content: 'Welcome to Dear Days ♡\nPull a tab to visit a section, or flip the page.' } },
     updatedAt: now,
   };
   return {
     book: {
       id: bookId,
-      title: 'My Little World',
+      title: 'Dear Days',
       coverColor: '#d98a9f',
       coverTexture: 'linen',
       paperType: 'lined',

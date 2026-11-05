@@ -24,7 +24,7 @@ export function openStickerTray(onPick: (stickerId: string, aspect: number) => v
   dlg.setAttribute('aria-label', 'Stickers');
   dlg.innerHTML = `
     <form method="dialog" class="panel-inner">
-      <header class="panel-head"><div><h2>Sticker box</h2><p class="st-library-count">${STICKERS.length} illustrated details, made for your little world.</p></div><button class="icon-btn" value="close" aria-label="Close">${icon('x')}</button></header>
+      <header class="panel-head"><div><h2>Sticker box</h2><p class="st-library-count">${STICKERS.length} illustrated details for your pages.</p></div><button class="icon-btn" value="close" aria-label="Close">${icon('x')}</button></header>
       <label class="field-label st-search">Find a little detail<input class="inspector-input" type="search" aria-label="Find stickers" placeholder="Try coffee, camera, flowers…" /></label>
       <p class="st-results" role="status" hidden></p>
       <section class="cz-sec st-recent-sec"><h3>Recently used</h3><div class="st-grid" data-g="recent"></div></section>

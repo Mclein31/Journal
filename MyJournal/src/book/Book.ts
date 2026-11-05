@@ -34,7 +34,7 @@ const narrow = matchMedia('(max-aspect-ratio: 1/1), (max-width: 719px) and (min-
 
 const TEMPLATE = `
 <div class="desk">
-  <div class="desk-identity"><span class="brand-mark" aria-hidden="true">✿</span><div><span class="brand-name">My Little World</span><span class="save-status" role="status">Saved on this device</span></div></div>
+  <div class="desk-identity"><span class="brand-mark" aria-hidden="true">✿</span><div><span class="brand-name">Dear Days</span><span class="save-status" role="status">Saved on this device</span></div></div>
   <div class="desk-tools">
     <button type="button" class="tool-btn install-btn" data-act="install" aria-label="Install app" hidden>⬇<span class="tool-label"> Install</span></button>
     <button type="button" class="tool-btn sound-btn" data-act="sound" aria-label="Page sounds">🔊</button>
@@ -415,7 +415,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
       const fade = v.mode === 'single' ? (dir === 1 ? 'out' : 'in') : undefined;
       drag.turn = { ctl: dragLeaf(stage, faces, dir, fade, { grab }), dir, target, width: bounds.width, height: bounds.height, grabX: grab.x };
     }
-    drag.turn.ctl.set(progressOf(drag, e.clientX), drag.pullOrigin + (e.clientY - drag.y) / Math.max(1, drag.turn.height));
+    drag.turn.ctl.follow(progressOf(drag, e.clientX), drag.pullOrigin + (e.clientY - drag.y) / Math.max(1, drag.turn.height));
   });
 
   async function endDrag(e: PointerEvent) {

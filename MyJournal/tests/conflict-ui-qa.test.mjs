@@ -49,7 +49,7 @@ test('a stale-window save opens the conflict dialog and downloads the unsaved jo
   const downloads = captureDownloads(stale, t);
   dialog.querySelector('[data-conflict="download"]').click();
   assert.equal(downloads.length, 1);
-  assert.equal(downloads[0].filename, 'my-little-world-unsaved-changes.json');
+  assert.equal(downloads[0].filename, 'dear-days-unsaved-changes.json');
   assert.ok(downloads[0].blob instanceof Blob);
   const exported = JSON.parse(await downloads[0].blob.text());
   assert.equal(exported.journal.book.id, baseline.book.id);

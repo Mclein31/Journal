@@ -11,6 +11,7 @@ import { lastFont, loadFonts } from './fonts/fonts';
 import { mountAccountControls, mountLogin, readSession, rememberAccount, rememberedAccount, watchAccountChanges } from './account/ui';
 import { useAccount, type Account } from './account/api';
 import { prepareCloud, startSync } from './sync/cloud';
+import { syncChibi } from './login/chibiStore';
 
 const ACTIVE_BOOK = 'activeBookId';
 
@@ -34,7 +35,7 @@ async function boot() {
   }
   useAccount(account?.id);
   setStorageOwner(account?.id);
-  if (account) await prepareCloud();
+  if (account) { await prepareCloud(); void syncChibi(); }
   const activeId = await getMeta<string>(ACTIVE_BOOK);
   let doc = activeId ? await loadBook(activeId) : null;
   if (!doc) {

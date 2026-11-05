@@ -6,3 +6,14 @@
 @media(prefers-reduced-motion:reduce){.auth-book{transform:none}}
 .desk[data-closed='true'] .desk-tools button.tool-btn.account-button{display:inline-flex;visibility:visible;opacity:1}
 .save-status[data-state="offline"]::before{background:#b18d3f}.save-status[data-state="syncing"]::before{background:#6b91b1}.save-status[data-state="conflict"]::before,.save-status[data-state="error"]::before{background:#b35569}
+/* Login chibi beside the closed book */
+.auth-stage{position:relative;display:flex;align-items:flex-end;justify-content:center;margin:40px auto 0;min-height:320px}
+.auth-stage .auth-book{margin:0}
+.auth-chibi{width:196px;height:236px;margin-left:-58px;margin-bottom:-8px;position:relative;z-index:1;filter:drop-shadow(0 10px 14px #5a36441f)}
+.auth-chibi .chibi-live{width:100%;height:100%}
+.auth-chibi-edit{margin-top:22px;border:1px solid #c9a9b7;background:#fffaf4cc;color:#7e4359;border-radius:999px;padding:9px 18px;min-height:40px;font:800 12px var(--font-ui);letter-spacing:.3px;cursor:pointer}
+.auth-chibi-edit::before{content:'✎ ';}
+.auth-chibi-edit:hover{background:#fff;border-color:#87465f}
+.auth-intro>.auth-chibi-edit+p{margin-top:22px}
+@media(max-width:760px){.auth-stage{margin:6px auto 0;min-height:0}.auth-chibi{width:116px;height:140px;margin:0}.auth-chibi-edit{margin-top:6px;padding:7px 14px;min-height:36px}.auth-intro>.auth-chibi-edit+p{margin-top:12px}}
+@media(max-height:560px) and (max-width:760px){.auth-chibi{width:90px;height:108px}}

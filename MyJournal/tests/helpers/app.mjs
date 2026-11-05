@@ -48,7 +48,7 @@ export async function appHarness({ single = false, stored = {}, manualFrames = f
     return media.get(query);
   };
   const context = vm.createContext({
-    document, window: { document, setTimeout, clearTimeout, setInterval(fn, ms) { const timer = setInterval(fn, ms); timer.unref(); return timer; }, dispatchEvent: events.dispatchEvent.bind(events) },
+    document, window: { document, setTimeout, clearTimeout, setInterval(fn, ms) { const timer = setInterval(fn, ms); timer.unref(); return timer; }, clearInterval, dispatchEvent: events.dispatchEvent.bind(events) },
     location, history: { replaceState(_state, _unused, path) { location.search = new URL(path, location.origin).search; } },
     addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events),
     CustomEvent: window.CustomEvent, HTMLElement: window.HTMLElement, HTMLInputElement: window.HTMLInputElement,

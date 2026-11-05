@@ -103,6 +103,8 @@ export interface ChibiConfig {
   outfit: number;
   accessory: 'none' | 'bow' | 'clips' | 'cat-ears' | 'glasses' | 'beret';
   blush: boolean;
+  /** ms epoch of the last customization; newer wins between device and account. */
+  updatedAt: number;
 }
 
 /** Everything needed to render one book. */

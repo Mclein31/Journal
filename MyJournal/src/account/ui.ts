@@ -6,6 +6,10 @@ import { getMeta, replaceSnapshot, setMeta, storageKey } from '../sync/local';
 import { cloudBooks, importDeviceJournal, keepAsSeparateJournal, requireSyncedJournal, snapshotHash, stopSync, syncNow } from '../sync/cloud';
 import { getPendingDrafts, getDraftConflicts } from '../book/bookmark';
 import { api, mediaBlob, post, type Account, type Session } from './api';
+import { mountChibi } from '../login/Chibi';
+import { openChibiEditor } from '../login/ChibiEditor';
+import { CHIBI_EVENT, loadChibi } from '../login/chibiStore';
+import type { ChibiConfig } from '../state/schema';
 
 const CACHE = 'dd:last-account';
 const GENERATION = 'dd:account-generation';
@@ -32,9 +36,21 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
   let email = initialEmail;
   let password = '';
   let name = '';
+  // One live chibi survives re-renders between sign in / sign up / reset; only its slot is rebuilt.
+  const chibiHost = document.createElement('div'); chibiHost.className = 'auth-chibi';
+  const chibi = mountChibi(chibiHost, loadChibi(), 'Your Dear Days companion. Her eyes follow your cursor.');
+  addEventListener(CHIBI_EVENT, (event) => chibi.update((event as CustomEvent<ChibiConfig>).detail));
+  const syncHands = () => setTimeout(() => {
+    const input = root.querySelector<HTMLInputElement>('[name="password"]');
+    const active = document.activeElement;
+    const typing = !!input && (active === input || active === root.querySelector('.password-toggle'));
+    chibi.setHands(!typing ? 'rest' : input!.type === 'password' ? 'cover' : 'peek');
+    if (typing && input!.type !== 'password') chibi.setMood('shy'); else if (!typing) chibi.setMood('idle');
+  });
+  root.addEventListener('focusin', syncHands); root.addEventListener('focusout', syncHands);
   function render() {
     const heading = { signin: 'Welcome back.', signup: 'A place for your days.', forgot: 'Let’s get you back in.', reset: 'A fresh start.', verify: 'A little note in your inbox.' }[mode];
-    root.innerHTML = `<section class="auth-screen"><div class="auth-intro"><a class="auth-wordmark" href="/">✿ Dear Days</a><div class="auth-book" aria-hidden="true"><span>Dear<br>Days</span><small>the little things,<br>kept close.</small></div><p>Your days, tucked between pages.</p></div><div class="auth-card"><p class="auth-eyebrow">YOUR PERSONAL JOURNAL</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
+    root.innerHTML = `<section class="auth-screen"><div class="auth-intro"><a class="auth-wordmark" href="/">✿ Dear Days</a><div class="auth-stage"><div class="auth-book" aria-hidden="true"><span>Dear<br>Days</span><small>the little things,<br>kept close.</small></div><div class="auth-chibi-slot"></div></div><button type="button" class="auth-chibi-edit">Customize her</button><p>Your days, tucked between pages.</p></div><div class="auth-card"><p class="auth-eyebrow">YOUR PERSONAL JOURNAL</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
       <form class="auth-form">
       ${mode === 'signup' ? `<label>Your name<input name="name" autocomplete="name" maxlength="100" required value="${escapeHTML(name)}"></label>` : ''}
       ${!['verify','reset'].includes(mode) ? `<label>Email address<input name="email" type="email" autocomplete="email" required value="${escapeHTML(email)}"></label>` : ''}
@@ -47,12 +63,15 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
       <div class="auth-divider"></div><button class="auth-guest" type="button">Continue on this device</button><p class="auth-hint">No account needed. Device-only journals stay in this browser until you choose to import them.</p>
       </div></section>`;
     root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => { saveFields(); mode = button.dataset.mode as Mode; password = ''; render(); }));
+    root.querySelector('.auth-chibi-slot')!.appendChild(chibiHost);
+    root.querySelector('.auth-chibi-edit')!.addEventListener('click', () => openChibiEditor(false));
     root.querySelector('.auth-guest')!.addEventListener('click', () => { sessionStorage.setItem('dd:guest', '1'); history.replaceState(null, '', '/'); location.reload(); });
     root.querySelector('.password-toggle')?.addEventListener('click', (event) => {
       const input = root.querySelector<HTMLInputElement>('[name="password"]')!;
       input.type = input.type === 'password' ? 'text' : 'password';
       (event.currentTarget as HTMLButtonElement).textContent = input.type === 'password' ? 'Show' : 'Hide';
       (event.currentTarget as HTMLButtonElement).setAttribute('aria-label', `${input.type === 'password' ? 'Show' : 'Hide'} password`);
+      syncHands();
     });
     root.querySelector('form')!.addEventListener('submit', (event) => { event.preventDefault(); void submit(); });
     root.querySelector<HTMLInputElement>('input')?.focus();
@@ -70,11 +89,15 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
     try {
       if (mode === 'signin') {
         await post('/auth/sign-in/email', { email, password, callbackURL: location.origin });
-        sessionStorage.removeItem('dd:guest'); accountChanged(); location.assign('/'); return;
+        sessionStorage.removeItem('dd:guest'); accountChanged();
+        chibi.setHands('rest'); chibi.setMood('happy');
+        const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        await new Promise((resolve) => setTimeout(resolve, reduce ? 200 : 650)); // a quick smile before the book opens
+        location.assign('/'); return;
       }
       if (mode === 'signup') {
         await post('/auth/sign-up/email', { email, password, name: name || 'Dear Days writer', callbackURL: location.origin });
-        password = ''; mode = 'verify'; render(); return;
+        password = ''; mode = 'verify'; render(); chibi.setHands('rest'); chibi.setMood('happy', 2400); return;
       }
       if (mode === 'forgot') {
         await post('/auth/request-password-reset', { email, redirectTo: `${location.origin}/?reset=1` });
@@ -92,7 +115,7 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not complete this request. Try again.';
       if (mode === 'signin' && /verif/i.test(message)) { mode = 'verify'; password = ''; render(); }
-      else { feedback.textContent = message; feedback.setAttribute('role', 'alert'); }
+      else { feedback.textContent = message; feedback.setAttribute('role', 'alert'); chibi.setHands('rest'); chibi.setMood('confused', 2600); }
     } finally { button.disabled = false; }
   }
   render();
@@ -136,7 +159,7 @@ async function openAccount(account: Account): Promise<void> {
   await commitEditor();
   const dialog = document.createElement('dialog'); dialog.className = 'account-dialog';
   dialog.setAttribute('aria-labelledby', 'account-title');
-  dialog.innerHTML = `<div class="account-head"><div><p class="auth-eyebrow">DEAR DAYS</p><h2 id="account-title">Your account</h2></div><button class="account-close" aria-label="Close account">×</button></div><p class="account-email">${escapeHTML(account.email)}</p><p class="account-description">Your journals and uploaded images are private. Changes save on this device first, then sync to your account.</p><p class="account-feedback" role="status"></p><div class="account-actions"><button data-account="sync">Sync now</button><button data-account="import">Import device-only journal</button><button data-account="copy">Keep this as a separate journal</button><button data-account="local">Download this device’s copy</button><button data-account="export">Export account with images</button><button data-account="reload">Reload latest cloud copy</button></div><h3>Your journals</h3><div class="account-books">Loading journals…</div><div class="auth-divider"></div><button class="auth-guest" data-account="signout">Sign out</button><details class="account-danger"><summary>Delete account</summary><p>This permanently removes your cloud journals and uploads. Export a copy first. Device-only journals remain on this browser.</p><label>Confirm your password<input type="password" autocomplete="current-password" name="delete-password"></label><button data-account="delete">Permanently delete my account</button></details>`;
+  dialog.innerHTML = `<div class="account-head"><div><p class="auth-eyebrow">DEAR DAYS</p><h2 id="account-title">Your account</h2></div><button class="account-close" aria-label="Close account">×</button></div><p class="account-email">${escapeHTML(account.email)}</p><p class="account-description">Your journals and uploaded images are private. Changes save on this device first, then sync to your account.</p><p class="account-feedback" role="status"></p><div class="account-actions"><button data-account="sync">Sync now</button><button data-account="import">Import device-only journal</button><button data-account="copy">Keep this as a separate journal</button><button data-account="local">Download this device’s copy</button><button data-account="export">Export account with images</button><button data-account="reload">Reload latest cloud copy</button><button data-account="chibi">Customize your chibi</button></div><h3>Your journals</h3><div class="account-books">Loading journals…</div><div class="auth-divider"></div><button class="auth-guest" data-account="signout">Sign out</button><details class="account-danger"><summary>Delete account</summary><p>This permanently removes your cloud journals and uploads. Export a copy first. Device-only journals remain on this browser.</p><label>Confirm your password<input type="password" autocomplete="current-password" name="delete-password"></label><button data-account="delete">Permanently delete my account</button></details>`;
   document.body.appendChild(dialog);
   dialog.querySelector('.account-close')!.addEventListener('click', () => { dialog.close(); });
   dialog.addEventListener('close', () => dialog.remove());
@@ -163,6 +186,7 @@ async function openAccount(account: Account): Promise<void> {
   }
   dialog.querySelectorAll<HTMLButtonElement>('[data-account]').forEach((control) => control.addEventListener('click', () => void act(async () => {
     const action = control.dataset.account;
+    if (action === 'chibi') { feedback.textContent = ''; openChibiEditor(true); return; }
     if (action === 'sync') { await commitEditor(); await syncNow(); feedback.textContent = 'Sync checked. See the journal’s save status for the result.'; }
     if (action === 'import') {
       if (!confirm('Import the device-only journal into this account? The original device copy will be kept.')) { feedback.textContent = ''; return; }

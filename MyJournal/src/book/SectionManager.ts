@@ -17,13 +17,19 @@ export function openSectionManager(): void {
   document.body.appendChild(dlg);
   const list = dlg.querySelector<HTMLOListElement>('.sec-list')!;
 
-  const draw = () => {
+  const draw = (focusId?: string, action?: string) => {
     list.replaceChildren(...sorted(getDoc()).map((s, i, all) => row(s, i, all.length)));
+    if (focusId) {
+      const target = list.querySelector<HTMLElement>(`[data-section-id="${focusId}"]`);
+      const button = target?.querySelector<HTMLButtonElement>(`[data-act="${action}"]`);
+      (button && !button.disabled ? button : target?.querySelector<HTMLInputElement>('.sec-name'))?.focus();
+    }
   };
 
   function row(s: Section, i: number, count: number): HTMLLIElement {
     const li = document.createElement('li');
     li.className = 'sec-row';
+    li.dataset.sectionId = s.id;
     li.innerHTML = `
       <input class="sec-icon" maxlength="2" aria-label="Icon" />
       <input class="sec-name" maxlength="24" aria-label="Section name" />
@@ -45,8 +51,8 @@ export function openSectionManager(): void {
     li.querySelector<HTMLButtonElement>('[data-act="del"]')!.disabled = count <= 1;
     li.querySelector<HTMLButtonElement>('[data-act="up"]')!.disabled = i === 0;
     li.querySelector<HTMLButtonElement>('[data-act="down"]')!.disabled = i === count - 1;
-    li.querySelector('[data-act="up"]')!.addEventListener('click', () => { move(s.id, -1); draw(); });
-    li.querySelector('[data-act="down"]')!.addEventListener('click', () => { move(s.id, 1); draw(); });
+    li.querySelector('[data-act="up"]')!.addEventListener('click', () => { move(s.id, -1); draw(s.id, 'up'); });
+    li.querySelector('[data-act="down"]')!.addEventListener('click', () => { move(s.id, 1); draw(s.id, 'down'); });
     li.querySelector('[data-act="del"]')!.addEventListener('click', () => {
       if (count <= 1) return;
       if (!confirm(`Delete “${s.name}” and all of its pages?`)) return;

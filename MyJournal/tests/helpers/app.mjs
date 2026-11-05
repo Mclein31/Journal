@@ -76,7 +76,14 @@ export async function appHarness({ single = false, stored = {} } = {}) {
   store.initStore(createSeedBook());
   await get('book/bookmark');
   const root = document.getElementById('app');
-  const fire = (target, name, props = {}) => { const e = new window.Event(name, { bubbles: true, cancelable: true }); Object.assign(e,props); target.dispatchEvent(e); return e; };
+  const fire = (target, name, props = {}) => {
+    const e = new window.Event(name, { bubbles: true, cancelable: true });
+    Object.assign(e, props);
+    // Preserve the originating control for global-key simulations; the event bus otherwise retargets it.
+    if (target === events && props.target) Object.defineProperty(e, 'target', { get: () => props.target, set() {}, configurable: true });
+    target.dispatchEvent(e);
+    return e;
+  };
   const settle = async () => { for (let i=0;i<12;i++) await new Promise((resolve) => setImmediate(resolve)); };
   return { get, root, store, document, window, storage, fire, settle, media, captured, events };
 }

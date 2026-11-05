@@ -18,7 +18,7 @@ async function setup(side = 'left') {
   }
   const modules = new Map([
     ['state/store', stub({ getDoc: () => doc, update: (_reason, mutate) => { doc = structuredClone(doc); mutate(doc); } })],
-    ['sync/local', stub({ putAsset: () => { throw new Error('unexpected storage write'); } })],
+    ['sync/local', stub({ putAsset: () => { throw new Error('unexpected storage write'); }, deleteAsset: () => { throw new Error('unexpected asset deletion'); } })],
     ['util/image', stub({ compressImage: () => { throw new Error('unexpected image decode'); } })],
     ['fonts/fonts', stub({ lastFont: () => 'caveat' })],
   ]);

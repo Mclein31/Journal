@@ -138,7 +138,13 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   function render() {
     canvas?.commitEditing();
     const doc = getDoc();
-    v.layout = buildLayout(doc);
+    const layout = buildLayout(doc);
+    if (layout.pages.some((p, i) => p.id !== v.layout.pages[i]?.id) || layout.pages.length !== v.layout.pages.length) {
+      const activeId = canvas?.activePageId() ?? v.layout.pages[v.mode === 'spread' ? v.spread * 2 : v.spread]?.id;
+      const index = layout.pages.findIndex((p) => p.id === activeId);
+      if (index >= 0) v.spread = layout.spreadOfPage(index, v.mode);
+    }
+    v.layout = layout;
     v.spread = clamp(v.spread);
     applyBookStyle(doc);
     root.querySelector('.closed-cover .cover-title')!.textContent = doc.book.title;
@@ -214,7 +220,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
       else if (here) ribbon.classList.add('rb-on', i === left && v.mode === 'spread' ? 'rb-left' : 'rb-right');
       else ribbon.classList.add('rb-tail', (left ?? right ?? 0) > i ? 'rb-left' : 'rb-right');
     }
-    btn.setAttribute('aria-pressed', String(here));
+    btn.setAttribute('aria-pressed', String(!!bookmark && bookmark.pageId === canvas?.activePageId()));
   }
 
   function bookmarkLabel(i: number) {
@@ -222,15 +228,14 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   }
 
   async function toggleBookmark() {
-    const i = bookmarkIndex();
     const { left, right } = v.layout.spreadPages(v.spread, v.mode);
-    if (i >= 0 && (i === left || i === right)) {
+    const pageId = canvas?.activePageId() ?? v.layout.pages[right ?? left ?? 0]?.id;
+    if (!pageId) return;
+    if (bookmark?.pageId === pageId) {
       bookmark = null;
       await clearBookmark(getDoc().book.id);
       toast('Bookmark removed');
     } else {
-      const pageId = canvas?.activePageId() ?? v.layout.pages[right ?? left ?? 0]?.id;
-      if (!pageId) return;
       await setBookmark(getDoc().book.id, pageId);
       bookmark = (await getBookmark(getDoc().book.id)) ?? null;
       toast(`🔖 Bookmarked ${bookmarkLabel(bookmarkIndex())}`);
@@ -305,6 +310,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
 
   // ── input ──
   canvas = attachCanvas(stage, () => v.busy || desk.dataset.closed === 'true');
+  stage.addEventListener('pointerdown', renderRibbon);
   addEventListener('mlw:tear', (e) => openTearTool((e as CustomEvent<string>).detail));
   const photoInput = $<HTMLInputElement>('[data-photo-input]');
   $('[data-act="add-photo"]').addEventListener('click', () => photoInput.click());
@@ -315,12 +321,13 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   });
   $('[data-act="add-text"]').addEventListener('click', () => canvas?.addTextHere());
   $('[data-act="add-sticker"]').addEventListener('click', () => { if (!v.busy && desk.dataset.closed !== 'true') openStickerTray((id, aspect) => canvas?.addStickerHere(id, aspect)); });
-  $('[data-act="undo"]').addEventListener('click', () => undo());
-  $('[data-act="redo"]').addEventListener('click', () => redo());
+  $('[data-act="undo"]').addEventListener('click', () => { canvas?.commitEditing(); undo(); });
+  $('[data-act="redo"]').addEventListener('click', () => { canvas?.commitEditing(); redo(); });
   $('[data-act="layout"]').addEventListener('click', () => {
     if (v.busy) return;
+    const activeIndex = v.layout.pages.findIndex((p) => p.id === canvas?.activePageId());
     canvas?.deselect();
-    const first = v.mode === 'spread' ? v.spread * 2 : v.spread;
+    const first = activeIndex >= 0 ? activeIndex : v.mode === 'spread' ? v.spread * 2 : v.spread;
     v.mode = v.mode === 'spread' ? 'single' : 'spread';
     v.spread = v.layout.spreadOfPage(first, v.mode);
     try { localStorage.setItem(layoutKey, v.mode); } catch { /* Optional preference. */ }

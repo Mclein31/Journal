@@ -43,17 +43,20 @@ export function setBackground(bg: Background): void {
   });
 }
 
-/** Compress + store each image; returns the id of the last one so it can be selected. */
-export async function uploadBackgrounds(files: Iterable<File>): Promise<string | undefined> {
-  let last: string | undefined;
+/** A bad file must not discard successful uploads or stop the rest of a batch. */
+export async function uploadBackgrounds(files: Iterable<File>): Promise<{ added: number; failed: number; lastId?: string }> {
+  const result = { added: 0, failed: 0, lastId: undefined as string | undefined };
   for (const f of files) {
-    if (!f.type.startsWith('image/')) continue;
-    const { blob, w, h } = await compressImage(f, 2200, 0.85);
-    const meta: Asset = { id: uid(), kind: 'background', mime: blob.type, w, h, bytes: blob.size, createdAt: Date.now() };
-    await putAsset(meta, blob);
-    last = meta.id;
+    if (!f.type.startsWith('image/')) { result.failed++; continue; }
+    try {
+      const { blob, w, h } = await compressImage(f, 2200, 0.85);
+      const meta: Asset = { id: uid(), kind: 'background', mime: blob.type, w, h, bytes: blob.size, createdAt: Date.now() };
+      await putAsset(meta, blob);
+      result.lastId = meta.id;
+      result.added++;
+    } catch { result.failed++; }
   }
-  return last;
+  return result;
 }
 
 export const listBackgrounds = () => listAssets('background');

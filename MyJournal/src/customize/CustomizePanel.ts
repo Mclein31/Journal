@@ -193,9 +193,10 @@ export function openCustomizePanel(pageId?: string): void {
       input.value = '';
       add.disabled = true;
       try {
-        const id = await uploadBackgrounds(files);
-        if (id) setBackground({ kind: 'upload', ref: id, fit: bg.fit });
+        const result = await uploadBackgrounds(files);
+        if (result.lastId) setBackground({ kind: 'upload', ref: result.lastId, fit: bg.fit });
         await refreshUploads();
+        if (result.failed) toast(`${result.failed} background${result.failed === 1 ? '' : 's'} could not be added. Try a JPG or PNG, or free up device storage.`);
       } catch { toast('Could not add this background. Try a JPG or PNG, or free up device storage.'); }
       finally { add.disabled = false; }
     });

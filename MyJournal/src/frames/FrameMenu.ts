@@ -1,10 +1,12 @@
 /* Visual photo inspector. Original image and tear remain non-destructive. */
-import { getDoc } from '../state/store';
+import { flush, getDoc } from '../state/store';
 import { patchElement } from '../canvas/elements';
 import { FRAMES, FRAME_COLORS, frameDef } from './frames';
 import { bindAssetImage } from '../sync/assetUrls';
 import { mountPicker } from '../ui/picker';
 import { icon } from '../ui/icons';
+import { saveCaptionDraft } from '../book/bookmark';
+import { toast } from '../ui/toast';
 
 let close: (() => void) | null = null;
 export function closeFrameMenu(): void { close?.(); close = null; }
@@ -55,9 +57,16 @@ export function openFrameMenu(elId: string, anchor: HTMLElement, onTear: (id: st
   const commitCaption = () => {
     const p = getDoc().elements.find((e) => e.id === elId)?.data.photo;
     const value = caption.value.trim();
-    if (p && value !== (p.caption ?? '')) patchElement(elId, { data: { photo: { ...p, caption: value } } }, 'photo:caption');
+    if (p && value !== (p.caption ?? '')) {
+      patchElement(elId, { data: { photo: { ...p, caption: value } } }, 'photo:caption');
+      void flush().catch(() => {});
+    }
   };
   caption.addEventListener('change', commitCaption);
+  caption.addEventListener('input', () => { void saveCaptionDraft(elId, caption.value.trim()).catch(() => toast('Could not save your caption. Check available device storage.')); });
+  const onHide = () => { if (document.visibilityState === 'hidden') commitCaption(); };
+  addEventListener('pagehide', commitCaption);
+  addEventListener('visibilitychange', onHide);
   menu.querySelector('.fm-tear')!.addEventListener('click', () => { closeFrameMenu(); onTear(elId); });
   function draw() {
     const p = current();
@@ -72,5 +81,10 @@ export function openFrameMenu(elId: string, anchor: HTMLElement, onTear: (id: st
     picker.value = p.frameColor ?? '#ffffff';
   }
   draw();
-  close = mountPicker(menu, anchor, () => { close = null; commitCaption(); });
+  close = mountPicker(menu, anchor, () => {
+    close = null;
+    removeEventListener('pagehide', commitCaption);
+    removeEventListener('visibilitychange', onHide);
+    commitCaption();
+  });
 }

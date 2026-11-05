@@ -6,7 +6,7 @@ import { addPhoto, addSticker, addText, deleteElement, duplicateElement, moveEle
 import { buildLayout } from '../book/layout';
 import { closeFrameMenu, openFrameMenu } from '../frames/FrameMenu';
 import { closeFontMenu, openFontMenu } from '../fonts/FontMenu';
-import { clearDraft, saveDraft } from '../book/bookmark';
+import { clearDraft, saveCaptionDraft, saveDraft } from '../book/bookmark';
 import { toast } from '../ui/toast';
 import { icon } from '../ui/icons';
 
@@ -52,6 +52,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   }
 
   let captionEditing = false;
+  let commitCaption: (() => void) | null = null;
 
   function select(id: string | null) {
     if (id !== selectedId) { closeFrameMenu(); closeFontMenu(); }
@@ -174,7 +175,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   let tapStart: { x: number; y: number; t: number } | null = null;
   let lastTap: { x: number; y: number; t: number } | null = null;
 
-  const clampW = (w: number) => Math.min(stage.closest<HTMLElement>('.book')?.dataset.mode === 'spread' ? 2 : 1.4, Math.max(0.08, w));
+  const clampW = (w: number, _id: string) => Math.max(.08, Math.min(stage.closest<HTMLElement>('.book')?.dataset.mode === 'spread' ? 2 : 1.4, w));
   const deg = (r: number) => (r * 180) / Math.PI;
   const sizeOf = (id: string) => model(id)?.data.text?.size ?? 1;
   function applyXform(node: HTMLElement, rot: number, w: number, size: number) {
@@ -211,7 +212,9 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
     const owner = t.closest<HTMLElement>('.el')?.dataset.ownerPage;
     if (owner || page) activePage = owner ?? page?.dataset.pageId;
     if (isBusy() || t.closest('.el-bar')) return;
-    const hit = t.closest('.el-knob') ? elNode(selectedId) : t.closest<HTMLElement>('.el');
+    const handle = t.closest('.el-knob');
+    if (handle) stopEditing(true);
+    const hit = handle ? elNode(selectedId) : t.closest<HTMLElement>('.el');
     const node = hit?.dataset.ghost ? elNode(hit.dataset.elId!) ?? hit : hit;
     if (!node) { tapStart = { x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
     if (node.classList.contains('is-editing')) return; // let the caret/selection work
@@ -247,7 +250,8 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
     if (pinch && pointers.size >= 2) {
       const [a, b] = [...pointers.values()];
       pinch.rot = pinch.rot0 + deg(Math.atan2(b.y - a.y, b.x - a.x)) - pinch.a0;
-      pinch.w = clampW(pinch.w0 * (Math.hypot(b.x - a.x, b.y - a.y) / pinch.d0));
+      const factor = Math.hypot(b.x - a.x, b.y - a.y) / pinch.d0;
+      pinch.w = clampW(pinch.w0 * factor, pinch.id);
       pinch.size = pinch.size0 * (pinch.w / pinch.w0);
       applyXform(pinch.node, pinch.rot, pinch.w, pinch.size);
       positionUI();
@@ -267,7 +271,8 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
       let rot = g.rot0 + deg(Math.atan2(e.clientY - g.cy, e.clientX - g.cx)) - g.a0;
       if (e.shiftKey) rot = Math.round(rot / 15) * 15;
       g.rot = rot;
-      g.w = clampW(g.w0 * (Math.hypot(e.clientX - g.cx, e.clientY - g.cy) / g.d0));
+      const factor = Math.hypot(e.clientX - g.cx, e.clientY - g.cy) / g.d0;
+      g.w = clampW(g.w0 * factor, g.id);
       g.size = g.size0 * (g.w / g.w0);
       g.changed = true;
       applyXform(g.node, g.rot, g.w, g.size);
@@ -278,20 +283,34 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   /** handwritten caption on polaroid / instant frames */
   function editCaption(cap: HTMLElement, node: HTMLElement) {
     const id = node.dataset.elId!;
+    commitCaption?.();
+    node = elNode(id) ?? node;
+    cap = node.querySelector<HTMLElement>('.frame-caption') ?? cap;
+    if (!node.isConnected || !cap.isConnected) return;
     captionEditing = true;
     node.classList.add('is-editing');
     cap.contentEditable = 'plaintext-only';
     cap.focus();
     getSelection()?.selectAllChildren(cap);
     getSelection()?.collapseToEnd();
-    cap.addEventListener('blur', () => {
+    const value = () => cap.innerText.replace(/\s+/g, ' ').trim();
+    cap.oninput = () => { void saveCaptionDraft(id, value()).catch(() => toast('Could not save your caption. Check available device storage.')); };
+    const finish = () => {
+      if (commitCaption !== finish) return;
+      commitCaption = null;
       captionEditing = false;
       node.classList.remove('is-editing');
       cap.contentEditable = 'false';
-      const value = cap.innerText.replace(/\s+/g, ' ').trim();
+      cap.oninput = null;
+      const caption = value();
       const photo = model(id)?.data.photo;
-      if (photo && value !== (photo.caption ?? '')) patchElement(id, { data: { photo: { ...photo, caption: value } } }, 'photo:caption');
-    }, { once: true });
+      if (photo && caption !== (photo.caption ?? '')) {
+        patchElement(id, { data: { photo: { ...photo, caption } } }, 'photo:caption');
+        void flush().catch(() => {});
+      }
+    };
+    commitCaption = finish;
+    cap.addEventListener('blur', finish, { once: true });
   }
 
   function commitXform(id: string, rot: number, w: number, size: number) {
@@ -358,19 +377,24 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   stage.addEventListener('dblclick', (e) => {
     const cap = (e.target as HTMLElement).closest<HTMLElement>('.frame-caption');
     const capEl = cap?.closest<HTMLElement>('.el');
-    if (cap && capEl) { editCaption(cap, capEl); return; }
+    if (cap && capEl) { if (!capEl.classList.contains('is-editing')) editCaption(cap, capEl); return; }
     const node = (e.target as HTMLElement).closest<HTMLElement>('.el-text');
     if (node && !node.classList.contains('is-editing')) startEditing(node.dataset.elId!);
   });
 
   addEventListener('keydown', (e) => {
-    if (isBusy() || document.querySelector('.tear-tool, dialog[open], .frame-menu')) return; // a tool/sheet owns the keyboard
+    if (e.defaultPrevented || isBusy() || document.querySelector('.tear-tool, dialog[open]:not(.sticker-sheet), .frame-menu')) return; // other tools/sheets own the keyboard
     if (captionEditing) { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); (document.activeElement as HTMLElement | null)?.blur(); } return; }
     if (editingId) { if (e.key === 'Escape') (document.activeElement as HTMLElement | null)?.blur(); return; }
     const t = e.target as HTMLElement;
     if (t.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(t.tagName)) return;
     const mod = e.metaKey || e.ctrlKey;
     const k = e.key.toLowerCase();
+    if (document.querySelector('.sticker-sheet[open]')) {
+      const history = mod && (k === 'z' || k === 'y');
+      const removeSticker = selectedId && model(selectedId)?.type === 'sticker' && (k === 'delete' || k === 'backspace');
+      if (!history && !removeSticker) return;
+    }
     if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
     if (mod && k === 'y') { e.preventDefault(); redo(); return; }
     if (!selectedId) return;
@@ -383,11 +407,15 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
   // drop photos where they land; paste goes to the active page
   stage.addEventListener('dragover', (e) => { if (e.dataTransfer?.types.includes('Files')) e.preventDefault(); });
   stage.addEventListener('drop', (e) => {
-    const files = [...(e.dataTransfer?.files ?? [])].filter((f) => f.type.startsWith('image/'));
-    if (!files.length) return;
+    const files = [...(e.dataTransfer?.files ?? [])];
+    if (!files.length && !e.dataTransfer?.types.includes('Files')) return;
     e.preventDefault();
     const hit = (e.target as HTMLElement).closest<HTMLElement>('.el');
-    const page = (e.target as HTMLElement).closest<HTMLElement>('.page[data-page-id]') ?? (hit?.dataset.ownerPage ? stage.querySelector<HTMLElement>(`.slot .page[data-page-id="${hit.dataset.ownerPage}"]`) : null);
+    const pageAtPoint = visiblePageIds().map((id) => stage.querySelector<HTMLElement>(`.slot .page[data-page-id="${id}"]`)!).find((p) => {
+      const r = p.querySelector('.page-sheet')!.getBoundingClientRect();
+      return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    const page = pageAtPoint ?? (e.target as HTMLElement).closest<HTMLElement>('.page[data-page-id]') ?? (hit?.dataset.ownerPage ? stage.querySelector<HTMLElement>(`.slot .page[data-page-id="${hit.dataset.ownerPage}"]`) : null);
     const sheet = page?.querySelector('.page-sheet')?.getBoundingClientRect();
     const at = sheet ? { x: (e.clientX - sheet.left) / sheet.width, y: (e.clientY - sheet.top) / sheet.height } : undefined;
     void api.addPhotos(files, page?.dataset.pageId, at);
@@ -403,6 +431,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
     decorate,
     commitEditing() {
       if (captionEditing) (document.activeElement as HTMLElement | null)?.blur();
+      commitCaption?.();
       stopEditing();
     },
     activePageId,
@@ -411,15 +440,19 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
       stopEditing();
       let i = 0;
       let failed = 0;
+      let unsupported = 0;
       const base = onPage(pageId); // cascade so new photos don't land exactly on older ones
       for (const f of files) {
-        if (!f.type.startsWith('image/')) continue;
+        if (!f.type.startsWith('image/')) { unsupported++; continue; }
         const spot = at ? { x: at.x + i * 0.04, y: at.y + i * 0.04 } : { x: 0.5 + ((base + i) % 5) * 0.05 - 0.1, y: 0.22 + ((base + i) % 5) * 0.06 };
         try { selectedId = await addPhoto(pageId, f, spot); i++; }
         catch { failed++; }
       }
       decorate();
-      if (failed) toast(`${failed} image${failed === 1 ? '' : 's'} could not be added. Try a JPG or PNG, or free up device storage.`);
+      const messages = [];
+      if (failed) messages.push(`${failed} image${failed === 1 ? '' : 's'} could not be added. Try a JPG or PNG, or free up device storage.`);
+      if (unsupported) messages.push(`${unsupported} unsupported file${unsupported === 1 ? '' : 's'} skipped. Only images can be added.`);
+      if (messages.length) toast(messages.join(' '));
     },
     addTextHere() {
       const pageId = activePageId();
@@ -439,5 +472,7 @@ export function attachCanvas(stage: HTMLElement, isBusy: () => boolean): CanvasA
     },
     deselect: () => select(null),
   };
+  addEventListener('pagehide', () => api.commitEditing());
+  addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') api.commitEditing(); });
   return api;
 }

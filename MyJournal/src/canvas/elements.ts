@@ -1,7 +1,7 @@
 /* Page element operations. All changes go through the store (one undo step each). */
 import { uid, type ElementData, type ElementType, type PageElement } from '../state/schema';
 import { getDoc, update } from '../state/store';
-import { putAsset } from '../sync/local';
+import { deleteAsset, putAsset } from '../sync/local';
 import { compressImage } from '../util/image';
 import { buildLayout } from '../book/layout';
 import { lastFont } from '../fonts/fonts';
@@ -15,6 +15,7 @@ const spreadPages = (doc: ReturnType<typeof getDoc>, pageId: string) => {
 const maxZ = (pageId: string) => { const doc = getDoc(); const ids = spreadPages(doc, pageId); return Math.max(0, ...doc.elements.filter((e) => ids.has(e.pageId)).map((e) => e.z)); };
 
 function add(pageId: string, type: ElementType, data: ElementData, at: { x: number; y: number }, w: number, rot = 0): string {
+  if (!getDoc().pages.some((p) => p.id === pageId)) throw new Error('This page is no longer available');
   const id = uid();
   const el: PageElement = { id, pageId, type, x: at.x - w / 2, y: at.y, w, rot, z: maxZ(pageId) + 1, data, updatedAt: Date.now() };
   update(`add:${type}`, (d) => { d.elements.push(el); });
@@ -24,10 +25,16 @@ function add(pageId: string, type: ElementType, data: ElementData, at: { x: numb
 /** Store the image, then drop it on the page centered at `at` with a slight scrapbook tilt. */
 export async function addPhoto(pageId: string, file: Blob, at = { x: 0.5, y: 0.3 }): Promise<string> {
   const { blob, w, h } = await compressImage(file, 1600, 0.82);
+  if (!getDoc().pages.some((p) => p.id === pageId)) throw new Error('This page is no longer available');
   const assetId = uid();
   await putAsset({ id: assetId, kind: 'photo', mime: blob.type, w, h, bytes: blob.size, createdAt: Date.now() }, blob);
   const rot = Math.round((Math.random() * 8 - 4) * 10) / 10;
-  return add(pageId, 'photo', { photo: { assetId, aspect: w / h, frame: 'none' } }, { x: at.x, y: Math.max(0.04, at.y - 0.1) }, 0.5, rot);
+  try {
+    return add(pageId, 'photo', { photo: { assetId, aspect: w / h, frame: 'none' } }, { x: at.x, y: Math.max(0.04, at.y - 0.1) }, 0.5, rot);
+  } catch (error) {
+    await deleteAsset(assetId).catch(() => {}); // Only this unfinished import owns the new blob.
+    throw error;
+  }
 }
 
 export function addSticker(pageId: string, stickerId: string, aspect = 1, at = { x: 0.5, y: 0.3 }): string {

@@ -5,7 +5,7 @@ import type { Env } from './env';
 import { createAuth } from './auth';
 import { sendEmail } from './email';
 import { AccountDeletingError, lockWritableAccount } from './db';
-import { assetSchema, idSchema, matchesImage, referencedAssets, syncSchema } from './validation';
+import { assetSchema, chibiSchema, idSchema, matchesImage, referencedAssets, syncSchema } from './validation';
 
 type User = { id: string; email: string; emailVerified: boolean; name: string };
 type Context = { Bindings: Env; Variables: { pool: Pool; auth: ReturnType<typeof createAuth>; user: User } };
@@ -154,7 +154,30 @@ app.get('/api/account/export', async (c) => {
   const owner = c.get('user').id;
   const books = await c.get('pool').query('SELECT doc,bookmark,version FROM journal_books WHERE user_id=$1', [owner]);
   const assets = await c.get('pool').query('SELECT meta FROM journal_assets WHERE user_id=$1 AND state=\'ready\'', [owner]);
-  return c.json({ format: 'dear-days-backup-v1', books: books.rows, assets: assets.rows.map((r) => r.meta) });
+  const state = await c.get('pool').query('SELECT chibi FROM journal_account_state WHERE user_id=$1', [owner]);
+  return c.json({ format: 'dear-days-backup-v1', books: books.rows, assets: assets.rows.map((r) => r.meta), chibi: state.rows[0]?.chibi ?? null });
+});
+app.get('/api/account/chibi', async (c) => {
+  const result = await c.get('pool').query('SELECT chibi FROM journal_account_state WHERE user_id=$1', [c.get('user').id]);
+  return c.json({ chibi: result.rows[0]?.chibi ?? null });
+});
+app.put('/api/account/chibi', async (c) => {
+  const chibi = chibiSchema.parse(await c.req.json());
+  const owner = c.get('user').id;
+  const client = await c.get('pool').connect();
+  try {
+    await client.query('BEGIN');
+    await lockWritableAccount(client, owner);
+    // Newer device edits win; an older retry never replaces a later look.
+    const saved = await client.query(`INSERT INTO journal_account_state(user_id, chibi) VALUES($1, $2::jsonb)
+      ON CONFLICT(user_id) DO UPDATE SET chibi = EXCLUDED.chibi
+      WHERE journal_account_state.chibi IS NULL OR (journal_account_state.chibi->>'updatedAt')::float8 <= (EXCLUDED.chibi->>'updatedAt')::float8
+      RETURNING chibi`, [owner, JSON.stringify(chibi)]);
+    const current = saved.rows[0]?.chibi ?? (await client.query('SELECT chibi FROM journal_account_state WHERE user_id=$1', [owner])).rows[0]?.chibi;
+    await client.query('COMMIT');
+    return c.json({ chibi: current });
+  } catch (error) { await client.query('ROLLBACK').catch(() => undefined); throw error; }
+  finally { client.release(); }
 });
 app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 app.onError((error, c) => {

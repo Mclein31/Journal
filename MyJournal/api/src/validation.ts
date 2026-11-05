@@ -69,3 +69,17 @@ export function matchesImage(bytes: Uint8Array, mime: string): boolean {
   if (mime === 'image/webp') return new TextDecoder().decode(bytes.slice(0,4)) === 'RIFF' && new TextDecoder().decode(bytes.slice(8,12)) === 'WEBP';
   return mime === 'image/gif' && /GIF8[79]a/.test(new TextDecoder().decode(bytes.slice(0,6)));
 }
+
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+/** Mirrors src/login/chibiOptions.ts. Indexes are bounded so any saved combination renders. */
+export const chibiSchema = z.object({
+  hairStyle: z.number().int().min(0).max(5),
+  hairColor: hex,
+  eyeColor: hex,
+  eyeShape: z.number().int().min(0).max(2),
+  skinTone: hex,
+  outfit: z.number().int().min(0).max(5),
+  accessory: z.enum(['none', 'bow', 'clips', 'cat-ears', 'glasses', 'beret']),
+  blush: z.boolean(),
+  updatedAt: timestamp,
+}).strict();

@@ -22,7 +22,7 @@ try {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query(await readFile('api/migrations/001-journal.sql', 'utf8'));
+      for (const file of ['001-journal.sql', '002-chibi.sql']) await client.query(await readFile(`api/migrations/${file}`, 'utf8'));
       await client.query('COMMIT');
     } catch (error) { await client.query('ROLLBACK'); throw error; }
     finally { client.release(); }

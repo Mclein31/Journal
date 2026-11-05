@@ -19,7 +19,8 @@ last_updated: 2026-11-04
 - Guest disclaimer (user request): login note under "Continue on this device" plus a dismissible in-app
   banner for device-only journals — not backed up; may be deleted when Dear Days is updated or browser data
   is cleared (`GUEST_WARNING` in `src/account/ui.ts`). Dismissal: `localStorage['dd:guest-warning-dismissed']`.
-- 173 tests pass; desktop/mobile/header/icon/disclaimer screenshots reviewed. Deploy awaits user approval.
+- 173 tests pass; screenshots reviewed. Deployed with user approval (Pages `40a0b80e`); live login, app,
+  disclaimer, icon, API health and old-URL redirect verified.
 
 ## 2026-11-05 — Gender-neutral character
 - Neutral default look and wording ("Customize character", "Make it yours"); presets Neutral/Masculine/Feminine.

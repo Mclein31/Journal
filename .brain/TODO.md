@@ -14,7 +14,7 @@ last_updated: 2026-11-05
 - [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
-- [ ] Deploy login audit/polish (`npm run deploy`) — awaiting user approval
+- [x] Login audit/polish deployed (2026-11-05, Pages `8e27192c`); live sizes and render verified
 - [ ] Optional: `/impeccable init` to capture PRODUCT.md for future design work
 - [x] Login journal mirroring deployed (2026-11-05, Pages `3e2a380c`); live save + login render verified
 - [x] Deployed masculine options, bandana, facial hair, new login layout, new logo and guest disclaimer (2026-11-05, Pages `40a0b80e`)

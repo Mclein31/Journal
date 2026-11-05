@@ -14,7 +14,8 @@ last_updated: 2026-11-04
   edits (`main.ts`). Uploaded desks get a ≤1280px JPEG copy (`dd:book-look-desk`) with a dark/light flag.
 - Login scene uses the same desk presets/textures/paper tints; dark desks flip the headline to light text;
   photo desks get a readable panel. Titles are HTML-escaped. Not account-scoped (like the chibi).
-- 177 tests pass; browser flow verified (guest edits title/cover/photo desk → login shows them). Deploy pending approval.
+- 177 tests pass; browser flow verified (guest edits title/cover/photo desk → login shows them). Deployed with
+  user approval (Pages `3e2a380c`); live look saving and login mirroring verified.
 
 ## 2026-11-05 — More masculine options, new login layout and logo
 - Character: hair Buzz cut/Messy/Curtains/Man bun; outfits Jersey/Flannel/Suit; accessories Bandana,

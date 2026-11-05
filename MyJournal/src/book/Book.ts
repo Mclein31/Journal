@@ -34,7 +34,7 @@ const narrow = matchMedia('(max-aspect-ratio: 1/1), (max-width: 719px) and (min-
 
 const TEMPLATE = `
 <div class="desk">
-  <div class="desk-identity"><span class="brand-mark" aria-hidden="true">✿</span><div><span class="brand-name">Dear Days</span><span class="save-status" role="status">Saved on this device</span></div></div>
+  <div class="desk-identity"><span class="brand-mark" aria-hidden="true">✦</span><div><span class="brand-name">Dear Days</span><span class="save-status" role="status">Saved on this device</span></div></div>
   <div class="desk-tools">
     <button type="button" class="tool-btn install-btn" data-act="install" aria-label="Install app" hidden>⬇<span class="tool-label"> Install</span></button>
     <button type="button" class="tool-btn sound-btn" data-act="sound" aria-label="Page sounds">🔊</button>
@@ -139,7 +139,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     book.style.setProperty('--cover', doc.book.coverColor);
     const rgb = doc.book.coverColor.match(/[a-f\d]{2}/gi)?.map((n) => parseInt(n, 16));
     const light = rgb && (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 > 165;
-    book.style.setProperty('--cover-ink', light ? '#3d2d3a' : '#fff8f6');
+    book.style.setProperty('--cover-ink', light ? '#383532' : '#fff8f6');
     void applyDesk(root.querySelector<HTMLElement>('.desk')!, doc.book.background);
   }
 
@@ -512,7 +512,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     if (bi >= 0) v.spread = v.layout.spreadOfPage(bi, v.mode); // open straight onto the bookmark
     if (bi >= 0 && !sessionStorage.getItem('mlw:welcomed')) {
       sessionStorage.setItem('mlw:welcomed', '1');
-      window.setTimeout(() => toast(`Welcome back ♡ continuing from ${bookmarkLabel(bi)}`), OPEN_MS * 0.6);
+      window.setTimeout(() => toast(`Welcome back — continuing from ${bookmarkLabel(bi)}`), OPEN_MS * 0.6);
     }
     playCover(OPEN_MS);
     if (reduced.matches) {

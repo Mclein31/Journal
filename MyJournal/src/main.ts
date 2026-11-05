@@ -59,6 +59,6 @@ async function boot() {
 
 void boot().catch(() => {
   const app = document.getElementById('app')!;
-  app.innerHTML = `<div class="boot-error" role="alert"><span aria-hidden="true">✿</span><h1>Dear Days needs a moment</h1><p>We couldn’t open your journal’s storage. Make sure this browser allows site storage, then try again.</p><button type="button">Try again</button></div>`;
+  app.innerHTML = `<div class="boot-error" role="alert"><span aria-hidden="true">✦</span><h1>Dear Days needs a moment</h1><p>We couldn’t open your journal’s storage. Make sure this browser allows site storage, then try again.</p><button type="button">Try again</button></div>`;
   app.querySelector('button')!.addEventListener('click', () => location.reload());
 });

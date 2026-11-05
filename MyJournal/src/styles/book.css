@@ -45,7 +45,7 @@
   position: absolute;
   inset: -12px calc(-14px - var(--edge-r)) -12px calc(-14px - var(--edge-l));
   border-radius: 10px;
-  background-color: var(--cover, #d98a9f);
+  background-color: var(--cover, #3e5568);
   box-shadow:
     0 2px 0 rgba(0, 0, 0, 0.12),
     0 24px 50px -12px var(--shadow),
@@ -83,7 +83,7 @@
 }
 /* full-size page, right-aligned, so only its gutter edge shows (lines line up with the main page) */
 .book[data-mode='single'] .slot-left .page { inset: 0 0 0 auto; width: var(--page-w); }
-.book[data-mode='single'] .slot-left .page-empty { background: color-mix(in srgb, var(--cover, #d98a9f) 70%, #fff); }
+.book[data-mode='single'] .slot-left .page-empty { background: color-mix(in srgb, var(--cover, #3e5568) 70%, #fff); }
 .book[data-mode='single'] .slot-right { left: 0; width: 100%; }
 
 .page {
@@ -103,9 +103,9 @@
   inset: 0;
   pointer-events: none;
 }
-.page-left::after { background: linear-gradient(to left, rgba(60, 30, 20, 0.16), transparent 9%); }
-.page-right::after { background: linear-gradient(to right, rgba(60, 30, 20, 0.16), transparent 9%); }
-.book[data-mode='single'] .page-right::after { background: linear-gradient(to right, rgba(60, 30, 20, 0.18), transparent 7%); }
+.page-left::after { background: linear-gradient(to left, rgba(48, 40, 32, 0.16), transparent 9%); }
+.page-right::after { background: linear-gradient(to right, rgba(48, 40, 32, 0.16), transparent 9%); }
+.book[data-mode='single'] .page-right::after { background: linear-gradient(to right, rgba(48, 40, 32, 0.18), transparent 7%); }
 
 /* ── Turning leaves (flip.ts) ───────────────────────────── */
 .leaf {
@@ -138,7 +138,7 @@
 .leaf-facet { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform-style: preserve-3d; will-change: transform; pointer-events: none; }
 .leaf-facet-face { overflow: hidden; }
 .leaf-paper .leaf-shade { background: radial-gradient(ellipse at var(--grab-x, 90%) var(--grab-y, 50%), #fff9ed80, transparent 35%), linear-gradient(90deg, #3822151a, #38221573 55%, #3822151a); }
-.leaf-floor-shadow { position: absolute; top: 0; width: 50%; height: 100%; z-index: 40; opacity: 0; pointer-events: none; background: radial-gradient(ellipse at 12% 50%, #35241dd9, #35241d59 34%, transparent 72%); will-change: transform, opacity; }
+.leaf-floor-shadow { position: absolute; top: 0; width: 50%; height: 100%; z-index: 40; opacity: 0; pointer-events: none; background: radial-gradient(ellipse at 12% 50%, #2e2924d9, #2e292459 34%, transparent 72%); will-change: transform, opacity; }
 .book[data-mode='single'] .leaf-floor-shadow { width: 100%; }
 .leaf-reduced .leaf-shade { display: none; }
 
@@ -260,9 +260,9 @@
   align-items: center;
   gap: 4px;
   overflow: hidden;
-  color: #3d2d3a;
+  color: #383532;
   background: var(--tab-color);
-  box-shadow: 0 2px 6px rgba(60, 30, 40, 0.22), inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(51, 45, 39, 0.22), inset 0 -2px 0 rgba(0, 0, 0, 0.08);
   transition: transform 220ms var(--ease-out), filter 220ms;
 }
 .tabs-right .tab { left: 0; border-radius: 0 10px 10px 0; transform: translateX(-8px); }
@@ -301,13 +301,13 @@
   display: grid;
   place-items: center;
   border-radius: 0 10px 10px 0;
-  background-color: var(--cover, #d98a9f);
+  background-color: var(--cover, #3e5568);
   box-shadow: inset 6px 0 10px -6px rgba(0, 0, 0, 0.3);
 }
 .cover-inside {
   inset: -12px 0 -12px -14px;
   border-radius: 10px 0 0 10px;
-  background-color: color-mix(in srgb, var(--cover, #d98a9f) 70%, #fff);
+  background-color: color-mix(in srgb, var(--cover, #3e5568) 70%, #fff);
   box-shadow: inset -6px 0 10px -6px rgba(0, 0, 0, 0.25);
 }
 .cover-title {
@@ -351,9 +351,9 @@
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  box-shadow: 0 24px 60px rgba(40, 20, 30, 0.35);
+  box-shadow: 0 24px 60px rgba(34, 30, 26, 0.35);
 }
-.panel::backdrop { background: rgba(40, 25, 30, 0.35); }
+.panel::backdrop { background: rgba(36, 32, 29, 0.35); }
 .panel-inner { display: grid; gap: 14px; padding: 18px; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; }
 .panel-head h2 { margin: 0; font-family: var(--font-display); font-size: 1.5rem; }
@@ -379,7 +379,7 @@
 }
 .icon-btn:hover { background: var(--surface-2); }
 .icon-btn:disabled { opacity: 0.3; cursor: default; }
-.icon-btn.danger:hover { background: #fde2e2; }
+.icon-btn.danger:hover { background: #f4f1eb; }
 
 /* ── Closed book ────────────────────────────────────────── */
 .desk {
@@ -413,7 +413,7 @@
   gap: 14px;
   border: 0;
   border-radius: 0 10px 10px 0;
-  background-color: var(--cover, #d98a9f);
+  background-color: var(--cover, #3e5568);
   /* drop shadow comes from .cover-board underneath, so nothing changes when the leaf takes over */
   box-shadow: inset 6px 0 10px -6px rgba(0, 0, 0, 0.3);
   container-type: inline-size;
@@ -645,7 +645,7 @@ body {
   border-radius: 50%;
   font-size: 0.7rem;
   color: #fff;
-  background: rgba(61, 45, 58, 0.85);
+  background: rgba(56, 53, 50, 0.85);
 }
 .cz-add {
   display: grid;
@@ -697,7 +697,7 @@ body {
 .ribbon.rb-closed { top: auto; bottom: -50px; height: 62px; left: calc(50% + var(--page-w) * 0.74); }
 .book[data-mode='single'] .ribbon.rb-closed { left: 74%; }
 .desk[data-closed='true'] .ribbon { z-index: 2; }
-.bookmark-btn[aria-pressed='true'] { background: #fde2ea; }
+.bookmark-btn[aria-pressed='true'] { background: #f4f1eb; }
 
 /* ── Toast ─────────────────────────────────────────────── */
 .toast {
@@ -710,8 +710,8 @@ body {
   border-radius: 999px;
   font-weight: 700;
   color: #fff;
-  background: rgba(61, 45, 58, 0.92);
-  box-shadow: 0 8px 24px rgba(40, 20, 30, 0.3);
+  background: rgba(56, 53, 50, 0.92);
+  box-shadow: 0 8px 24px rgba(34, 30, 26, 0.3);
   transform: translateX(-50%);
   animation: toast-in 260ms var(--ease-out);
 }

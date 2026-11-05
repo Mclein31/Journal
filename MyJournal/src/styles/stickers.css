@@ -2,15 +2,15 @@
 .sticker-img { display: block; width: 100%; height: auto; pointer-events: none; }
 .sticker-paper { position: relative; }
 .sticker-paper.has-texture::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: var(--grain), var(--fibers); background-size: 110px 110px, 190px 190px; -webkit-mask-image: var(--sticker-mask); mask-image: var(--sticker-mask); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mask-repeat: no-repeat; mix-blend-mode: multiply; opacity: .17; }
-.sticker-img[data-effect='none'] { filter: drop-shadow(0 1px 2px rgba(40, 20, 20, 0.22)); }
+.sticker-img[data-effect='none'] { filter: drop-shadow(0 1px 2px rgba(34, 30, 26, 0.22)); }
 /* die-cut: white border hugging the sticker's shape */
 .sticker-img[data-effect='outline'],
 .sticker-img[data-effect='glossy'],
 .sticker-img[data-effect='glitter'] {
   --cut: drop-shadow(1.6px 0 0 #fff) drop-shadow(-1.6px 0 0 #fff) drop-shadow(0 1.6px 0 #fff) drop-shadow(0 -1.6px 0 #fff);
-  filter: var(--cut) drop-shadow(0 2px 3px rgba(40, 20, 20, 0.25));
+  filter: var(--cut) drop-shadow(0 2px 3px rgba(34, 30, 26, 0.25));
 }
-.sticker-img[data-effect='glossy'] { filter: saturate(1.25) contrast(1.06) var(--cut) drop-shadow(0 3px 5px rgba(40, 20, 20, 0.3)); }
+.sticker-img[data-effect='glossy'] { filter: saturate(1.25) contrast(1.06) var(--cut) drop-shadow(0 3px 5px rgba(34, 30, 26, 0.3)); }
 .sticker-img[data-effect='glitter'] { animation: glitter 1.8s ease-in-out infinite; }
 @keyframes glitter {
   0%, 100% { filter: var(--cut) drop-shadow(0 0 2px rgba(255, 230, 150, 0.6)) brightness(1); }
@@ -46,7 +46,7 @@
 .st-upload { position: relative; min-width: 0; }
 .st-upload .st-item { width: 100%; }
 .st-upload .st-item:disabled { opacity: .55; }
-.st-remove { position: absolute; top: -3px; right: -3px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #ddc8d0; border-radius: 9px; background: #fff8f6; color: #8d3656; box-shadow: 0 2px 5px #45333f19; }
+.st-remove { position: absolute; top: -3px; right: -3px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #cdd2d8; border-radius: 9px; background: #fff8f6; color: #4c6077; box-shadow: 0 2px 5px #403c3819; }
 .st-remove .ui-icon { width: 16px; height: 16px; }
 .st-upload-tools { display: grid; gap: 8px; }
 .st-upload-tools .field-help { margin: 0; }

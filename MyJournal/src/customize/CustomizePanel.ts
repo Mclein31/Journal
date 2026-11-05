@@ -6,7 +6,7 @@ import type { CoverTexture, PaperTint, PaperType } from '../state/schema';
 import { getDoc, subscribe, update } from '../state/store';
 import { DESK_PRESETS, assetUrl, listBackgrounds, removeBackground, setBackground, uploadBackgrounds } from './backgrounds';
 
-const COVER_COLORS = ['#d98a9f', '#f2879e', '#e8a87c', '#f6c26b', '#9fd3b4', '#7fb7a4', '#8ec5e8', '#7c9ed9', '#b8a1e3', '#c48bb8', '#8a6f5c', '#3d3a4a'];
+const COVER_COLORS = ['#3e5568', '#d98a9f', '#f2879e', '#e8a87c', '#f6c26b', '#9fd3b4', '#7fb7a4', '#8ec5e8', '#7c9ed9', '#b8a1e3', '#c48bb8', '#8a6f5c', '#3d3a4a'];
 const TEXTURES: { id: CoverTexture; label: string }[] = [
   { id: 'matte', label: 'Matte' },
   { id: 'linen', label: 'Linen' },

@@ -86,7 +86,7 @@ function addSection() {
   update('section:add', (d) => {
     const now = Date.now();
     const id = uid();
-    d.sections.push({ id, bookId: d.book.id, name: 'New section', icon: '✿', color: palette[d.sections.length % palette.length], position: d.sections.length });
+    d.sections.push({ id, bookId: d.book.id, name: 'New section', icon: '✦', color: palette[d.sections.length % palette.length], position: d.sections.length });
     for (let i = 0; i < PAGES_PER_NEW_SECTION; i++) d.pages.push({ id: uid(), sectionId: id, position: i, updatedAt: now });
   });
 }

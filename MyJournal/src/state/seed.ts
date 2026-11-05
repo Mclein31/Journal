@@ -2,7 +2,7 @@
 import { uid, type BookDoc, type Page, type PageElement, type Section } from './schema';
 
 export const DEFAULT_SECTIONS = [
-  { name: 'Journal', color: '#f2879e', icon: '✒️' },
+  { name: 'Journal', color: '#e8a87c', icon: '✒️' },
   { name: 'Schedule', color: '#8ec5e8', icon: '📅' },
   { name: 'Memories', color: '#f6c26b', icon: '📷' },
   { name: 'Notes', color: '#9fd3b4', icon: '🌿' },
@@ -26,14 +26,14 @@ export function createSeedBook(): BookDoc {
     w: 0.8,
     rot: 0,
     z: 1,
-    data: { text: { content: 'Welcome to Dear Days ♡\nPull a tab to visit a section, or flip the page.' } },
+    data: { text: { content: 'Welcome to Dear Days.\nPull a tab to visit a section, or flip the page.' } },
     updatedAt: now,
   };
   return {
     book: {
       id: bookId,
       title: 'Dear Days',
-      coverColor: '#d98a9f',
+      coverColor: '#3e5568',
       coverTexture: 'linen',
       paperType: 'lined',
       paperTint: 'cream',

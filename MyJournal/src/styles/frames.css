@@ -5,13 +5,13 @@
 .frame:is([data-frame='polaroid'], [data-frame='instant'], [data-frame='instant-wide'], [data-frame='photocard'], [data-frame='scallop']) { background-image: var(--grain); background-size: 180px 180px; }
 
 /* plain: soft shadow only */
-[data-frame='none'] .photo-img { box-shadow: 0 3px 10px rgba(40, 20, 20, 0.28); border-radius: 2px; }
+[data-frame='none'] .photo-img { box-shadow: 0 3px 10px rgba(34, 30, 26, 0.28); border-radius: 2px; }
 
 /* polaroid / instant film: card border, thick bottom with handwritten caption */
 :is([data-frame='polaroid'], [data-frame='instant'], [data-frame='instant-wide']) {
   padding: 5% 5% 0;
   background: var(--frame-color);
-  box-shadow: 0 4px 12px rgba(40, 20, 20, 0.28), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(34, 30, 26, 0.28), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 :is([data-frame='polaroid'], [data-frame='instant'], [data-frame='instant-wide']) .photo-img { object-fit: cover; }
 [data-frame='polaroid'] .photo-img { aspect-ratio: 1 !important; }
@@ -27,12 +27,12 @@
   font-size: 7.5cqw;
   line-height: 1.2;
   text-align: center;
-  color: #3d2d3a;
+  color: #383532;
   outline: none;
   overflow-wrap: anywhere;
 }
 [data-frame='polaroid'] .frame-caption { padding-bottom: 0.9em; }
-.frame-caption:empty::before { content: 'tap to caption'; color: rgba(61, 45, 58, 0.3); }
+.frame-caption:empty::before { content: 'tap to caption'; color: rgba(56, 53, 50, 0.3); }
 .frame-caption[contenteditable='false']:empty::before { content: ''; }
 .el.is-selected .frame-caption:empty::before { content: 'double-tap to caption'; }
 
@@ -41,7 +41,7 @@
   padding: 3%;
   border-radius: 9% / 6.5%;
   background: var(--frame-color);
-  box-shadow: 0 4px 12px rgba(40, 20, 20, 0.28);
+  box-shadow: 0 4px 12px rgba(34, 30, 26, 0.28);
   overflow: hidden;
 }
 [data-frame='photocard'] .photo-img { aspect-ratio: 0.7 !important; object-fit: cover; border-radius: 7% / 5%; }
@@ -58,7 +58,7 @@
 .el.is-selected [data-frame='photocard']::after { background-position: 0 0; }
 
 /* washi tape: photo held by two tape strips */
-[data-frame='tape'] .photo-img { box-shadow: 0 2px 8px rgba(40, 20, 20, 0.22); }
+[data-frame='tape'] .photo-img { box-shadow: 0 2px 8px rgba(34, 30, 26, 0.22); }
 [data-frame='tape']::before,
 [data-frame='tape']::after {
   content: '';
@@ -70,7 +70,7 @@
   opacity: 0.85;
   background:
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.45) 0 6px, transparent 6px 12px),
-    var(--frame-color, #f7c6d0);
+    var(--frame-color, #e7e1d6);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 [data-frame='tape']::before { left: -6%; transform: rotate(-32deg); }
@@ -88,7 +88,7 @@
     radial-gradient(closest-side, #f3ede4 70%, transparent 76%) 1.5% 97.4% / 7% 6% repeat-x,
     #1e1a1c;
   border-radius: 2px;
-  box-shadow: 0 4px 12px rgba(20, 10, 10, 0.35);
+  box-shadow: 0 4px 12px rgba(17, 15, 13, 0.35);
 }
 [data-frame='film'] .photo-img { border-radius: 1px; }
 
@@ -100,7 +100,7 @@
     linear-gradient(#000 0 0) 6px 6px / calc(100% - 12px) calc(100% - 12px) no-repeat;
   mask: radial-gradient(circle at center, transparent 0 3.2px, #000 3.6px) -6px -6px / 12px 12px,
     linear-gradient(#000 0 0) 6px 6px / calc(100% - 12px) calc(100% - 12px) no-repeat;
-  filter: drop-shadow(0 3px 6px rgba(40, 20, 20, 0.28));
+  filter: drop-shadow(0 3px 6px rgba(34, 30, 26, 0.28));
 }
 
 /* scalloped: wavy edge on a colored mat */
@@ -120,19 +120,19 @@
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 90C20 68 2 50 2 28 2 13 14 2 28 2c10 0 18 5 22 13C54 7 62 2 72 2c14 0 26 11 26 26 0 22-18 40-48 62z'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 90C20 68 2 50 2 28 2 13 14 2 28 2c10 0 18 5 22 13C54 7 62 2 72 2c14 0 26 11 26 26 0 22-18 40-48 62z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-[data-frame='heart'] { filter: drop-shadow(0 3px 6px rgba(40, 20, 20, 0.3)); }
+[data-frame='heart'] { filter: drop-shadow(0 3px 6px rgba(34, 30, 26, 0.3)); }
 [data-frame='circle'] .photo-img {
   aspect-ratio: 1 !important;
   object-fit: cover;
   border-radius: 50%;
   border: 4px solid var(--frame-color);
-  box-shadow: 0 3px 10px rgba(40, 20, 20, 0.3);
+  box-shadow: 0 3px 10px rgba(34, 30, 26, 0.3);
 }
 
 /* torn: shape comes from the tear tool (Phase 6); until torn it looks plain */
 /* white paper fibers along every edge (drop-shadows follow the clipped shape) + depth */
 [data-frame='torn'] {
-  filter: drop-shadow(0 0 0.8px #fffdf8) drop-shadow(0 0 0.8px #fffdf8) drop-shadow(0 0 0.6px #f4ece0) drop-shadow(0 3px 4px rgba(40, 20, 20, 0.32));
+  filter: drop-shadow(0 0 0.8px #fffdf8) drop-shadow(0 0 0.8px #fffdf8) drop-shadow(0 0 0.6px #f4ece0) drop-shadow(0 3px 4px rgba(34, 30, 26, 0.32));
 }
 
 /* caption editing */
@@ -146,7 +146,7 @@
   padding: 10px;
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 14px 40px rgba(40, 20, 30, 0.3);
+  box-shadow: 0 14px 40px rgba(34, 30, 26, 0.3);
   animation: fm-in 160ms var(--ease-out);
 }
 @keyframes fm-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
@@ -176,7 +176,7 @@
   justify-items: center;
   gap: 12px;
   padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
-  background: rgba(30, 20, 26, 0.82);
+  background: rgba(27, 25, 23, 0.82);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   color: #fff;
@@ -196,7 +196,7 @@
 .tt-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .tt-line { fill: none; stroke: #fff; stroke-width: 0.012; stroke-dasharray: 0.03 0.02; stroke-linecap: round; vector-effect: none; }
 .tt-piece { stroke: #fff; stroke-width: 0.006; cursor: pointer; transition: fill-opacity 150ms; }
-.tt-a { fill: #f2879e; fill-opacity: 0.38; }
+.tt-a { fill: #a2bbd7; fill-opacity: 0.38; }
 .tt-b { fill: #8ec5e8; fill-opacity: 0.38; }
 .tt-piece:hover { fill-opacity: 0.6; }
 .tear-tool.is-picking .tt-stage { cursor: pointer; }

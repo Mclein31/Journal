@@ -8,6 +8,14 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Login journal mirrors the user's book
+- `src/login/bookLook.ts` keeps a device copy (`localStorage['dd:book-look']`) of the last opened journal's
+  title, cover color/texture, paper type/tint, section tab colors and desk; written at boot and 600 ms after
+  edits (`main.ts`). Uploaded desks get a ≤1280px JPEG copy (`dd:book-look-desk`) with a dark/light flag.
+- Login scene uses the same desk presets/textures/paper tints; dark desks flip the headline to light text;
+  photo desks get a readable panel. Titles are HTML-escaped. Not account-scoped (like the chibi).
+- 177 tests pass; browser flow verified (guest edits title/cover/photo desk → login shows them). Deploy pending approval.
+
 ## 2026-11-05 — More masculine options, new login layout and logo
 - Character: hair Buzz cut/Messy/Curtains/Man bun; outfits Jersey/Flannel/Suit; accessories Bandana,
   Beanie, Backwards cap, Sunglasses; new Facial hair field (None/Stubble/Mustache); "Sporty" preset.

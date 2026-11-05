@@ -14,6 +14,7 @@ last_updated: 2026-11-05
 - [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
+- [ ] Deploy login journal mirroring (`npm run deploy`) — awaiting user approval
 - [x] Deployed masculine options, bandana, facial hair, new login layout, new logo and guest disclaimer (2026-11-05, Pages `40a0b80e`)
 - [x] Gender-neutral character + neutral app palette deployed to https://dear-days.pages.dev (2026-11-05, user approved)
 - [x] Apply `002-chibi.sql` to Neon production (2026-11-05, user approved)

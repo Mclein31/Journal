@@ -4,17 +4,18 @@ import { shade } from '../chibiOptions';
 
 const MIRROR = 'transform="translate(200 0) scale(-1 1)"';
 const TORSO = 'M74 152Q100 146 126 152L132 188L68 188Z';
+const PANTS = 'M68 186L132 186L131 227L106 227L100 202L94 227L69 227Z';
 const SKIRT = 'M68 186L132 186L142 210Q100 218 58 210Z';
 const fillLine = (fill: string) => `fill="${fill}" stroke="${shade(fill, -0.3)}" stroke-width="1.5" stroke-linejoin="round"`;
 interface Look { sleeve: string; parts: string }
 
 function look(outfit: number): Look {
   switch (outfit) {
-    case 1: return { sleeve: '#c3a7e0', parts: `
-      <path d="M70 196h60l3 12H67Z" ${fillLine('#6c6a8e')}/>
-      <ellipse cx="100" cy="153" rx="28" ry="8" ${fillLine('#a98bc9')}/>
-      <path d="M74 152Q100 146 126 152L134 200Q100 206 66 200Z" ${fillLine('#c3a7e0')}/>
-      <path d="M82 180h36l-4 13H86Z" ${fillLine('#b394d6')}/>
+    case 1: return { sleeve: '#9fb6c9', parts: `
+      <path d="${PANTS}" ${fillLine('#5b6473')}/>
+      <ellipse cx="100" cy="153" rx="28" ry="8" ${fillLine('#87a0b5')}/>
+      <path d="M74 152Q100 146 126 152L134 200Q100 206 66 200Z" ${fillLine('#9fb6c9')}/>
+      <path d="M82 180h36l-4 13H86Z" ${fillLine('#8ea7bc')}/>
       <path d="M94 157l-1 15M106 157l1 15" stroke="#fffaf3" stroke-width="1.8" stroke-linecap="round"/>` };
     case 2: return { sleeve: '#fff4dc', parts: `
       <path d="${TORSO}" ${fillLine('#fff4dc')}/>
@@ -40,6 +41,25 @@ function look(outfit: number): Look {
       <path d="M74 152L95 156L93 190L66 188Z" ${fillLine('#f5d06f')}/>
       <path d="M126 152L105 156L107 190L134 188Z" ${fillLine('#f5d06f')}/>
       <g fill="#c9993a"><circle cx="90" cy="166" r="1.8"/><circle cx="90" cy="178" r="1.8"/><circle cx="110" cy="166" r="1.8"/><circle cx="110" cy="178" r="1.8"/></g>` };
+    case 6: return { sleeve: '#e9eef2', parts: `
+      <path d="${PANTS}" ${fillLine('#4d6f9c')}/><path d="M100 196v28" stroke="#3d5a80" stroke-width="1.2"/>
+      <path d="${TORSO}" ${fillLine('#e9eef2')}/>
+      <path d="M92 150q8 6 16 0" fill="none" stroke="#b7c2cc" stroke-width="1.6"/>
+      <path d="M100 164l2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8Z" fill="#f5c842" stroke="#c99a1f" stroke-width="1"/>` };
+    case 7: return { sleeve: '#dfe9f5', parts: `
+      <path d="${PANTS}" ${fillLine('#b49a74')}/>
+      <path d="${TORSO}" ${fillLine('#dfe9f5')}/>
+      <path d="M88 149L100 160L112 149L114 156L100 164L86 156Z" ${fillLine('#f6f9fc')}/>
+      <path d="M100 164v24" stroke="#a9bccf" stroke-width="1.2"/>
+      <g fill="#8aa1b8"><circle cx="100" cy="170" r="1.5"/><circle cx="100" cy="178" r="1.5"/><circle cx="100" cy="185" r="1.5"/></g>
+      <path d="M110 166h8v7h-8Z" fill="none" stroke="#a9bccf" stroke-width="1.1"/>` };
+    case 8: return { sleeve: '#3f5a4a', parts: `
+      <path d="${PANTS}" ${fillLine('#3a3f4b')}/>
+      <path d="${TORSO}" ${fillLine('#f1ece2')}/>
+      <path d="M74 152L94 154L92 190L66 188Z" ${fillLine('#3f5a4a')}/>
+      <path d="M126 152L106 154L108 190L134 188Z" ${fillLine('#3f5a4a')}/>
+      <path d="M66 184h26v6H66ZM108 184h26v6h-26Z" fill="#e8dcc4"/>
+      <path d="M78 151q8 5 16 3M122 151q-8 5-16 3" fill="none" stroke="#e8dcc4" stroke-width="3" stroke-linecap="round"/>` };
     default: return { sleeve: '#fffaf3', parts: `
       <path d="${SKIRT}" ${fillLine('#36507a')}/>
       <path d="M80 188l-8 22M100 188v26M120 188l8 22" stroke="#26395a" stroke-width="1.3"/>

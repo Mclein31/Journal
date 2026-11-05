@@ -20,7 +20,7 @@ let counter = 0;
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const between = (min: number, max: number) => min + Math.random() * (max - min);
 
-export function mountChibi(host: HTMLElement, config: ChibiConfig, label = 'Your Dear Days companion'): ChibiHandle {
+export function mountChibi(host: HTMLElement, config: ChibiConfig, label = 'Your Dear Days character'): ChibiHandle {
   const uid = `chibi${++counter}`;
   const el = document.createElement('div');
   el.className = 'chibi-live';

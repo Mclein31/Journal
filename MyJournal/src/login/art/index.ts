@@ -26,6 +26,13 @@ function topAccessory(c: ChibiConfig): string {
       <circle cx="76" cy="104" r="16"/><circle cx="124" cy="104" r="16"/><path d="M92 103q8-6 16 0M60 100L45 96M140 100l15-4" fill="none"/></g>`;
     case 'beret': return `<g class="ch-acc"><ellipse cx="86" cy="34" rx="46" ry="15" transform="rotate(-12 86 34)" fill="#c0475f" stroke="#91304a" stroke-width="1.6"/>
       <path d="M84 20l2-9" stroke="#91304a" stroke-width="3" stroke-linecap="round"/><path d="M48 46q38-14 76-18" fill="none" stroke="#91304a" stroke-width="1.4" opacity=".6"/></g>`;
+    case 'cap': return `<g class="ch-acc" stroke="#33485f" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M38 78C38 38 66 20 100 20S162 38 162 78Z" fill="#4f6d8f"/>
+      <path d="M100 21v56M70 28q-8 22-8 50M130 28q8 22 8 50" fill="none" opacity=".45"/>
+      <path d="M34 76Q100 60 166 76Q168 88 160 88Q100 74 40 88Q32 88 34 76Z" fill="#3f5a78"/><circle cx="100" cy="20" r="3.5" fill="#3f5a78"/></g>`;
+    case 'headphones': return `<g class="ch-acc"><path d="M36 98C30 42 66 18 100 18S170 42 164 98" fill="none" stroke="#3d4b5c" stroke-width="7" stroke-linecap="round"/>
+      <rect x="26" y="86" width="18" height="30" rx="8" fill="#5a6b7f" stroke="#3d4b5c" stroke-width="1.6"/>
+      <rect x="156" y="86" width="18" height="30" rx="8" fill="#5a6b7f" stroke="#3d4b5c" stroke-width="1.6"/></g>`;
     default: return '';
   }
 }

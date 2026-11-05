@@ -4,12 +4,14 @@ import type { ChibiConfig } from '../state/schema';
 export type Accessory = ChibiConfig['accessory'];
 export interface Swatch { name: string; value: string }
 
-export const HAIR_STYLES = ['Bob', 'Long', 'Twin tails', 'Space buns', 'Ponytail', 'Wavy'] as const;
+// Indexes are stored in saved looks: only append new choices.
+export const HAIR_STYLES = ['Bob', 'Long', 'Twin tails', 'Space buns', 'Ponytail', 'Wavy', 'Short', 'Spiky', 'Side part'] as const;
 export const EYE_SHAPES = ['Round', 'Sparkle', 'Gentle'] as const;
-export const OUTFITS = ['Sailor', 'Hoodie', 'Overalls', 'Sweater', 'Pinafore', 'Cardigan'] as const;
+export const OUTFITS = ['Sailor', 'Hoodie', 'Overalls', 'Sweater', 'Pinafore', 'Cardigan', 'Tee & jeans', 'Button shirt', 'Jacket'] as const;
 export const ACCESSORIES: { id: Accessory; name: string }[] = [
   { id: 'none', name: 'None' }, { id: 'bow', name: 'Bow' }, { id: 'clips', name: 'Clips' },
   { id: 'cat-ears', name: 'Cat ears' }, { id: 'glasses', name: 'Glasses' }, { id: 'beret', name: 'Beret' },
+  { id: 'cap', name: 'Cap' }, { id: 'headphones', name: 'Headphones' },
 ];
 export const HAIR_COLORS: Swatch[] = [
   { name: 'Cocoa', value: '#5a3a2e' }, { name: 'Ink', value: '#2c2430' }, { name: 'Chestnut', value: '#8a4b2f' },
@@ -26,9 +28,16 @@ export const SKIN_TONES: Swatch[] = [
   { name: 'Honey', value: '#cf9a6c' }, { name: 'Caramel', value: '#a8714a' }, { name: 'Cocoa', value: '#6f4630' },
 ];
 
+/** Starting points; every piece stays individually customizable. Default is the neutral look. */
+export const PRESETS = [
+  { id: 'neutral', name: 'Neutral', look: { hairStyle: 6, outfit: 1, accessory: 'headphones', eyeShape: 0, blush: false } },
+  { id: 'masculine', name: 'Masculine', look: { hairStyle: 8, outfit: 7, accessory: 'none', eyeShape: 0, blush: false } },
+  { id: 'feminine', name: 'Feminine', look: { hairStyle: 1, outfit: 5, accessory: 'clips', eyeShape: 1, blush: true } },
+] as const satisfies readonly { id: string; name: string; look: Partial<ChibiConfig> }[];
+
 export const DEFAULT_CHIBI: ChibiConfig = {
-  hairStyle: 0, hairColor: HAIR_COLORS[0].value, eyeColor: EYE_COLORS[0].value, eyeShape: 0,
-  skinTone: SKIN_TONES[1].value, outfit: 0, accessory: 'bow', blush: true, updatedAt: 0,
+  hairColor: HAIR_COLORS[0].value, eyeColor: EYE_COLORS[0].value, skinTone: SKIN_TONES[1].value,
+  ...PRESETS[0].look, updatedAt: 0,
 };
 
 const HEX = /^#[0-9a-f]{6}$/i;

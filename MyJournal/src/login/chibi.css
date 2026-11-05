@@ -60,3 +60,6 @@
   .ce-stage{width:120px;height:146px;padding:6px}.ce-quick{flex-direction:column}
   .ce-thumbs{grid-template-columns:repeat(3,1fr)}
 }
+.ce-presets{display:flex;flex-wrap:wrap;gap:8px}
+.ce-presets button{border:1.5px solid #d7c6cd;background:#fff;border-radius:999px;padding:8px 16px;min-height:40px;font:800 12px var(--font-ui);color:#4f4450;cursor:pointer}
+.ce-presets button:hover{border-color:#6f6470}

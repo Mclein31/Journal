@@ -101,7 +101,7 @@ export interface ChibiConfig {
   eyeShape: number;
   skinTone: string;
   outfit: number;
-  accessory: 'none' | 'bow' | 'clips' | 'cat-ears' | 'glasses' | 'beret';
+  accessory: 'none' | 'bow' | 'clips' | 'cat-ears' | 'glasses' | 'beret' | 'cap' | 'headphones';
   blush: boolean;
   /** ms epoch of the last customization; newer wins between device and account. */
   updatedAt: number;

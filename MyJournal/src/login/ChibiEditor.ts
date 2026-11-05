@@ -2,7 +2,7 @@
 import type { ChibiConfig } from '../state/schema';
 import { chibiSVG } from './art/index';
 import { mountChibi } from './Chibi';
-import { ACCESSORIES, DEFAULT_CHIBI, EYE_COLORS, EYE_SHAPES, HAIR_COLORS, HAIR_STYLES, OUTFITS, SKIN_TONES, randomChibi, type Swatch } from './chibiOptions';
+import { ACCESSORIES, DEFAULT_CHIBI, PRESETS, EYE_COLORS, EYE_SHAPES, HAIR_COLORS, HAIR_STYLES, OUTFITS, SKIN_TONES, randomChibi, type Swatch } from './chibiOptions';
 import { loadChibi, saveChibi } from './chibiStore';
 
 type Field = keyof Omit<ChibiConfig, 'updatedAt' | 'blush'>;
@@ -27,9 +27,10 @@ export function openChibiEditor(signedIn: boolean): void {
   const dialog = document.createElement('dialog');
   dialog.className = 'chibi-editor';
   dialog.setAttribute('aria-labelledby', 'chibi-editor-title');
-  dialog.innerHTML = `<div class="ce-head"><div><p class="auth-eyebrow">DEAR DAYS</p><h2 id="chibi-editor-title">Make her yours</h2></div><button type="button" class="account-close" data-ce="cancel" aria-label="Close without saving">×</button></div>
+  dialog.innerHTML = `<div class="ce-head"><div><p class="auth-eyebrow">DEAR DAYS</p><h2 id="chibi-editor-title">Make it yours</h2></div><button type="button" class="account-close" data-ce="cancel" aria-label="Close without saving">×</button></div>
     <div class="ce-body"><div class="ce-preview"><div class="ce-stage"></div><div class="ce-quick"><button type="button" data-ce="random">Surprise me</button><button type="button" data-ce="reset">Reset</button></div></div>
     <form class="ce-controls" method="dialog">
+      <fieldset class="ce-group"><legend>Start from</legend><div class="ce-presets">${PRESETS.map((p) => `<button type="button" data-preset="${p.id}">${p.name}</button>`).join('')}</div></fieldset>
       ${thumbGroup('hairStyle', 'Hair style', HAIR_STYLES.map((name, i) => ({ value: i, name })))}
       ${swatchGroup('hairColor', 'Hair color', HAIR_COLORS, true)}
       ${thumbGroup('eyeShape', 'Eye shape', EYE_SHAPES.map((name, i) => ({ value: i, name })))}
@@ -71,6 +72,10 @@ export function openChibiEditor(signedIn: boolean): void {
     const input = event.target as HTMLInputElement;
     if (input.dataset.custom) { draft = { ...draft, [input.dataset.custom]: input.value.toLowerCase() }; sync(); }
   });
+  form.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((button) => button.addEventListener('click', () => {
+    const preset = PRESETS.find((p) => p.id === button.dataset.preset)!;
+    draft = { ...draft, ...preset.look }; sync();
+  }));
   const feedback = dialog.querySelector<HTMLElement>('.ce-feedback')!;
   dialog.querySelectorAll<HTMLButtonElement>('[data-ce]').forEach((button) => button.addEventListener('click', async () => {
     const act = button.dataset.ce;

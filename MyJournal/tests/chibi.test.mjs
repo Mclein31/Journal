@@ -25,7 +25,19 @@ test('every chibi option combination renders complete layered SVG with instance-
             assert.equal(svg.includes('ch-acc-ears'), accessory === 'cat-ears');
             count++;
           }
-  assert.equal(count, 6 * 3 * 6 * 6 * 2);
+  assert.equal(count, 9 * 3 * 9 * 8 * 2);
+});
+
+test('the default character is gender-neutral and every preset is valid', async () => {
+  const h = await appHarness();
+  const o = await h.get('login/chibiOptions');
+  const { chibiSchema } = await import('../api/src/validation.ts');
+  assert.equal(o.DEFAULT_CHIBI.hairStyle, 6); assert.equal(o.DEFAULT_CHIBI.outfit, 1); assert.notEqual(o.DEFAULT_CHIBI.accessory, 'bow');
+  assert.deepEqual(plain(o.PRESETS.map((p) => p.name)), ['Neutral', 'Masculine', 'Feminine']);
+  for (const p of o.PRESETS) assert.ok(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, ...p.look }).success, p.id);
+  const ui = await h.get('account/ui'); ui.mountLogin(h.root);
+  assert.equal(h.root.querySelector('.auth-chibi-edit').textContent, 'Customize character');
+  assert.doesNotMatch(h.root.innerHTML, /\bher\b|\bshe\b/i);
 });
 
 test('malformed saved chibis are repaired and the server schema accepts every repaired look', async () => {
@@ -36,11 +48,11 @@ test('malformed saved chibis are repaired and the server schema accepts every re
   assert.deepEqual(plain(fixed), { ...plain(o.DEFAULT_CHIBI), eyeColor: '#abcdef' });
   assert.deepEqual(plain(o.normalizeChibi(null)), plain(o.DEFAULT_CHIBI));
   for (let i = 0; i < 50; i++) assert.ok(chibiSchema.safeParse(o.normalizeChibi(o.randomChibi())).success);
-  assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, outfit: 6 }).success, false);
+  assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, outfit: 9 }).success, false);
   assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, extra: '<script>' }).success, false);
 });
 
-test('login chibi covers her eyes for hidden passwords, peeks when shown, and reacts to sign-in results', async () => {
+test('login chibi covers its eyes for hidden passwords, peeks when shown, and reacts to sign-in results', async () => {
   let attempt = 0;
   const h = await appHarness({ fetchImpl: async () => (++attempt === 1 ? json({ message: 'Invalid email or password' }, 401) : json({ token: 'ok' })) });
   const ui = await h.get('account/ui'); ui.mountLogin(h.root);
@@ -72,7 +84,11 @@ test('the editor saves the look on this device and updates the login chibi live'
   h.root.querySelector('.auth-chibi-edit').click();
   const dialog = h.document.querySelector('.chibi-editor');
   assert.ok(dialog?.hasAttribute('open'));
-  assert.equal(dialog.querySelectorAll('.ce-thumb').length, 6 + 3 + 6 + 6);
+  assert.equal(dialog.querySelectorAll('.ce-thumb').length, 9 + 3 + 9 + 8);
+  assert.equal(dialog.querySelector('h2').textContent, 'Make it yours');
+  dialog.querySelector('[data-preset="masculine"]').click();
+  const checked = (name) => [...dialog.querySelectorAll(`input[name="${name}"]`)].find((i) => i.checked)?.value;
+  assert.equal(checked('hairStyle'), '8'); assert.equal(checked('outfit'), '7');
   const pick = (name, value) => { const input = dialog.querySelector(`input[name="${name}"][value="${value}"]`); input.checked = true; input.dispatchEvent(new h.window.Event('change', { bubbles: true })); };
   pick('hairStyle', '2'); pick('accessory', 'cat-ears'); pick('skinTone', '#a8714a');
   assert.ok(dialog.querySelector('.ce-stage svg .ch-acc-ears'), 'preview updates before saving');

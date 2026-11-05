@@ -73,13 +73,13 @@ export function matchesImage(bytes: Uint8Array, mime: string): boolean {
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 /** Mirrors src/login/chibiOptions.ts. Indexes are bounded so any saved combination renders. */
 export const chibiSchema = z.object({
-  hairStyle: z.number().int().min(0).max(5),
+  hairStyle: z.number().int().min(0).max(8),
   hairColor: hex,
   eyeColor: hex,
   eyeShape: z.number().int().min(0).max(2),
   skinTone: hex,
-  outfit: z.number().int().min(0).max(5),
-  accessory: z.enum(['none', 'bow', 'clips', 'cat-ears', 'glasses', 'beret']),
+  outfit: z.number().int().min(0).max(8),
+  accessory: z.enum(['none', 'bow', 'clips', 'cat-ears', 'glasses', 'beret', 'cap', 'headphones']),
   blush: z.boolean(),
   updatedAt: timestamp,
 }).strict();

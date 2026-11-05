@@ -14,6 +14,9 @@ import { CHIBI_EVENT, loadChibi } from '../login/chibiStore';
 import type { ChibiConfig } from '../state/schema';
 
 const CACHE = 'dd:last-account';
+const GUEST_DISMISSED = 'dd:guest-warning-dismissed';
+/** Disclaimer for device-only (no account) journals, shown on the login screen and in the app. */
+export const GUEST_WARNING = 'Journals made without an account are stored only in this browser and are not backed up. They may be deleted when Dear Days is updated or if browser data is cleared.';
 const GENERATION = 'dd:account-generation';
 export const escapeHTML = (text: string): string => text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 export function rememberAccount(account: Account | null): void {
@@ -62,7 +65,7 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
       </form>
       ${mode === 'signin' ? '<button class="auth-link" data-mode="forgot">Forgot password?</button><p class="auth-switch">New here? <button class="auth-link" data-mode="signup">Create an account</button></p>' : '<button class="auth-link" data-mode="signin">Back to sign in</button>'}
       ${mode === 'signup' ? '<p class="auth-privacy">Your journal is private to your account. Your email is used for sign-in, verification, and password recovery. You can export your journals or delete your account in Account.</p>' : ''}
-      <div class="auth-divider"></div><button class="auth-guest" type="button">Continue on this device</button><p class="auth-hint">No account needed. Device-only journals stay in this browser until you choose to import them.</p>
+      <div class="auth-divider"></div><button class="auth-guest" type="button">Continue on this device</button><p class="auth-hint auth-guest-warning" role="note"><strong>Heads up:</strong> ${GUEST_WARNING} Create an account to keep them safe.</p>
       </div></div></section>`;
     root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => { saveFields(); mode = button.dataset.mode as Mode; password = ''; render(); }));
     root.querySelector('.auth-chibi-slot')!.appendChild(chibiHost);
@@ -142,7 +145,7 @@ export function mountAccountControls(root: HTMLElement, account: Account | null)
     if (!account) { sessionStorage.removeItem('dd:guest'); location.assign('/'); return; }
     void openAccount(account);
   });
-  if (!account) return;
+  if (!account) { showGuestWarning(root); return; }
   addEventListener('dd:cloud-status', (event) => {
     const { state, message } = (event as CustomEvent<{ state: string; message: string }>).detail;
     const label = root.querySelector<HTMLElement>('.save-status');
@@ -154,6 +157,19 @@ export function mountAccountControls(root: HTMLElement, account: Account | null)
       const action = document.createElement('button'); action.textContent = 'Review'; action.addEventListener('click', () => void openAccount(account)); banner.appendChild(action);
     } else banner?.remove();
   });
+}
+
+function showGuestWarning(root: HTMLElement): void {
+  try { if (localStorage.getItem(GUEST_DISMISSED) === '1') return; } catch { /* show it */ }
+  const note = document.createElement('div');
+  note.className = 'cloud-banner guest-banner'; note.setAttribute('role', 'note');
+  const text = document.createElement('p'); text.textContent = GUEST_WARNING;
+  const create = document.createElement('button'); create.type = 'button'; create.textContent = 'Create an account';
+  create.addEventListener('click', () => { sessionStorage.removeItem('dd:guest'); location.assign('/'); });
+  const close = document.createElement('button'); close.type = 'button'; close.className = 'guest-banner-close'; close.setAttribute('aria-label', 'Dismiss this notice'); close.textContent = '×';
+  close.addEventListener('click', () => { try { localStorage.setItem(GUEST_DISMISSED, '1'); } catch { /* hides for this visit */ } note.remove(); });
+  note.append(text, create, close);
+  root.appendChild(note);
 }
 
 async function openAccount(account: Account): Promise<void> {

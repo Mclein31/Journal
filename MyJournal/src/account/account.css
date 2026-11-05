@@ -3,3 +3,6 @@
 @media(max-width:760px){.account-dialog{padding:22px}.cloud-banner{bottom:100px}}
 .desk[data-closed='true'] .desk-tools button.tool-btn.account-button{display:inline-flex;visibility:visible;opacity:1}
 .save-status[data-state="offline"]::before{background:#b18d3f}.save-status[data-state="syncing"]::before{background:#6b91b1}.save-status[data-state="conflict"]::before,.save-status[data-state="error"]::before{background:#6c829b}
+.guest-banner p{margin:0;line-height:1.5}.guest-banner button{flex:none;white-space:nowrap}.guest-banner .guest-banner-close{margin-left:0;background:none;color:#4b5563;font-size:20px;padding:4px 8px;line-height:1}
+.auth-guest-warning{background:#f6efe2;border:1px solid #e3d3b7;border-radius:10px;padding:10px 12px;color:#5c4a2e}
+@media(max-width:760px){.guest-banner{flex-wrap:wrap;gap:10px}.guest-banner button:not(.guest-banner-close){margin-left:0}}

@@ -20,6 +20,8 @@ last_updated: 2026-11-04
 - Before → after at 4× throttle: single turns 6/6 with a 50–77 ms stall → 0; 8 tab jumps 8 stalls
   (622 ms, worst 101 ms) → 0. Headless Chromium measurement; real-device check still recommended.
 - Login on phones/tablets scrolls itself (body never scrolls), so Continue on this device is reachable.
+- Deployed with user approval (Pages `01d5619a`); live: 0 long frames on 6 single turns + 8 tab jumps at 4×
+  throttle (default journal content), and the guest option is reachable at 390×844 and 768×1024.
 
 ## 2026-11-05 — Login audit and polish (Impeccable + tasteskill)
 - Audited with tasteskill inspector/lint (1440/768/390, production build) and the Impeccable detector.

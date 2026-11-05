@@ -1,4 +1,5 @@
 /* The 3D book: static left/right pages + temporary turning leaves (see flip.ts). */
+import { logoMark } from '../ui/logo';
 import '../styles/book.css';
 import '../styles/textures.css';
 import '../styles/desks.css';
@@ -34,7 +35,7 @@ const narrow = matchMedia('(max-aspect-ratio: 1/1), (max-width: 719px) and (min-
 
 const TEMPLATE = `
 <div class="desk">
-  <div class="desk-identity"><span class="brand-mark" aria-hidden="true">✦</span><div><span class="brand-name">Dear Days</span><span class="save-status" role="status">Saved on this device</span></div></div>
+  <div class="desk-identity"><span class="brand-mark">${logoMark(28)}</span><div><span class="brand-name">Dear Days</span><span class="save-status" role="status">Saved on this device</span></div></div>
   <div class="desk-tools">
     <button type="button" class="tool-btn install-btn" data-act="install" aria-label="Install app" hidden>⬇<span class="tool-label"> Install</span></button>
     <button type="button" class="tool-btn sound-btn" data-act="sound" aria-label="Page sounds">🔊</button>

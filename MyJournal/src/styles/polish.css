@@ -7,8 +7,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 button, input, select { -webkit-tap-highlight-color: transparent; }
 input, select, textarea { font: inherit; color: inherit; }
 .desk-identity { position: absolute; top: calc(17px + env(safe-area-inset-top)); left: calc(24px + env(safe-area-inset-left)); display: flex; gap: 10px; align-items: center; z-index: 4; padding: 6px 12px; background: #fffaf2e8; border: 1px solid #ffffffa8; border-radius: 14px; box-shadow: 0 2px 12px #49331f0a; }
-.brand-mark { color: var(--accent-deep); font-size: 27px; }
-.brand-name { display: block; font-size: 13px; font-weight: 800; letter-spacing: .015em; }
+.brand-mark { display: inline-flex; line-height: 0; }
+.brand-name { display: block; font: 400 16px/1.1 'Lora', Georgia, serif; letter-spacing: -.005em; }
 .save-status { display: block; font-size: 10px; color: #705b64; margin-top: 1px; }
 .save-status::before { content: ''; display: inline-block; width: 5px; height: 5px; margin-right: 5px; border-radius: 50%; background: #6f987d; vertical-align: 1px; }
 .save-status[data-state='error'] { color: #4e6886; }
@@ -102,7 +102,7 @@ input, select, textarea { font: inherit; color: inherit; }
 }
 @media (max-width: 600px) {
   .desk-identity { top: calc(10px + env(safe-area-inset-top)); left: 10px; padding: 5px 8px; gap: 6px; }
-  .brand-name { font-size: 10px; }.brand-mark { font-size: 21px; }.save-status { font-size: 8px; }
+  .brand-name { font-size: 12px; }.brand-mark .dd-logo { width: 22px; height: 22px; }.save-status { font-size: 8px; }
   .desk-tools { top: calc(65px + env(safe-area-inset-top)); left: 50%; right: auto; transform: translateX(-50%); padding: 4px; gap: 2px; }
   .desk-tools .tool-btn { width: 36px; min-height: 36px; padding: 0; }
   .book-wrap { padding-top: calc(110px + env(safe-area-inset-top)); }

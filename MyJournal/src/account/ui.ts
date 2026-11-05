@@ -1,4 +1,5 @@
 import './account.css';
+import './login.css';
 import { zipSync, strToU8 } from 'fflate';
 import type { Asset, BookDoc, Bookmark } from '../state/schema';
 import { flush, getDoc } from '../state/store';
@@ -7,6 +8,7 @@ import { cloudBooks, importDeviceJournal, keepAsSeparateJournal, requireSyncedJo
 import { getPendingDrafts, getDraftConflicts } from '../book/bookmark';
 import { api, mediaBlob, post, type Account, type Session } from './api';
 import { mountChibi } from '../login/Chibi';
+import { logoMark } from '../ui/logo';
 import { openChibiEditor } from '../login/ChibiEditor';
 import { CHIBI_EVENT, loadChibi } from '../login/chibiStore';
 import type { ChibiConfig } from '../state/schema';
@@ -50,7 +52,7 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
   root.addEventListener('focusin', syncHands); root.addEventListener('focusout', syncHands);
   function render() {
     const heading = { signin: 'Welcome back.', signup: 'A place for your days.', forgot: 'Let’s get you back in.', reset: 'A fresh start.', verify: 'A little note in your inbox.' }[mode];
-    root.innerHTML = `<section class="auth-screen"><div class="auth-intro"><a class="auth-wordmark" href="/">✦ Dear Days</a><div class="auth-stage"><div class="auth-book" aria-hidden="true"><span>Dear<br>Days</span><small>the little things,<br>kept close.</small></div><div class="auth-chibi-slot"></div></div><button type="button" class="auth-chibi-edit">Customize character</button><p>Your days, tucked between pages.</p></div><div class="auth-card"><p class="auth-eyebrow">YOUR PERSONAL JOURNAL</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
+    root.innerHTML = `<section class="auth-screen"><div class="auth-scene"><a class="auth-brand" href="/">${logoMark(34)}<span>Dear Days</span></a><div class="auth-pitch"><h2>A journal that feels like paper.</h2><p>Write, add photos, tear and decorate your pages. Saved on your device and synced privately to your account.</p></div><div class="auth-stage"><div class="auth-book" aria-hidden="true"><span class="auth-book-star">✦</span><span class="auth-book-title">Dear<br>Days</span></div><div class="auth-chibi-slot"></div><button type="button" class="auth-chibi-edit">Customize<span class="auth-edit-long"> character</span></button></div></div><div class="auth-panel"><div class="auth-card"><p class="auth-eyebrow">Your personal journal</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
       <form class="auth-form">
       ${mode === 'signup' ? `<label>Your name<input name="name" autocomplete="name" maxlength="100" required value="${escapeHTML(name)}"></label>` : ''}
       ${!['verify','reset'].includes(mode) ? `<label>Email address<input name="email" type="email" autocomplete="email" required value="${escapeHTML(email)}"></label>` : ''}
@@ -61,7 +63,7 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
       ${mode === 'signin' ? '<button class="auth-link" data-mode="forgot">Forgot password?</button><p class="auth-switch">New here? <button class="auth-link" data-mode="signup">Create an account</button></p>' : '<button class="auth-link" data-mode="signin">Back to sign in</button>'}
       ${mode === 'signup' ? '<p class="auth-privacy">Your journal is private to your account. Your email is used for sign-in, verification, and password recovery. You can export your journals or delete your account in Account.</p>' : ''}
       <div class="auth-divider"></div><button class="auth-guest" type="button">Continue on this device</button><p class="auth-hint">No account needed. Device-only journals stay in this browser until you choose to import them.</p>
-      </div></section>`;
+      </div></div></section>`;
     root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => { saveFields(); mode = button.dataset.mode as Mode; password = ''; render(); }));
     root.querySelector('.auth-chibi-slot')!.appendChild(chibiHost);
     root.querySelector('.auth-chibi-edit')!.addEventListener('click', () => openChibiEditor(false));

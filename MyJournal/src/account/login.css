@@ -1,0 +1,40 @@
+/* Login: desk scene (brand, pitch, journal + character) beside a paper panel with the form. */
+.auth-screen{--ink:#26303b;--ink-soft:#5c5852;--serif:'Lora',Georgia,'Times New Roman',serif;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(420px,.9fr);height:100dvh;min-height:100dvh;overflow:auto;background:#fbf8f3;color:var(--ink)}
+.auth-scene{position:relative;display:flex;flex-direction:column;gap:clamp(18px,3vh,32px);padding:clamp(28px,4vw,56px) clamp(28px,5vw,80px);background:radial-gradient(110% 80% at 25% 15%,#f3eadc 0,#e6d7c0 58%,#d9c6a8 100%);overflow:hidden}
+.auth-scene::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;background:repeating-linear-gradient(92deg,#ffffff00 0 18px,#ffffff22 18px 19px,#ffffff00 19px 41px,#8a6f4c10 41px 42px)}
+.auth-brand{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:400 25px/1 var(--serif);letter-spacing:-.01em;align-self:flex-start}
+.auth-brand .dd-logo{flex:none;filter:drop-shadow(0 2px 3px #3b2f2226)}
+.auth-pitch{position:relative;z-index:1;max-width:34rem}
+.auth-pitch h2{font:400 clamp(30px,3.3vw,48px)/1.1 var(--serif);letter-spacing:-.015em;margin:0 0 14px;color:var(--ink);max-width:13em}
+.auth-pitch p{font-size:15px;line-height:1.65;color:var(--ink-soft);margin:0;max-width:30em}
+.auth-stage{position:relative;z-index:1;flex:1;min-height:300px;display:grid;grid-template-columns:auto auto;grid-template-areas:'book chibi' 'edit edit';align-content:center;justify-content:center;align-items:end;row-gap:44px;padding-bottom:12px}
+.auth-stage .auth-book{grid-area:book}.auth-stage .auth-chibi{grid-area:chibi}
+.auth-book{position:relative;width:clamp(190px,17vw,236px);aspect-ratio:236/308;border-radius:8px 16px 16px 8px;background:linear-gradient(90deg,#2f4354 0 18px,#ffffff10 18px 19px,transparent 19px),#3e5568;box-shadow:10px 9px 0 -3px #f4ecdf,11px 10px 0 -2px #cdbfa8,18px 26px 40px #3b2f2238;transform:rotate(-5deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#f3ead9}
+.auth-book::before{content:'';position:absolute;top:-1px;bottom:-1px;right:16px;width:7px;background:#2a3a49;box-shadow:inset 1px 0 #ffffff14}
+.auth-book::after{content:'';position:absolute;bottom:-34px;left:58%;width:16px;height:46px;background:#e8a87c;clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);z-index:-1}
+.auth-book-star{font-size:22px;line-height:1;opacity:.9}
+.auth-book-title{font:400 clamp(26px,2.4vw,34px)/1.08 var(--serif);letter-spacing:.01em;text-align:center;padding:0 10px 0 22px}
+.auth-chibi{width:clamp(180px,16vw,220px);aspect-ratio:200/240;margin-left:clamp(-64px,-4vw,-40px);margin-bottom:-6px;position:relative;z-index:1;filter:drop-shadow(0 12px 14px #3b2f2224)}
+.auth-chibi .chibi-live{width:100%;height:100%}
+.auth-chibi-edit{grid-area:edit;justify-self:center;display:inline-flex;align-items:center;gap:6px;border:1px solid #c9b79c;background:#fbf8f3e6;color:#3a4654;border-radius:999px;padding:9px 16px;min-height:40px;font:800 12px var(--font-ui);letter-spacing:.2px;cursor:pointer;box-shadow:0 4px 14px #3b2f2214;white-space:nowrap}
+.auth-chibi-edit::before{content:'✎'}
+.auth-chibi-edit:hover{background:#fff;border-color:#8b7a62}
+.auth-panel{display:grid;place-items:center;padding:clamp(28px,5vw,72px) clamp(24px,4vw,64px);background:#fbf8f3;box-shadow:-30px 0 60px -40px #3b2f2255}
+.auth-panel .auth-card{width:100%;max-width:390px;background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+.auth-panel .auth-eyebrow{text-transform:uppercase;color:#7a6a55}
+.auth-panel .auth-card h1{font:400 clamp(30px,2.6vw,38px)/1.12 var(--serif);letter-spacing:-.01em;color:var(--ink)}
+.auth-panel .auth-description{color:var(--ink-soft)}
+.auth-panel .auth-primary{background:#3e5568}.auth-panel .auth-primary:hover{background:#2f4354}
+@media (max-width:900px){
+  .auth-screen{grid-template-columns:1fr;height:auto;min-height:100dvh}
+  .auth-scene{display:grid;grid-template-columns:1fr auto;grid-template-areas:'brand stage' 'pitch stage';align-items:center;gap:6px 12px;padding:18px 20px 14px}
+  .auth-brand{grid-area:brand;font-size:21px}.auth-brand .dd-logo{width:28px;height:28px}
+  .auth-pitch{grid-area:pitch}.auth-pitch h2{font-size:21px;margin:0}.auth-pitch p{display:none}
+  .auth-stage{grid-area:stage;min-height:0;padding:0;flex:none;grid-template-columns:auto;grid-template-areas:'chibi' 'edit';row-gap:6px}
+  .auth-book{display:none}
+  .auth-chibi{width:96px;margin:0}
+  .auth-chibi-edit{padding:6px 10px;min-height:32px;font-size:11px}
+  .auth-panel{padding:26px 20px 40px;place-items:start center;box-shadow:none;border-top:1px solid #e3d6c3}
+}
+@media (min-width:901px) and (max-height:720px){.auth-pitch p{display:none}.auth-stage{min-height:220px}.auth-book{width:170px}.auth-chibi{width:160px}}
+@media (max-width:900px){.auth-edit-long{display:none}}

@@ -185,3 +185,10 @@ Look = `ChibiConfig` (`src/login/chibiOptions.ts`, mirrored by `chibiSchema` in
 login screen shows it before sign-in) and in `journal_account_state.chibi` (additive migration
 `002-chibi.sql`). `updatedAt` decides: the newer of device/account wins on sign-in; the server
 upsert never replaces a newer look with an older retry. Every write uses the account deletion lock.
+
+## 2026-11-05 — The chibi is gender-neutral, with masculine options
+**Why**: the user asked that the app not be girly and that men and women can both use it.
+Default look is neutral (Short hair, Hoodie, Headphones, no blush). Added hair Short/Spiky/Side part,
+outfits Tee & jeans/Button shirt/Jacket (trousers), accessories Cap/Headphones, and "Start from"
+presets Neutral/Masculine/Feminine. Copy refers to "your character", never "her". Option indexes are
+append-only because saved looks store them. Spiky hair is drawn flattened under a cap/beret.

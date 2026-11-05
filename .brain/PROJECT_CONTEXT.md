@@ -29,7 +29,7 @@ You change sections by pulling the **tabs** that stick out of the pages, the pag
 7. **Stickers** to decorate pages (built-in packs + user uploads).
 8. **Page-flip animation** for tab jumps and next/prev.
 9. **Bookmark**: ribbon bookmark + autosave so users continue where they stopped.
-10. **Login screen** with a **chibi girl** whose eyes follow the cursor; the chibi is customizable.
+10. **Login screen** with a **gender-neutral chibi character** whose eyes follow the cursor; fully customizable (masculine, feminine or neutral).
 
 ## Sections (tabs) — default set
 Journal · Schedule · Memories (photos) · Notes. Users can rename, recolor, add, and reorder tabs.

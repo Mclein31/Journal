@@ -8,6 +8,11 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Gender-neutral character
+- Neutral default look and wording ("Customize character", "Make it yours"); presets Neutral/Masculine/Feminine.
+- New: 3 hair styles, 3 trouser outfits, cap and headphones (9 hair × 3 eyes × 9 outfits × 8 accessories × blush = 3,888 looks, all rendered in tests). API schema widened.
+- 170 tests pass; headless screenshots reviewed. Deployment awaits user approval.
+
 ## 2026-11-05 — Customizable chibi + public URL https://dear-days.pages.dev
 - Login chibi (original layered SVG): eyes follow mouse, taps and the text caret; blinks,
   breathing, idle glances; covers her eyes while a hidden password is typed, peeks when shown,

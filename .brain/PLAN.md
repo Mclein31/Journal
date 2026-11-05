@@ -143,7 +143,7 @@ Frame picker opens from the selected photo. Each frame is a registry entry, so a
 
 ## Phase 9 — Login screen + chibi
 **Login screen**: the closed book on the desk, with the chibi beside it. Sign in / Sign up (email + password), "Forgot password?" link, short privacy note.
-**Chibi girl** (original SVG, layered so each part swaps):
+**Chibi character** (gender-neutral by default; original SVG, layered so each part swaps):
 - Layers: back hair, body/outfit, head, face (eyes, brows, mouth, blush), front hair, accessory.
 - **Eye tracking**: on `pointermove`, compute the angle from each eye center to the cursor;
   move the pupil along that angle, clamped inside the eye (max ~35% of eye radius), eased with

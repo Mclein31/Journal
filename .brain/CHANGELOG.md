@@ -16,7 +16,10 @@ last_updated: 2026-11-04
   Customize button) beside a paper form panel; compact header + form on phones.
 - New logo `src/ui/logo.ts` (navy journal, paper edge, terracotta ribbon, star); same art in
   `public/icons/icon.svg` and regenerated PNGs; used in the login and desk header. Lora loaded on boot.
-- 170 tests pass; desktop/mobile/header/icon screenshots reviewed. Deploy awaits user approval.
+- Guest disclaimer (user request): login note under "Continue on this device" plus a dismissible in-app
+  banner for device-only journals — not backed up; may be deleted when Dear Days is updated or browser data
+  is cleared (`GUEST_WARNING` in `src/account/ui.ts`). Dismissal: `localStorage['dd:guest-warning-dismissed']`.
+- 173 tests pass; desktop/mobile/header/icon/disclaimer screenshots reviewed. Deploy awaits user approval.
 
 ## 2026-11-05 — Gender-neutral character
 - Neutral default look and wording ("Customize character", "Make it yours"); presets Neutral/Masculine/Feminine.

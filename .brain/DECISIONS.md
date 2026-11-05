@@ -192,3 +192,9 @@ Default look is neutral (Short hair, Hoodie, Headphones, no blush). Added hair S
 outfits Tee & jeans/Button shirt/Jacket (trousers), accessories Cap/Headphones, and "Start from"
 presets Neutral/Masculine/Feminine. Copy refers to "your character", never "her". Option indexes are
 append-only because saved looks store them. Spiky hair is drawn flattened under a cap/beret.
+
+## 2026-11-05 — Neutral visual identity
+User: "neutralize all". App chrome uses warm paper backgrounds with slate-navy accents and warm
+charcoal text (`src/styles/tokens.css`). Default cover is navy `#3e5568`; brand mark is ✦, not ✿.
+Pink remains only as an optional user choice (paper tint, cover/desk/frame/hair colors) and in the
+classic red notebook margin rule and crimson bookmark ribbon. Do not reintroduce pink UI defaults.

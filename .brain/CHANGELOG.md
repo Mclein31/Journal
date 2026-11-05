@@ -11,7 +11,11 @@ last_updated: 2026-11-04
 ## 2026-11-05 — Gender-neutral character
 - Neutral default look and wording ("Customize character", "Make it yours"); presets Neutral/Masculine/Feminine.
 - New: 3 hair styles, 3 trouser outfits, cap and headphones (9 hair × 3 eyes × 9 outfits × 8 accessories × blush = 3,888 looks, all rendered in tests). API schema widened.
-- 170 tests pass; headless screenshots reviewed. Deployment awaits user approval.
+- Whole app neutralized (user request "neutralize all"): pink/mauve UI colors → warm paper + slate navy
+  (light tones → warm paper, accents → slate, plum text → warm charcoal); default cover `#3e5568`,
+  Journal tab `#e8a87c`; ✿ marks → ✦; title "Dear Days"; icon heart → star (PNGs regenerated);
+  no ♡ in welcome text/toast. User-chosen options (pink paper, cover/desk/frame palettes) kept.
+- 170 tests pass; live login/book/icon checked after deploy.
 
 ## 2026-11-05 — Customizable chibi + public URL https://dear-days.pages.dev
 - Login chibi (original layered SVG): eyes follow mouse, taps and the text caret; blinks,

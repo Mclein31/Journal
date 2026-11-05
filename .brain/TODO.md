@@ -14,7 +14,7 @@ last_updated: 2026-11-05
 - [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
-- [ ] Deploy the gender-neutral character update (`npm run deploy`) — awaiting user approval 2026-11-05
+- [x] Gender-neutral character + neutral app palette deployed to https://dear-days.pages.dev (2026-11-05, user approved)
 - [x] Apply `002-chibi.sql` to Neon production (2026-11-05, user approved)
 - [x] Pages project `dear-days` + 5 secrets + deploy; full `npm run test:live` with browser passes on https://dear-days.pages.dev
 - [x] Old workers.dev address redirects to the new URL

@@ -97,6 +97,12 @@ try {
   result=await request(`/api/assets/${meta.id}/content`,{cookie:second.cookie,account:owner});assert.deepEqual(new Uint8Array(result.bytes),image);
   assert.equal((await request(`/api/assets/${meta.id}/content`)).status,401,'Unauthenticated media rejected');
   console.log('PASS private R2 upload/download across sessions.');
+  const look={hairStyle:3,hairColor:'#a98bd0',eyeColor:'#3f86a8',eyeShape:1,skinTone:'#e8b994',outfit:4,accessory:'cat-ears',blush:true,updatedAt:Date.now()};
+  result=await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:look});assert.equal(result.status,200,'Chibi saved to account');
+  result=await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:{...look,outfit:0,updatedAt:look.updatedAt-1}});assert.equal(result.data.chibi.outfit,4,'Older chibi retry never replaces a newer look');
+  result=await request('/api/account/chibi',{cookie:second.cookie,account:owner});assert.deepEqual(result.data.chibi,look);
+  assert.equal((await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:{...look,outfit:9}})).status,400,'Invalid chibi rejected');
+  console.log('PASS chibi look saved to the account and read from another session.');
   if(process.env.PLAYWRIGHT_MODULE){
     const {chromium}=await import(process.env.PLAYWRIGHT_MODULE);
     const browser=await chromium.launch({headless:true});

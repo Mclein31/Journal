@@ -1,7 +1,7 @@
 /* Boot: open the last book from IndexedDB (or create the seed book), then mount the 3D book. */
 import './styles/tokens.css';
 import { createSeedBook } from './state/seed';
-import { getDoc, initStore, flush } from './state/store';
+import { getDoc, initStore, flush, subscribe } from './state/store';
 import { getMeta, loadBook, setMeta, setStorageOwner } from './sync/local';
 import { mountBook } from './book/Book';
 import { initPWA } from './pwa/install';
@@ -12,6 +12,7 @@ import { mountAccountControls, mountLogin, readSession, rememberAccount, remembe
 import { useAccount, type Account } from './account/api';
 import { prepareCloud, startSync } from './sync/cloud';
 import { syncChibi } from './login/chibiStore';
+import { rememberBookLook } from './login/bookLook';
 
 const ACTIVE_BOOK = 'activeBookId';
 
@@ -51,6 +52,10 @@ async function boot() {
   // only the fonts this book actually uses (plus the last picked) load at startup
   loadFonts([lastFont(), ...getDoc().elements.map((e) => e.data.text?.font).filter((f): f is string => !!f)]);
   mountBook(app, getDoc());
+  // Keep the login screen's journal in step with this one (cover, title, paper, tabs, desk).
+  rememberBookLook(getDoc());
+  let lookTimer = 0;
+  subscribe(() => { clearTimeout(lookTimer); lookTimer = window.setTimeout(() => rememberBookLook(getDoc()), 600); });
   initPWA(app.querySelector<HTMLButtonElement>('[data-act="install"]'));
   mountAccountControls(app, account);
   if (account) startSync();

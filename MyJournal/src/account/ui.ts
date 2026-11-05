@@ -9,6 +9,7 @@ import { getPendingDrafts, getDraftConflicts } from '../book/bookmark';
 import { api, mediaBlob, post, type Account, type Session } from './api';
 import { mountChibi } from '../login/Chibi';
 import { logoMark } from '../ui/logo';
+import { isDarkPreset, loadBookLook, loadDeskImage } from '../login/bookLook';
 import { openChibiEditor } from '../login/ChibiEditor';
 import { CHIBI_EVENT, loadChibi } from '../login/chibiStore';
 import type { ChibiConfig } from '../state/schema';
@@ -34,6 +35,24 @@ export function watchAccountChanges(): void {
 export async function readSession(): Promise<Session | null> { return api<Session | null>('/auth/get-session'); }
 type Mode = 'signin' | 'signup' | 'forgot' | 'reset' | 'verify';
 
+/** The login journal mirrors the last journal opened here: cover, texture, title, paper, tabs, desk. */
+function loginLook(): { scene: string; book: string } {
+  const look = loadBookLook();
+  const rgb = look.coverColor.match(/[a-f\d]{2}/gi)!.map((n) => parseInt(n, 16));
+  const light = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 > 165;
+  const bg = look.background;
+  const image = bg.kind === 'upload' ? loadDeskImage(bg.ref) : null;
+  let scene = '';
+  if (bg.kind === 'preset') scene = ` data-bg="${escapeHTML(bg.ref)}"${isDarkPreset(bg.ref) ? ' data-tone="dark"' : ''}`;
+  else if (image) scene = ` data-bg="upload" data-fit="${bg.fit === 'tile' ? 'tile' : 'cover'}" style="background-image:url('${image.url}')"${image.dark ? ' data-tone="dark"' : ''}`;
+  const title = look.title.trim() === 'Dear Days' ? 'Dear<br>Days' : escapeHTML(look.title);
+  const size = look.title.length <= 12 ? 'l' : look.title.length <= 26 ? 'm' : 's';
+  const tabs = look.sections.map((s) => `<i style="background:${s.color}" title="${escapeHTML(s.name)}"></i>`).join('');
+  const paper = `data-paper="${look.paperType}" style="--paper:var(--paper-${look.paperTint})"`;
+  const book = `<div class="auth-page" ${paper} aria-hidden="true"></div><div class="auth-book" data-texture="${look.coverTexture}" ${paper.replace('style="', `style="--cover:${look.coverColor};--cover-ink:${light ? '#383532' : '#f6efe3'};`)} aria-hidden="true"><span class="auth-book-tex tex-swatch"></span><span class="auth-book-tabs">${tabs}</span><span class="auth-book-star">✦</span><span class="auth-book-title" data-size="${size}">${title}</span></div>`;
+  return { scene, book };
+}
+
 /** Native labelled inputs work with paste, browser autofill, and password managers. */
 export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialEmail = ''): void {
   const params = new URLSearchParams(location.search);
@@ -54,8 +73,9 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
   });
   root.addEventListener('focusin', syncHands); root.addEventListener('focusout', syncHands);
   function render() {
+    const look = loginLook();
     const heading = { signin: 'Welcome back.', signup: 'A place for your days.', forgot: 'Let’s get you back in.', reset: 'A fresh start.', verify: 'A little note in your inbox.' }[mode];
-    root.innerHTML = `<section class="auth-screen"><div class="auth-scene"><a class="auth-brand" href="/">${logoMark(34)}<span>Dear Days</span></a><div class="auth-pitch"><h2>A journal that feels like paper.</h2><p>Write, add photos, tear and decorate your pages. Saved on your device and synced privately to your account.</p></div><div class="auth-stage"><div class="auth-book" aria-hidden="true"><span class="auth-book-star">✦</span><span class="auth-book-title">Dear<br>Days</span></div><div class="auth-chibi-slot"></div><button type="button" class="auth-chibi-edit">Customize<span class="auth-edit-long"> character</span></button></div></div><div class="auth-panel"><div class="auth-card"><p class="auth-eyebrow">Your personal journal</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
+    root.innerHTML = `<section class="auth-screen"><div class="auth-scene"${look.scene}><a class="auth-brand" href="/">${logoMark(34)}<span>Dear Days</span></a><div class="auth-pitch"><h2>A journal that feels like paper.</h2><p>Write, add photos, tear and decorate your pages. Saved on your device and synced privately to your account.</p></div><div class="auth-stage">${look.book}<div class="auth-chibi-slot"></div><button type="button" class="auth-chibi-edit">Customize<span class="auth-edit-long"> character</span></button></div></div><div class="auth-panel"><div class="auth-card"><p class="auth-eyebrow">Your personal journal</p><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
       <form class="auth-form">
       ${mode === 'signup' ? `<label>Your name<input name="name" autocomplete="name" maxlength="100" required value="${escapeHTML(name)}"></label>` : ''}
       ${!['verify','reset'].includes(mode) ? `<label>Email address<input name="email" type="email" autocomplete="email" required value="${escapeHTML(email)}"></label>` : ''}

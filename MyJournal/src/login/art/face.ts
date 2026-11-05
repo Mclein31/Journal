@@ -44,12 +44,21 @@ function eye(c: ChibiConfig, side: 0 | 1, uid: string): string {
   </g></g>`;
 }
 
+function facialHair(c: ChibiConfig): string {
+  const tone = shade(c.hairColor, -0.1);
+  if (c.facialHair === 'stubble') return `<g class="ch-facial"><path d="M60 126Q100 160 140 126Q134 148 100 151Q66 148 60 126Z" fill="${tone}" opacity=".16"/>
+    <g fill="${tone}" opacity=".35"><circle cx="78" cy="140" r=".9"/><circle cx="88" cy="145" r=".9"/><circle cx="100" cy="147" r=".9"/><circle cx="112" cy="145" r=".9"/><circle cx="122" cy="140" r=".9"/><circle cx="94" cy="141" r=".9"/><circle cx="106" cy="141" r=".9"/></g></g>`;
+  if (c.facialHair === 'mustache') return `<path class="ch-facial" d="M86 124q7-7 14-1q7-6 14 1q-7 5-14 1q-7 4-14-1Z" fill="${tone}" stroke="${shade(c.hairColor, -0.3)}" stroke-width=".8"/>`;
+  return '';
+}
+
 export function face(c: ChibiConfig, uid: string): string {
   const blush = c.blush ? `<g class="ch-blush" fill="#f4889e" opacity=".42">
       <ellipse cx="62" cy="124" rx="10" ry="6"/><ellipse cx="138" cy="124" rx="10" ry="6"/></g>
     <g stroke="#e8708a" stroke-width="1.2" stroke-linecap="round" opacity=".55"><path d="M57 125l3-4M62 126l3-4M133 125l3-4M138 126l3-4"/></g>` : '';
   return `<g class="ch-face">
     ${blush}
+    ${facialHair(c)}
     <g class="ch-eyes">${eye(c, 0, uid)}${eye(c, 1, uid)}</g>
     <g class="ch-happy-eyes" fill="none" stroke="#3a2730" stroke-width="3.2" stroke-linecap="round">
       <path d="M65 108q11-14 22 0"/><path d="M113 108q11-14 22 0"/></g>

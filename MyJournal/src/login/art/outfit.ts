@@ -60,6 +60,26 @@ function look(outfit: number): Look {
       <path d="M126 152L106 154L108 190L134 188Z" ${fillLine('#3f5a4a')}/>
       <path d="M66 184h26v6H66ZM108 184h26v6h-26Z" fill="#e8dcc4"/>
       <path d="M78 151q8 5 16 3M122 151q-8 5-16 3" fill="none" stroke="#e8dcc4" stroke-width="3" stroke-linecap="round"/>` };
+    case 9: return { sleeve: '#c94f3d', parts: `
+      <path d="M68 186h64l3 20h-31l-4-7-4 7H65Z" ${fillLine('#2f3f55')}/>
+      <path d="${TORSO}" ${fillLine('#c94f3d')}/>
+      <path d="M89 150l11 11 11-11" fill="none" stroke="#fffaf3" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M71 160l-2 26M129 160l2 26" stroke="#fffaf3" stroke-width="2.4"/>
+      <text x="100" y="184" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="17" fill="#fffaf3">7</text>` };
+    case 10: return { sleeve: '#a8483e', parts: `
+      <path d="${PANTS}" ${fillLine('#4d6f9c')}/>
+      <path d="${TORSO}" ${fillLine('#a8483e')}/>
+      <g stroke="#5e2420" stroke-width="2.2" opacity=".45"><path d="M70 166h60M69 178h62M84 151v37M116 151v37"/></g>
+      <g stroke="#e9c9a8" stroke-width="1" opacity=".55"><path d="M70 171h60M76 152v36M108 152v36"/></g>
+      <path d="M88 149L100 160L112 149L114 156L100 164L86 156Z" ${fillLine('#a8483e')}/>
+      <g fill="#f1e4d0"><circle cx="100" cy="170" r="1.5"/><circle cx="100" cy="179" r="1.5"/></g>` };
+    case 11: return { sleeve: '#2c3a4f', parts: `
+      <path d="${PANTS}" ${fillLine('#2c3a4f')}/>
+      <path d="${TORSO}" ${fillLine('#f6f8fb')}/>
+      <path d="M100 158l-4 5 4 22 4-22Z" fill="#b8423a" stroke="#8c2f29" stroke-width="1"/>
+      <path d="M74 152L92 152L98 176L94 190L66 188Z" ${fillLine('#2c3a4f')}/>
+      <path d="M126 152L108 152L102 176L106 190L134 188Z" ${fillLine('#2c3a4f')}/>
+      <path d="M90 152l6 14M110 152l-6 14" stroke="#465670" stroke-width="1.4"/><circle cx="99" cy="182" r="1.5" fill="#8a96a8"/>` };
     default: return { sleeve: '#fffaf3', parts: `
       <path d="${SKIRT}" ${fillLine('#36507a')}/>
       <path d="M80 188l-8 22M100 188v26M120 188l8 22" stroke="#26395a" stroke-width="1.3"/>

@@ -5,13 +5,17 @@ export type Accessory = ChibiConfig['accessory'];
 export interface Swatch { name: string; value: string }
 
 // Indexes are stored in saved looks: only append new choices.
-export const HAIR_STYLES = ['Bob', 'Long', 'Twin tails', 'Space buns', 'Ponytail', 'Wavy', 'Short', 'Spiky', 'Side part'] as const;
+export const HAIR_STYLES = ['Bob', 'Long', 'Twin tails', 'Space buns', 'Ponytail', 'Wavy', 'Short', 'Spiky', 'Side part', 'Buzz cut', 'Messy', 'Curtains', 'Man bun'] as const;
 export const EYE_SHAPES = ['Round', 'Sparkle', 'Gentle'] as const;
-export const OUTFITS = ['Sailor', 'Hoodie', 'Overalls', 'Sweater', 'Pinafore', 'Cardigan', 'Tee & jeans', 'Button shirt', 'Jacket'] as const;
+export const OUTFITS = ['Sailor', 'Hoodie', 'Overalls', 'Sweater', 'Pinafore', 'Cardigan', 'Tee & jeans', 'Button shirt', 'Jacket', 'Jersey', 'Flannel', 'Suit'] as const;
 export const ACCESSORIES: { id: Accessory; name: string }[] = [
   { id: 'none', name: 'None' }, { id: 'bow', name: 'Bow' }, { id: 'clips', name: 'Clips' },
   { id: 'cat-ears', name: 'Cat ears' }, { id: 'glasses', name: 'Glasses' }, { id: 'beret', name: 'Beret' },
-  { id: 'cap', name: 'Cap' }, { id: 'headphones', name: 'Headphones' },
+  { id: 'cap', name: 'Cap' }, { id: 'headphones', name: 'Headphones' }, { id: 'bandana', name: 'Bandana' },
+  { id: 'beanie', name: 'Beanie' }, { id: 'backwards-cap', name: 'Backwards cap' }, { id: 'sunglasses', name: 'Sunglasses' },
+];
+export const FACIAL_HAIR: { id: ChibiConfig['facialHair']; name: string }[] = [
+  { id: 'none', name: 'None' }, { id: 'stubble', name: 'Stubble' }, { id: 'mustache', name: 'Mustache' },
 ];
 export const HAIR_COLORS: Swatch[] = [
   { name: 'Cocoa', value: '#5a3a2e' }, { name: 'Ink', value: '#2c2430' }, { name: 'Chestnut', value: '#8a4b2f' },
@@ -30,9 +34,10 @@ export const SKIN_TONES: Swatch[] = [
 
 /** Starting points; every piece stays individually customizable. Default is the neutral look. */
 export const PRESETS = [
-  { id: 'neutral', name: 'Neutral', look: { hairStyle: 6, outfit: 1, accessory: 'headphones', eyeShape: 0, blush: false } },
-  { id: 'masculine', name: 'Masculine', look: { hairStyle: 8, outfit: 7, accessory: 'none', eyeShape: 0, blush: false } },
-  { id: 'feminine', name: 'Feminine', look: { hairStyle: 1, outfit: 5, accessory: 'clips', eyeShape: 1, blush: true } },
+  { id: 'neutral', name: 'Neutral', look: { hairStyle: 6, outfit: 1, accessory: 'headphones', eyeShape: 0, blush: false, facialHair: 'none' } },
+  { id: 'masculine', name: 'Masculine', look: { hairStyle: 8, outfit: 7, accessory: 'none', eyeShape: 0, blush: false, facialHair: 'none' } },
+  { id: 'sporty', name: 'Sporty', look: { hairStyle: 10, outfit: 9, accessory: 'bandana', eyeShape: 0, blush: false, facialHair: 'none' } },
+  { id: 'feminine', name: 'Feminine', look: { hairStyle: 1, outfit: 5, accessory: 'clips', eyeShape: 1, blush: true, facialHair: 'none' } },
 ] as const satisfies readonly { id: string; name: string; look: Partial<ChibiConfig> }[];
 
 export const DEFAULT_CHIBI: ChibiConfig = {
@@ -42,6 +47,7 @@ export const DEFAULT_CHIBI: ChibiConfig = {
 
 const HEX = /^#[0-9a-f]{6}$/i;
 const ACCESSORY_IDS = new Set<string>(ACCESSORIES.map((a) => a.id));
+const FACIAL_IDS = new Set<string>(FACIAL_HAIR.map((f) => f.id));
 const index = (value: unknown, count: number, fallback: number): number =>
   Number.isInteger(value) && (value as number) >= 0 && (value as number) < count ? value as number : fallback;
 
@@ -58,6 +64,7 @@ export function normalizeChibi(input: unknown): ChibiConfig {
     outfit: index(raw.outfit, OUTFITS.length, DEFAULT_CHIBI.outfit),
     accessory: typeof raw.accessory === 'string' && ACCESSORY_IDS.has(raw.accessory) ? raw.accessory as Accessory : DEFAULT_CHIBI.accessory,
     blush: typeof raw.blush === 'boolean' ? raw.blush : DEFAULT_CHIBI.blush,
+    facialHair: typeof raw.facialHair === 'string' && FACIAL_IDS.has(raw.facialHair) ? raw.facialHair as ChibiConfig['facialHair'] : 'none',
     updatedAt: typeof raw.updatedAt === 'number' && Number.isFinite(raw.updatedAt) && raw.updatedAt >= 0 ? raw.updatedAt : 0,
   };
 }
@@ -68,7 +75,7 @@ export function randomChibi(): ChibiConfig {
     hairStyle: Math.floor(Math.random() * HAIR_STYLES.length), hairColor: pick(HAIR_COLORS).value,
     eyeColor: pick(EYE_COLORS).value, eyeShape: Math.floor(Math.random() * EYE_SHAPES.length),
     skinTone: pick(SKIN_TONES).value, outfit: Math.floor(Math.random() * OUTFITS.length),
-    accessory: pick(ACCESSORIES).id, blush: Math.random() > 0.3, updatedAt: Date.now(),
+    accessory: pick(ACCESSORIES).id, blush: Math.random() > 0.3, facialHair: Math.random() < 0.25 ? pick(FACIAL_HAIR).id : 'none', updatedAt: Date.now(),
   };
 }
 

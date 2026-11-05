@@ -2,12 +2,13 @@
 import type { ChibiConfig } from '../state/schema';
 import { chibiSVG } from './art/index';
 import { mountChibi } from './Chibi';
-import { ACCESSORIES, DEFAULT_CHIBI, PRESETS, EYE_COLORS, EYE_SHAPES, HAIR_COLORS, HAIR_STYLES, OUTFITS, SKIN_TONES, randomChibi, type Swatch } from './chibiOptions';
+import { ACCESSORIES, DEFAULT_CHIBI, FACIAL_HAIR, PRESETS, EYE_COLORS, EYE_SHAPES, HAIR_COLORS, HAIR_STYLES, OUTFITS, SKIN_TONES, randomChibi, type Swatch } from './chibiOptions';
 import { loadChibi, saveChibi } from './chibiStore';
 
 type Field = keyof Omit<ChibiConfig, 'updatedAt' | 'blush'>;
 interface Choice { value: string | number; name: string }
-const VIEW: Partial<Record<Field, string>> = { eyeShape: '52 80 96 48', accessory: '14 0 172 160', hairStyle: '0 0 200 240', outfit: '30 120 140 120' };
+const NUMERIC = new Set<string>(['hairStyle', 'eyeShape', 'outfit']);
+const VIEW: Partial<Record<Field, string>> = { facialHair: '50 92 100 64', eyeShape: '52 80 96 48', accessory: '14 0 172 160', hairStyle: '0 0 200 240', outfit: '30 120 140 120' };
 let renders = 0;
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -38,6 +39,7 @@ export function openChibiEditor(signedIn: boolean): void {
       ${swatchGroup('skinTone', 'Skin tone', SKIN_TONES, false)}
       ${thumbGroup('outfit', 'Outfit', OUTFITS.map((name, i) => ({ value: i, name })))}
       ${thumbGroup('accessory', 'Accessory', ACCESSORIES.map((a) => ({ value: a.id, name: a.name })))}
+      ${thumbGroup('facialHair', 'Facial hair', FACIAL_HAIR.map((f) => ({ value: f.id, name: f.name })))}
       <label class="ce-toggle"><input type="checkbox" name="blush"><span>Rosy cheeks</span></label>
     </form></div>
     <p class="ce-feedback" role="status" aria-live="polite"></p>
@@ -56,7 +58,7 @@ export function openChibiEditor(signedIn: boolean): void {
     const n = ++renders;
     for (const thumb of form.querySelectorAll<HTMLElement>('.chibi-thumb')) {
       const field = thumb.dataset.field as Field; const raw = thumb.dataset.value!;
-      const value = field === 'accessory' ? raw : Number(raw);
+      const value = NUMERIC.has(field) ? Number(raw) : raw;
       thumb.innerHTML = chibiSVG({ ...draft, [field]: value } as ChibiConfig, { uid: `ce${n}-${field}-${raw}` });
       thumb.querySelector('svg')!.setAttribute('viewBox', VIEW[field] ?? '0 0 200 240');
     }
@@ -65,7 +67,7 @@ export function openChibiEditor(signedIn: boolean): void {
   form.addEventListener('change', (event) => {
     const input = event.target as HTMLInputElement;
     if (input.name === 'blush') draft = { ...draft, blush: input.checked };
-    else if (input.type === 'radio') draft = { ...draft, [input.name]: input.name === 'accessory' || input.name.endsWith('Color') || input.name === 'skinTone' ? input.value : Number(input.value) };
+    else if (input.type === 'radio') draft = { ...draft, [input.name]: NUMERIC.has(input.name) ? Number(input.value) : input.value };
     sync();
   });
   form.addEventListener('input', (event) => {

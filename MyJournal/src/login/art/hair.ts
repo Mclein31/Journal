@@ -14,6 +14,10 @@ const BACK: string[] = [
   `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
   `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
   `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
+  `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
+  `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
+  `${CAP}C168 122 162 136 152 142L48 142C38 136 32 122 34 100Z`,
+  `${CAP}C168 106 162 114 156 118L44 118C38 114 32 106 34 100Z`,
 ];
 const LOCK: string[] = [
   'M39 90Q32 128 46 152Q54 140 53 112Z',
@@ -25,6 +29,10 @@ const LOCK: string[] = [
   'M39 92Q38 106 43 114Q48 108 49 98Z',
   'M39 92Q38 106 43 114Q48 108 49 98Z',
   'M39 92Q38 106 43 114Q48 108 49 98Z',
+  'M39 92Q38 106 43 114Q48 108 49 98Z',
+  'M39 92Q38 106 43 114Q48 108 49 98Z',
+  'M39 90Q35 116 44 132Q51 122 51 104Z',
+  'M39 92Q38 106 43 114Q48 108 49 98Z',
 ];
 
 const BANGS: Record<number, string> = {
@@ -32,6 +40,10 @@ const BANGS: Record<number, string> = {
   6: 'M36 100C32 52 62 28 100 28S168 52 164 100Q160 86 152 76Q140 82 128 72Q114 80 100 70Q86 80 72 72Q60 82 48 78Q42 88 36 100Z',
   7: 'M36 100C34 64 44 42 58 34L52 16L74 28L80 8L96 26L108 6L118 26L136 10L138 32L158 22L150 44C162 58 166 80 164 100Q158 86 150 78Q138 86 128 76Q116 86 104 76Q92 86 80 76Q68 86 58 78Q46 88 36 100Z',
   8: 'M36 100C30 52 62 28 100 28S170 52 164 100Q160 84 150 72Q128 60 104 66Q84 70 72 60Q62 74 50 80Q42 88 36 100Z',
+  9: 'M40 96C36 56 64 32 100 32S164 56 160 96Q156 80 148 70Q100 58 52 70Q44 80 40 96Z',
+  10: 'M36 100C30 56 56 30 72 28L66 18L84 24L92 12L104 24L118 14L122 28L140 24L136 36C160 48 168 74 164 100Q160 88 152 80Q146 92 136 80Q128 94 116 80Q106 94 96 80Q86 94 76 80Q66 92 56 80Q46 90 36 100Z',
+  11: 'M36 104C30 52 62 28 100 28S170 52 164 104Q152 76 126 66Q108 58 100 46Q92 58 74 66Q48 76 36 104Z',
+  12: 'M36 100C30 52 62 28 100 28S170 52 164 100Q158 80 144 70Q120 62 100 64Q80 62 56 70Q42 80 36 100Z',
 };
 
 function extras(style: number, fill: string, edge: string): string {
@@ -44,6 +56,7 @@ function extras(style: number, fill: string, edge: string): string {
     const bun = `<circle cx="46" cy="48" r="21" ${line}/><path d="M36 42q10-10 20 0q-6 10-14 4" fill="none" stroke="${edge}" stroke-width="1.4" stroke-linecap="round"/>`;
     return `${bun}<g ${MIRROR}>${bun}</g>`;
   }
+  if (style === 12) return `<circle cx="100" cy="17" r="15" ${line}/><path d="M89 27q11 5 22 0" fill="none" stroke="#5b6473" stroke-width="3" stroke-linecap="round"/>`;
   if (style === 4) return `<path d="M138 36C192 36 198 120 178 188Q170 200 164 186C176 130 170 80 140 58Z" ${line}/><ellipse cx="150" cy="42" rx="9" ry="7" transform="rotate(30 150 42)" fill="#b87fc4" stroke="#8d5a9c" stroke-width="1.4"/>`;
   return '';
 }
@@ -58,11 +71,12 @@ export function frontHair(c: ChibiConfig): string {
   const edge = shade(c.hairColor, -0.28);
   const line = `fill="${c.hairColor}" stroke="${edge}" stroke-width="1.6" stroke-linejoin="round"`;
   // A hat flattens spikes; otherwise they would poke through the crown.
-  const hatted = c.hairStyle === 7 && (c.accessory === 'cap' || c.accessory === 'beret');
+  const hatted = (c.hairStyle === 7 || c.hairStyle === 10) && ['cap', 'beret', 'beanie', 'backwards-cap'].includes(c.accessory);
   const bangs = BANGS[hatted ? 6 : c.hairStyle] ?? BANGS[0];
   return `<g class="ch-hair-front">
     <path d="${LOCK[c.hairStyle]}" ${line}/><g ${MIRROR}><path d="${LOCK[c.hairStyle]}" ${line}/></g>
     <path d="${bangs}" ${line}/>
+    ${c.hairStyle === 11 ? `<path d="M100 46V30" stroke="${edge}" stroke-width="1.4" stroke-linecap="round"/>` : ''}
     ${c.hairStyle === 8 ? `<path d="M72 60Q68 44 82 30" fill="none" stroke="${edge}" stroke-width="1.6" stroke-linecap="round"/>` : ''}
     <path d="M58 50Q100 30 142 50" fill="none" stroke="${shade(c.hairColor, 0.35)}" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="22 7 9 7" opacity=".6"/>
     <path d="M98 30Q94 40 98 50M118 32Q114 42 116 52" fill="none" stroke="${edge}" stroke-width="1.2" stroke-linecap="round" opacity=".55"/>

@@ -33,6 +33,23 @@ function topAccessory(c: ChibiConfig): string {
     case 'headphones': return `<g class="ch-acc"><path d="M36 98C30 42 66 18 100 18S170 42 164 98" fill="none" stroke="#3d4b5c" stroke-width="7" stroke-linecap="round"/>
       <rect x="26" y="86" width="18" height="30" rx="8" fill="#5a6b7f" stroke="#3d4b5c" stroke-width="1.6"/>
       <rect x="156" y="86" width="18" height="30" rx="8" fill="#5a6b7f" stroke="#3d4b5c" stroke-width="1.6"/></g>`;
+    case 'bandana': return `<g class="ch-acc" stroke="#7f2a24" stroke-width="1.5" stroke-linejoin="round">
+      <path d="M156 78l20-8-3 13ZM156 81l15 13-12 2Z" fill="#a8372f"/>
+      <path d="M37 76Q100 46 163 76L161 89Q100 60 39 89Z" fill="#b8423a"/>
+      <g fill="#fbf3ea" stroke="none" opacity=".85"><circle cx="58" cy="76" r="1.6"/><circle cx="78" cy="68" r="1.6"/><circle cx="100" cy="65" r="1.6"/><circle cx="122" cy="68" r="1.6"/><circle cx="142" cy="76" r="1.6"/>
+      <path d="M68 76l2 2-2 2-2-2ZM90 69l2 2-2 2-2-2ZM112 69l2 2-2 2-2-2ZM132 74l2 2-2 2-2-2Z"/></g><circle cx="158" cy="80" r="4" fill="#a8372f"/></g>`;
+    case 'beanie': return `<g class="ch-acc" stroke="#3e4a36" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M40 72C38 34 66 14 100 14S162 34 160 72Z" fill="#5b6b4f"/>
+      <path d="M34 64Q100 54 166 64L166 80Q100 70 34 80Z" fill="#6c7d5f"/>
+      <path d="M48 64v14M62 62v14M76 60v14M90 59v14M104 59v14M118 60v14M132 61v14M146 62v14" stroke-width="1.1" opacity=".55"/></g>`;
+    case 'backwards-cap': return `<g class="ch-acc" stroke="#33485f" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M146 40Q182 30 190 48Q176 56 154 52Z" fill="#3f5a78"/>
+      <path d="M38 80C38 38 66 20 100 20S162 38 162 80Z" fill="#4f6d8f"/>
+      <path d="M82 80Q100 62 118 80Z" fill="${c.hairColor}"/><path d="M84 74h32" stroke-width="2.5" stroke="#33485f"/></g>`;
+    case 'sunglasses': return `<g class="ch-acc"><g fill="#1f2833" fill-opacity=".86" stroke="#141a22" stroke-width="2">
+      <path d="M58 95h34v13q0 10-10 10H68q-10 0-10-10Z"/><path d="M108 95h34v13q0 10-10 10h-14q-10 0-10-10Z"/></g>
+      <path d="M92 99q8-4 16 0M58 97L44 94M142 97l14-3" fill="none" stroke="#141a22" stroke-width="2.4"/>
+      <path d="M64 99l8 0M114 99l8 0" stroke="#ffffff" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/></g>`;
     default: return '';
   }
 }

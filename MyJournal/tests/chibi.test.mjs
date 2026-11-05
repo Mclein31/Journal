@@ -12,11 +12,12 @@ test('every chibi option combination renders complete layered SVG with instance-
   const o = await h.get('login/chibiOptions');
   let count = 0;
   for (let hairStyle = 0; hairStyle < o.HAIR_STYLES.length; hairStyle++)
+   for (const { id: facialHair } of o.FACIAL_HAIR)
     for (let eyeShape = 0; eyeShape < o.EYE_SHAPES.length; eyeShape++)
       for (let outfit = 0; outfit < o.OUTFITS.length; outfit++)
         for (const { id: accessory } of o.ACCESSORIES)
           for (const blush of [true, false]) {
-            const svg = chibiSVG({ ...o.DEFAULT_CHIBI, hairStyle, eyeShape, outfit, accessory, blush }, { uid: `c${count}` });
+            const svg = chibiSVG({ ...o.DEFAULT_CHIBI, hairStyle, eyeShape, outfit, accessory, blush, facialHair }, { uid: `c${count}` });
             assert.doesNotMatch(svg, /undefined|NaN|null/);
             for (const layer of ['ch-hair-back', 'ch-body', 'ch-head', 'ch-face', 'ch-hair-front', 'ch-arms-cover', 'ch-arms-rest'])
               assert.ok(svg.includes(layer), `${layer} missing`);
@@ -25,7 +26,8 @@ test('every chibi option combination renders complete layered SVG with instance-
             assert.equal(svg.includes('ch-acc-ears'), accessory === 'cat-ears');
             count++;
           }
-  assert.equal(count, 9 * 3 * 9 * 8 * 2);
+  assert.equal(count, 13 * 3 * 3 * 12 * 12 * 2);
+  assert.equal(o.ACCESSORIES.some((a) => a.id === 'bandana'), true);
 });
 
 test('the default character is gender-neutral and every preset is valid', async () => {
@@ -33,7 +35,7 @@ test('the default character is gender-neutral and every preset is valid', async 
   const o = await h.get('login/chibiOptions');
   const { chibiSchema } = await import('../api/src/validation.ts');
   assert.equal(o.DEFAULT_CHIBI.hairStyle, 6); assert.equal(o.DEFAULT_CHIBI.outfit, 1); assert.notEqual(o.DEFAULT_CHIBI.accessory, 'bow');
-  assert.deepEqual(plain(o.PRESETS.map((p) => p.name)), ['Neutral', 'Masculine', 'Feminine']);
+  assert.deepEqual(plain(o.PRESETS.map((p) => p.name)), ['Neutral', 'Masculine', 'Sporty', 'Feminine']);
   for (const p of o.PRESETS) assert.ok(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, ...p.look }).success, p.id);
   const ui = await h.get('account/ui'); ui.mountLogin(h.root);
   assert.equal(h.root.querySelector('.auth-chibi-edit').textContent, 'Customize character');
@@ -44,11 +46,12 @@ test('malformed saved chibis are repaired and the server schema accepts every re
   const h = await appHarness();
   const o = await h.get('login/chibiOptions');
   const { chibiSchema } = await import('../api/src/validation.ts');
-  const fixed = o.normalizeChibi({ hairStyle: 9, hairColor: 'red', eyeColor: '#ABCDEF', eyeShape: -1, skinTone: 3, outfit: 2.5, accessory: 'crown', blush: 'yes', updatedAt: -4 });
+  const fixed = o.normalizeChibi({ hairStyle: 99, hairColor: 'red', eyeColor: '#ABCDEF', eyeShape: -1, skinTone: 3, outfit: 2.5, accessory: 'crown', blush: 'yes', updatedAt: -4 });
   assert.deepEqual(plain(fixed), { ...plain(o.DEFAULT_CHIBI), eyeColor: '#abcdef' });
+  assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, facialHair: undefined }).success, true, 'looks saved before facial hair existed stay valid');
   assert.deepEqual(plain(o.normalizeChibi(null)), plain(o.DEFAULT_CHIBI));
   for (let i = 0; i < 50; i++) assert.ok(chibiSchema.safeParse(o.normalizeChibi(o.randomChibi())).success);
-  assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, outfit: 9 }).success, false);
+  assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, outfit: 12 }).success, false);
   assert.equal(chibiSchema.safeParse({ ...o.DEFAULT_CHIBI, extra: '<script>' }).success, false);
 });
 
@@ -84,7 +87,7 @@ test('the editor saves the look on this device and updates the login chibi live'
   h.root.querySelector('.auth-chibi-edit').click();
   const dialog = h.document.querySelector('.chibi-editor');
   assert.ok(dialog?.hasAttribute('open'));
-  assert.equal(dialog.querySelectorAll('.ce-thumb').length, 9 + 3 + 9 + 8);
+  assert.equal(dialog.querySelectorAll('.ce-thumb').length, 13 + 3 + 12 + 12 + 3);
   assert.equal(dialog.querySelector('h2').textContent, 'Make it yours');
   dialog.querySelector('[data-preset="masculine"]').click();
   const checked = (name) => [...dialog.querySelectorAll(`input[name="${name}"]`)].find((i) => i.checked)?.value;

@@ -8,7 +8,7 @@ last_updated: 2026-11-04
 
 # Changelog
 
-## 2026-11-05 — Customizable chibi + public URL move (pending deploy)
+## 2026-11-05 — Customizable chibi + public URL https://dear-days.pages.dev
 - Login chibi (original layered SVG): eyes follow mouse, taps and the text caret; blinks,
   breathing, idle glances; covers her eyes while a hidden password is typed, peeks when shown,
   smiles on sign-in/sign-up, "?" on a wrong password. Reduced motion keeps tracking only.
@@ -17,7 +17,8 @@ last_updated: 2026-11-04
   blush, Surprise me/Reset, live preview with thumbnails. Device + account storage, newest wins.
 - API: `GET/PUT /api/account/chibi`, export includes the chibi; migration `002-chibi.sql`.
 - Hosting moved to Cloudflare Pages config for https://dear-days.pages.dev; old Worker becomes
-  a redirect (`redirect/`). Code verified locally; production migration/deploy await approval.
+  a redirect (`redirect/`). With user approval: migration applied, deployed, full live test
+  (emails, sync, R2, chibi, browser, reset, deletion) passes on the new URL; redirect verified.
 - Tests: 169 pass (5 new chibi tests: all 1,296 combinations, schema repair, login reactions,
   editor save, newest-wins sync). Headless Chromium screenshots desktop/mobile/editor reviewed.
 

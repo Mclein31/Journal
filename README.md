@@ -2,7 +2,7 @@
 
 A cozy, customizable 3D journal built with Vite and TypeScript. Open the cover, pull a section tab, and decorate pages with writing, framed photos, and original stickers.
 
-Live app: **[Dear Days](https://dear-days.mcleinonza0531.workers.dev)**. Create an account, verify your email, and sync private journals across devices. You can also continue with a device-only journal. Localhost and the live website have separate browser storage.
+Live app: **[Dear Days](https://dear-days.pages.dev)**. Create an account, verify your email, and sync private journals across devices. You can also continue with a device-only journal. Localhost and the live website have separate browser storage.
 
 The current app is in `MyJournal/`. Its predecessor is preserved in `MyJournal/legacy/`; `MyLittleWorld/` is the project's Obsidian vault and is excluded from Git along with private source photos.
 
@@ -33,7 +33,7 @@ Project context and outstanding work are in [.brain/PROJECT_CONTEXT.md](.brain/P
 
 Production service configuration uses Neon’s `production` branch, the private R2 bucket `journal-assets-prod`, and Gmail SMTP for account emails. Follow the [Gmail SMTP setup guide](MyJournal/SMTP_SETUP.md). Verification/reset email delivery, private uploads, browser sign-in, and cross-device sync are verified live.
 
-Deploy the current frontend to Cloudflare Workers from `MyJournal/` with `npm run deploy` (builds first). Use `npm run deploy:check` to validate without publishing. Frontend assets come from `dist/`; the Hono backend is bundled separately. Configure private values as Worker secrets, never in frontend builds. See [.brain/DEPLOYMENT.md](.brain/DEPLOYMENT.md) for the current deployment and remaining backend work.
+Deploy to Cloudflare Pages (project `dear-days`) from `MyJournal/` with `npm run deploy` (builds first). Use `npm run deploy:check` to validate without publishing. Static assets come from `dist/`; `functions/api/[[path]].ts` serves the Hono backend at `/api/*`. Configure private values as Pages secrets, never in frontend builds. The old workers.dev address only redirects (`npm run deploy:redirect`). See [.brain/DEPLOYMENT.md](.brain/DEPLOYMENT.md) for the current deployment and remaining backend work.
 
 Automated checks cover journal editing, persistence/recovery, account isolation, offline retries, and conflict protection. `npm run test:api` explicitly tests the configured database with synthetic accounts and captured mail; `npm run test:live` uses temporary plus-addressed mail on the configured Gmail sender to verify deployed email/auth/sync/R2 behavior and cleans up its accounts/files. Optional `PLAYWRIGHT_MODULE` enables an isolated real-browser editing/sync pass. Physical-device and complete accessibility checks remain outstanding. See the [QA report](.brain/QA_REPORT.md).
 

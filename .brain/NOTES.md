@@ -16,7 +16,7 @@ last_updated: 2026-11-04
 - R2 bucket must stay private (no public URL)
 - `APP_ORIGIN` (CORS), `VITE_API_BASE_URL` (only var exposed to the browser)
 - Only `VITE_*` vars reach the browser. Never prefix a secret with `VITE_`.
-- Production uses Neon's `production` branch, `R2_BUCKET_NAME=journal-assets-prod`, and `VITE_API_BASE_URL=/api`. Both origin fields use `https://dear-days.mcleinonza0531.workers.dev`. Email/auth/backend services are deployed and verified; see DEPLOYMENT.md. Native R2 bindings handle media; S3 keys remain local for explicit maintenance/test cleanup.
+- Production uses Neon's `production` branch, `R2_BUCKET_NAME=journal-assets-prod`, and `VITE_API_BASE_URL=/api`. Both origin fields use `https://dear-days.pages.dev` (Cloudflare Pages since 2026-11-05; the old workers.dev URL redirects). Email/auth/backend services are deployed and verified; see DEPLOYMENT.md. Native R2 bindings handle media; S3 keys remain local for explicit maintenance/test cleanup.
 
 ## v1 facts still relevant
 - v1 localStorage keys: `mlw_t` tasks, `mlw_j` journal entries, `mlw_p` prefs, `mlw_g` gallery meta; IndexedDB `mlw_db` store `photos` holds blobs.

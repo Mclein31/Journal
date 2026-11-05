@@ -10,13 +10,14 @@ last_updated: 2026-11-05
 
 ## Production service setup
 - [x] Populate production values in ignored `MyJournal/.env` (Neon `production` + private R2 `journal-assets-prod` + auth + Gmail SMTP + deployed HTTPS origin). Values and deployed runtime secrets are configured; live integration and delivery verified. See `MyJournal/SMTP_SETUP.md`.
-- [x] Deploy the current frontend to https://dear-days.mcleinonza0531.workers.dev using Worker static assets; see [DEPLOYMENT.md](DEPLOYMENT.md).
+- [x] Deploy to https://dear-days.pages.dev (Cloudflare Pages; old workers.dev address redirects); see [DEPLOYMENT.md](DEPLOYMENT.md).
 - [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
-- [ ] Apply `002-chibi.sql` to Neon production (`npm run db:migrate`) — blocked pending user approval 2026-11-05
-- [ ] Create Pages project `dear-days`, copy the 5 runtime secrets, `npm run deploy`, verify, run `npm run test:live` on https://dear-days.pages.dev
-- [ ] `npm run deploy:redirect` so the old workers.dev address forwards to the new URL
+- [x] Apply `002-chibi.sql` to Neon production (2026-11-05, user approved)
+- [x] Pages project `dear-days` + 5 secrets + deploy; full `npm run test:live` with browser passes on https://dear-days.pages.dev
+- [x] Old workers.dev address redirects to the new URL
+- [ ] Optional: remove the 5 unused secrets from the old redirect Worker (`wrangler secret delete … --name dear-days`)
 - [ ] Real-device check of chibi eye tracking (touch/caret) on iOS Safari + Android Chrome
 - [x] Phase 0 — scaffold, schema, store, IndexedDB, seed (verified: reload keeps state)
 - [~] Phase 1 — DONE: closed book + open/close cover, spread/single layouts, pull tabs (left/right + on closed cover), flip, riffle, swipe, arrows, section manager, add pages.

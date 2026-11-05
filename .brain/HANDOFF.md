@@ -7,18 +7,18 @@ last_updated: 2026-11-05
 
 # Handoff: continue the v2 3D Journal build
 
-## 2026-11-05 — Chibi done; public URL move prepared (read first)
+## 2026-11-05 — Chibi done; app moved to https://dear-days.pages.dev (read first)
 - Chibi lives in `MyJournal/src/login/` (`art/*` layered SVG, `Chibi.ts` live controller,
   `ChibiEditor.ts`, `chibiStore.ts`, `chibiOptions.ts`, `chibi.css`). Login wiring is in
   `src/account/ui.ts`; boot calls `syncChibi()` when signed in. Tests: `tests/chibi.test.mjs`.
 - Hosting is now configured for Cloudflare Pages (`wrangler.jsonc` + `functions/api/[[path]].ts`)
   → https://dear-days.pages.dev. Old Worker → `redirect/` (deploy with `npm run deploy:redirect`).
-  Local `.env` origins already point to the Pages URL. Production DB migration (`002-chibi.sql`)
-  and the deploy were blocked by the permission classifier and await the user's approval;
-  until then the live app is still the old Worker build without the chibi. See TODO "Now".
+  Local `.env` origins point to the Pages URL. With user approval: `002-chibi.sql` applied, Pages
+  deployed with secrets, full live test passed, old Worker replaced by the redirect. Deploy with
+  `npm run deploy` (Pages), not `wrangler deploy`. Older notes below that say "Worker" are historical.
 
 ## Production backend (2026-11-05)
-Dear Days is live at **https://dear-days.mcleinonza0531.workers.dev** with Better
+Dear Days is live at **https://dear-days.pages.dev** (was the workers.dev URL) with Better
 Auth email/password login, real Gmail verification/reset delivery, private R2
 uploads, and cloud sync backed by Neon. Runtime secrets are configured. Current
 live checks cover two independent sessions, browser editing/second-browser

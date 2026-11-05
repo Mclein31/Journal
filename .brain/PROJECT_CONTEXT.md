@@ -36,17 +36,17 @@ Journal · Schedule · Memories (photos) · Notes. Users can rename, recolor, ad
 Existing v1 features (tasks, journal entries, Korean title translation, gallery) move *into* the book.
 
 ## Status
-Dear Days is live at **https://dear-days.mcleinonza0531.workers.dev** with email/password accounts, Gmail verification/reset emails, private R2 uploads, account-scoped offline caches, and revision-protected cloud sync. Live tests verified real email delivery, two sessions, browser editing/second-browser hydration, password reset/session revocation, and account/media deletion. Login screens render on desktop/mobile. The customizable eye-tracking chibi is implemented and verified locally (2026-11-05). The public URL is moving to **https://dear-days.pages.dev** (Cloudflare Pages, no account name); the deploy awaits user approval. Physical-device, full accessibility, and v1 import remain pending. See [DEPLOYMENT.md](DEPLOYMENT.md), [TODO.md](TODO.md), and [HANDOFF.md](HANDOFF.md).
+Dear Days is live at **https://dear-days.pages.dev** with email/password accounts, Gmail verification/reset emails, private R2 uploads, account-scoped offline caches, and revision-protected cloud sync. Live tests verified real email delivery, two sessions, browser editing/second-browser hydration, password reset/session revocation, and account/media deletion. Login screens render on desktop/mobile. The customizable eye-tracking chibi is implemented and verified locally (2026-11-05). Since 2026-11-05 it is hosted on Cloudflare Pages (URL without the account name); the old workers.dev address redirects. Physical-device, full accessibility, and v1 import remain pending. See [DEPLOYMENT.md](DEPLOYMENT.md), [TODO.md](TODO.md), and [HANDOFF.md](HANDOFF.md).
 
 ## Stack (target)
 - **Frontend**: Vite + TypeScript, no UI framework. 3D is CSS 3D transforms (not WebGL).
-- **API**: Hono on Cloudflare Workers.
+- **API**: Hono in a Cloudflare Pages Function (`/api/*`).
 - **Database**: Neon Postgres (`DATABASE_URL`).
 - **File storage**: private Cloudflare R2 through authenticated Worker upload/download routes; native R2 binding enforces owner scope and upload size.
 - **Auth**: Better Auth, email + password, open public sign-up, email verification + reset via Gmail SMTP (TLS on port 465, Google App Password). Each user's journal is private. SMTP delivery is verified in the deployed Worker.
-- **Hosting**: one Cloudflare Worker serving static assets + `/api`.
+- **Hosting**: Cloudflare Pages project `dear-days` (static assets + `/api` function).
 - **Offline**: owner-scoped IndexedDB cache + service worker; whole-book JSONB snapshots synchronize using server revisions and idempotent mutations. Conflicts preserve both copies.
-- Production setup: Neon `production` branch and the user-created private R2 bucket `journal-assets-prod`; no development bucket is required. Preserve user-supplied credentials in ignored `MyJournal/.env`. All configured keys are populated; database, SMTP, R2, and auth are live-tested. Template: `MyJournal/.env.example`; Gmail instructions: `MyJournal/SMTP_SETUP.md`. Runtime secrets are configured on the Worker; server credentials never enter frontend assets. All 33 font choices and Korean fallback are bundled locally as WOFF2 with licenses and offline caching; no Google Fonts runtime requests.
+- Production setup: Neon `production` branch and the user-created private R2 bucket `journal-assets-prod`; no development bucket is required. Preserve user-supplied credentials in ignored `MyJournal/.env`. All configured keys are populated; database, SMTP, R2, and auth are live-tested. Template: `MyJournal/.env.example`; Gmail instructions: `MyJournal/SMTP_SETUP.md`. Runtime secrets are configured on the Pages project; server credentials never enter frontend assets. All 33 font choices and Korean fallback are bundled locally as WOFF2 with licenses and offline caching; no Google Fonts runtime requests.
 
 ## Constraints
 - Must feel good on a phone (touch drag, pinch, no hover-only controls).

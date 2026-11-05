@@ -9,8 +9,8 @@ last_updated: 2026-11-05
 # Architecture — v2 Customizable 3D Journal
 
 ## Current hosting (2026-11-05)
-Dear Days runs at https://dear-days.mcleinonza0531.workers.dev on one Cloudflare
-Worker: Hono API plus Vite static assets. `MyJournal/wrangler.jsonc` binds private
+Dear Days runs at https://dear-days.pages.dev on Cloudflare Pages: Vite static assets plus a
+Pages Function (`functions/api/[[path]].ts`) running the Hono API. `MyJournal/wrangler.jsonc` binds private
 R2 `journal-assets-prod` as `JOURNAL_FILES`; runtime secrets are separate from the
 public build. `/api/*` runs through the Worker and is excluded from the service
 worker navigation fallback. See [DEPLOYMENT.md](DEPLOYMENT.md).
@@ -34,7 +34,7 @@ MyJournal/
     frames/             frames.ts (frame registry), tear.ts (tear tool)
     stickers/           generatedPacks.ts, legacy SVG definitions, StickerTray.ts
     customize/          CoverPanel.ts, PaperPanel.ts, BackgroundPanel.ts
-    login/              Login.ts, Chibi.ts, chibi-parts/*.svg, ChibiEditor.ts
+    login/              Chibi.ts, ChibiEditor.ts, chibiStore.ts, chibiOptions.ts, art/ (layered SVG)
     sync/               local.ts (IndexedDB), api.ts, sync.ts (queue)
     styles/             tokens.css, book.css, paper.css, frames.css, login.css
   api/                  Cloudflare Worker (Hono + Better Auth)
@@ -133,4 +133,7 @@ GET  /api/assets/:id/content       authenticated private media download
 GET  /api/account/export           journals + media metadata (frontend adds ZIP files)
 POST /api/auth/delete-user         password-confirmed account and media deletion
 ```
-Chibi customization and v1 import remain separate unfinished phases.
+GET|PUT /api/account/chibi         the account's chibi look (newest updatedAt wins)
+```
+v1 import remains a separate unfinished phase.
+```

@@ -17,7 +17,7 @@ last_updated: 2026-11-05
 - [x] Apply `002-chibi.sql` to Neon production (2026-11-05, user approved)
 - [x] Pages project `dear-days` + 5 secrets + deploy; full `npm run test:live` with browser passes on https://dear-days.pages.dev
 - [x] Old workers.dev address redirects to the new URL
-- [ ] Optional: remove the 5 unused secrets from the old redirect Worker (`wrangler secret delete … --name dear-days`)
+- [x] Removed the 5 unused secrets from the old redirect Worker (2026-11-05). Worker commands need `--config redirect/wrangler.jsonc` because `MyJournal/wrangler.jsonc` is the Pages config.
 - [ ] Real-device check of chibi eye tracking (touch/caret) on iOS Safari + Android Chrome
 - [x] Phase 0 — scaffold, schema, store, IndexedDB, seed (verified: reload keeps state)
 - [~] Phase 1 — DONE: closed book + open/close cover, spread/single layouts, pull tabs (left/right + on closed cover), flip, riffle, swipe, arrows, section manager, add pages.

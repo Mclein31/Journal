@@ -4,7 +4,7 @@
 - Moved 2026-11-05 so the public URL has no account name. First Pages deployment: `b620274f`.
 - Old address https://dear-days.mcleinonza0531.workers.dev is the Worker `dear-days`, now only a 302 redirect
   to the same path/query on the new origin plus a retiring `/sw.js` (`MyJournal/redirect/`, version `f4fa916c`).
-  Its old secrets are unused by the redirect.
+  It holds no secrets or bindings (old secrets deleted 2026-11-05; Pages has its own copies).
 - Production R2 bucket: `journal-assets-prod`.
 - First frontend deployment: 2026-11-05 (`60619339-b109-4d90-91b8-89c059a81ae8`).
 - Verified backend deployment before font update: `5efaaf48-ce9e-4326-b486-c35fcd4b47e9`.

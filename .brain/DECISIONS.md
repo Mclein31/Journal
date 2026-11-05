@@ -167,3 +167,21 @@ auth handlers, Worker deployment and migrations are still pending. A deployed
 transport/delivery check is required before claiming email works. Create SMTP
 connections within Worker requests/background tasks using a compatible TLS
 transport; port 25 is blocked by default. Keep SMTP secrets out of frontend builds.
+
+## 2026-11-05 — Public URL without the account name: move to Cloudflare Pages
+**Why**: the user asked for a public URL that is only `dear-days`, without their name.
+`*.workers.dev` URLs always include the account subdomain (`mcleinonza0531`), so the app moves
+to the Cloudflare Pages project `dear-days` → **https://dear-days.pages.dev** (no custom domain).
+**How**: `MyJournal/wrangler.jsonc` is now the Pages config (dist/ static assets + `_headers`);
+`functions/api/[[path]].ts` serves `/api/*` through the same Hono app (`hono/cloudflare-pages`).
+Same Neon database, R2 bucket and secrets; `BETTER_AUTH_URL`/`APP_ORIGIN` = the Pages origin.
+The old Worker `dear-days` is replaced by `MyJournal/redirect/` (302 to the same path/query on
+the new origin, plus a retiring `sw.js` for installed copies). Browser storage is per-origin:
+device-only (guest) journals made at the old address stay in that browser's old-origin storage.
+
+## 2026-11-05 — Chibi customization storage
+Look = `ChibiConfig` (`src/login/chibiOptions.ts`, mirrored by `chibiSchema` in
+`api/src/validation.ts`). Saved in device `localStorage['dd:chibi']` (not account-scoped, so the
+login screen shows it before sign-in) and in `journal_account_state.chibi` (additive migration
+`002-chibi.sql`). `updatedAt` decides: the newer of device/account wins on sign-in; the server
+upsert never replaces a newer look with an older retry. Every write uses the account deletion lock.

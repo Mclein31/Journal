@@ -14,6 +14,10 @@ last_updated: 2026-11-05
 - [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
+- [ ] Apply `002-chibi.sql` to Neon production (`npm run db:migrate`) — blocked pending user approval 2026-11-05
+- [ ] Create Pages project `dear-days`, copy the 5 runtime secrets, `npm run deploy`, verify, run `npm run test:live` on https://dear-days.pages.dev
+- [ ] `npm run deploy:redirect` so the old workers.dev address forwards to the new URL
+- [ ] Real-device check of chibi eye tracking (touch/caret) on iOS Safari + Android Chrome
 - [x] Phase 0 — scaffold, schema, store, IndexedDB, seed (verified: reload keeps state)
 - [~] Phase 1 — DONE: closed book + open/close cover, spread/single layouts, pull tabs (left/right + on closed cover), flip, riffle, swipe, arrows, section manager, add pages.
   - [x] Drag a page to flip by hand (follows pointer, completes past 50% or on flick, falls back otherwise)
@@ -36,7 +40,7 @@ last_updated: 2026-11-05
 - [x] Carry-over across the spine (user request): items past the spine are drawn on the facing page too (aligned, under the gutter crease); drag across to move an item to the other page
 
 ## Later
-- [~] Phase 9 — Login/signup/verify/reset screens implemented and browser-tested; eye-tracking customizable chibi remains pending
+- [x] Phase 9 — Login/signup/verify/reset screens + eye-tracking customizable chibi (editor, device + account sync); headless-browser verified 2026-11-05
 - [x] Phase 10 — Neon + private R2 + Better Auth + Gmail verification/reset + conflict-safe sync, backups and account deletion; live-tested
 - [ ] Phase 11 — v1 data import, QA matrix, deploy
 

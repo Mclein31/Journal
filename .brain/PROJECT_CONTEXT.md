@@ -36,7 +36,7 @@ Journal · Schedule · Memories (photos) · Notes. Users can rename, recolor, ad
 Existing v1 features (tasks, journal entries, Korean title translation, gallery) move *into* the book.
 
 ## Status
-Dear Days is live at **https://dear-days.mcleinonza0531.workers.dev** with email/password accounts, Gmail verification/reset emails, private R2 uploads, account-scoped offline caches, and revision-protected cloud sync. Live tests verified real email delivery, two sessions, browser editing/second-browser hydration, password reset/session revocation, and account/media deletion. Login screens render on desktop/mobile. Physical-device, full accessibility, v1 import, and customizable chibi work remain pending. See [DEPLOYMENT.md](DEPLOYMENT.md), [TODO.md](TODO.md), and [HANDOFF.md](HANDOFF.md).
+Dear Days is live at **https://dear-days.mcleinonza0531.workers.dev** with email/password accounts, Gmail verification/reset emails, private R2 uploads, account-scoped offline caches, and revision-protected cloud sync. Live tests verified real email delivery, two sessions, browser editing/second-browser hydration, password reset/session revocation, and account/media deletion. Login screens render on desktop/mobile. The customizable eye-tracking chibi is implemented and verified locally (2026-11-05). The public URL is moving to **https://dear-days.pages.dev** (Cloudflare Pages, no account name); the deploy awaits user approval. Physical-device, full accessibility, and v1 import remain pending. See [DEPLOYMENT.md](DEPLOYMENT.md), [TODO.md](TODO.md), and [HANDOFF.md](HANDOFF.md).
 
 ## Stack (target)
 - **Frontend**: Vite + TypeScript, no UI framework. 3D is CSS 3D transforms (not WebGL).

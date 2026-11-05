@@ -8,6 +8,19 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Customizable chibi + public URL move (pending deploy)
+- Login chibi (original layered SVG): eyes follow mouse, taps and the text caret; blinks,
+  breathing, idle glances; covers her eyes while a hidden password is typed, peeks when shown,
+  smiles on sign-in/sign-up, "?" on a wrong password. Reduced motion keeps tracking only.
+- Editor ("Customize her" on login, "Customize your chibi" in Account): 6 hair styles, hair color
+  (8 + custom), 3 eye shapes, eye color (8 + custom), 6 skin tones, 6 outfits, 6 accessories,
+  blush, Surprise me/Reset, live preview with thumbnails. Device + account storage, newest wins.
+- API: `GET/PUT /api/account/chibi`, export includes the chibi; migration `002-chibi.sql`.
+- Hosting moved to Cloudflare Pages config for https://dear-days.pages.dev; old Worker becomes
+  a redirect (`redirect/`). Code verified locally; production migration/deploy await approval.
+- Tests: 169 pass (5 new chibi tests: all 1,296 combinations, schema repair, login reactions,
+  editor save, newest-wins sync). Headless Chromium screenshots desktop/mobile/editor reviewed.
+
 ## 2026-11-05 — Live accounts, private cloud sync, and self-hosted fonts
 - Implemented Hono/Better Auth on the existing Worker, additive Neon schemas,
   real Gmail verification/reset delivery, sessions, and password-confirmed deletion.

@@ -142,3 +142,10 @@ last_updated: 2026-11-04
 - Browser host remained unavailable and Chrome computer use was denied. Native rendering, device gestures/install/offline and full accessibility remain open; login/backend/migration/deployment phases remain pending.
 
 - Final user follow-ups: every text box stays one page wide regardless of corner/pinch scale (including legacy normalization), with one existing handle; Delete/Backspace and Undo/Redo work for placed stickers with the tray open while search fields and other dialogs retain keyboard ownership. Dedicated regression coverage added.
+
+## 2026-11-05 — Flexible page turns and switching fixes
+- Replaced rigid paper turns with a shared-projection CSS3D mesh, preserving full-page HTML/font units and mirrored back-side crops. Tension depends on grab location and vertical pull; shadows follow the bend. Covers retain their original rigid WAAPI timing.
+- Added a critically damped, velocity-aware release and catch/reversal of manual or automatic single turns. Stationary holds expire old flick velocity; cancel returns to the original pages. Reduced-motion dragging now uses a flat fade.
+- User reported buggy switching. Independently reproduced and fixed projected grab-point drift (~106.5px before projection in the reviewed half-turn case), stale mesh sizing on resize, dropped rapid Next requests, and blocked Previous input during a forward turn. Native verification of the reported visual bug remains pending.
+- Added subpixel terminal-face overlap to suppress tile cracks without changing full-page source dimensions. Rebind pending uploaded images/masks in cloned faces and disconnect per-leaf observation on cleanup.
+- Validation: all 152 tests (24 new motion/geometry cases) and production/PWA build pass. Static geometry preview inspected; native browser painting/performance remains unverified under the existing access limit. See `QA_REPORT.md`.

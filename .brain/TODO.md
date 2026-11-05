@@ -87,3 +87,11 @@ last_updated: 2026-11-05
 - [ ] Complete keyboard-only canvas manipulation and tear-tool alternatives before accessibility sign-off
 
 - [x] Final user follow-ups: every text box stays one page wide regardless of corner/pinch scale (including legacy normalization), with one existing handle; Delete/Backspace and Undo/Redo work for placed stickers with the tray open while search fields and other dialogs retain keyboard ownership. Dedicated regression coverage added.
+
+## Natural paper motion (2026-11-05)
+- [x] Grab-dependent CSS3D paper bend, projected contact constraint and fold lighting; rigid cover preserved
+- [x] Velocity-aware spring release, stale flick expiry, drag cancellation and catch/reversal of single turns
+- [x] Correct rapid relative navigation and Previous availability, including queued multi-leaf riffles
+- [x] Resize-safe facets/crops and lifecycle cleanup; delayed uploaded art preserved
+- [x] Reduced-motion dragging uses flat fade; all 152 tests and production/PWA build pass
+- [ ] Native Safari/Chrome motion/compositing/seams, decorated-page performance and real touch/device QA

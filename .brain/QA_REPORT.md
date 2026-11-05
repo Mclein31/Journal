@@ -2,7 +2,7 @@
 
 ## Result and limits
 
-**128 automated checks pass; TypeScript and the production/PWA build pass.** This pass added 47 regressions to the original 81 checks. The implemented app is the local-first frontend in `MyJournal/`; accounts, cloud sync, migration and deployment are still pending.
+**152 automated checks pass; TypeScript and the production/PWA build pass.** The functional pass added 47 regressions to the original 81 checks; the paper-motion follow-up added 24 more. The implemented app is the local-first frontend in `MyJournal/`; accounts, cloud sync, migration and deployment are still pending.
 
 This is **not browser/device sign-off**. Computer-use inventory reported the browser host unavailable, and access to Google Chrome was denied. DOM integration uses the actual app modules with simulated geometry, focus, image decoding, animation, audio and native install APIs. The user's Safari screenshot is direct evidence of the original outer-edge overflow. Its CSS fix and the new textures have not been inspected in a running browser.
 
@@ -72,3 +72,18 @@ P1 = potential data loss. P2 = broken or misleading interaction. Every functiona
 - Login/chibi (Phase 9), backend/auth/sync (Phase 10), v1 import and deployment (Phase 11) are not implemented and cannot be marked tested.
 
 Dependency audit passes the high threshold: **0 high/critical**, 2 low and 4 moderate transitive build-tool findings. The suggested forced fix downgrades the PWA plugin across a major version and was not applied. The PWA build still emits its existing nonblocking `inlineDynamicImports` deprecation warning.
+
+## Page motion follow-up — 2026-11-05
+
+The user requested flexible 3D turns with tension at the grab point, then reported buggy switching. Browser visual behavior remains unverified; the following independently reproduced defects were fixed without claiming native browser sign-off.
+
+- `page-curl.test.mjs`: 10 checks for flat endpoints, pinned spine, grab-height deformation, exact facet mapping/seams, drag reversal, velocity-continuous spring settling, and the actual faceted/perspective-projected grab constraint.
+- `page-flip-dom.test.mjs`: 14 checks for full-page mirrored source crops, delayed uploaded images and sticker masks, face-only fades, reduced motion, cancellation, stale momentum, catching/reversing manual and automatic single turns, resize/destroy cleanup, rapid Next/reversal, and relative navigation during multi-leaf riffles.
+- Fixed a measured grab slip: at width 400 / grabX.94 / half-turn, the unconstrained bent surface placed the grabbed point about 106.5px away from the flat pointer reference before projection. The rendered shared grid now constrains the actual barycentric point after perspective.
+- Fixed stale-sized meshes on resize: facets, source crops and current pose resize together; active pointer coordinates rebase without inheriting old velocity.
+- Fixed dropped rapid navigation requests and the disabled Previous button during the first forward turn. Queued intent and every active target, including riffles, now determine relative input and button availability.
+- Paper bends through CSS3D facets; covers retain the rigid board animation/timing. Release inherits current velocity through a critically damped spring, old flick velocity expires after a stationary hold, and canceled drags spring back without navigation. A settling manual/single automatic page can be caught again without a pose jump or stale completion.
+- Terminal tile faces overlap by a fraction of a pixel to suppress antialiasing cracks while their full-page source dimensions/crops remain exact. Opacity and clipping stay off preserve-3D ancestors.
+- Production/PWA build and all 152 checks pass. No dependencies changed. The build's prior PWA deprecation warning remains. `page-curl-preview.svg/png` is a static projection of the geometry, not a browser/material/compositing/performance verification.
+
+**Remaining:** native Safari/Chrome compositing, visible seams/backfaces, real input tracking, diagonal touch cancellation, frame rate and memory on decorated pages, live resizing and device reduced-motion behavior. The new timed-frame and geometry checks do not verify these browser properties.

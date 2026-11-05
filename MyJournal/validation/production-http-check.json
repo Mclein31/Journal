@@ -1,16 +1,16 @@
 {
-  "checkedAt": "2026-11-05T02:45:58.980Z",
+  "checkedAt": "2026-11-05T07:14:57.013Z",
   "method": "HTTP requests to local Vite production preview; no browser/runtime/offline verification",
   "appShell": 200,
   "serviceWorker": 200,
   "manifestDisplay": "standalone",
   "clientAssets": [
     {
-      "file": "/assets/index-VDcInecy.js",
+      "file": "/assets/index-B1Eb-pZn.js",
       "status": 200
     },
     {
-      "file": "/assets/index-Dt1ervql.css",
+      "file": "/assets/index-Q6XGBA--.css",
       "status": 200
     }
   ],

@@ -35,7 +35,7 @@ Journal · Schedule · Memories (photos) · Notes. Users can rename, recolor, ad
 Existing v1 features (tasks, journal entries, Korean title translation, gallery) move *into* the book.
 
 ## Status
-Frontend phases 0–8 are implemented in `MyJournal/`, with UI/reliability polish and a 128-check functional QA pass on 2026-11-05. Browser/device and full accessibility sign-off remain pending; see [QA_REPORT.md](QA_REPORT.md). Login/backend/deployment phases remain pending. See [TODO.md](TODO.md) for the live checklist and [HANDOFF.md](HANDOFF.md) for verification limits.
+Frontend phases 0–8 are implemented in `MyJournal/`, with UI/reliability polish and a 152-check functional QA and page-motion pass on 2026-11-05. Browser/device and full accessibility sign-off remain pending; see [QA_REPORT.md](QA_REPORT.md). Login/backend/deployment phases remain pending. See [TODO.md](TODO.md) for the live checklist and [HANDOFF.md](HANDOFF.md) for verification limits.
 
 ## Stack (target)
 - **Frontend**: Vite + TypeScript, no UI framework. 3D is CSS 3D transforms (not WebGL).

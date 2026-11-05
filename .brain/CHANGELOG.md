@@ -8,6 +8,16 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — More masculine options, new login layout and logo
+- Character: hair Buzz cut/Messy/Curtains/Man bun; outfits Jersey/Flannel/Suit; accessories Bandana,
+  Beanie, Backwards cap, Sunglasses; new Facial hair field (None/Stubble/Mustache); "Sporty" preset.
+  33,696 combinations render in tests. API accepts the new values (facialHair optional for old looks).
+- Login redesigned: full-height split — desk scene (logo, Lora headline/pitch, navy journal + character,
+  Customize button) beside a paper form panel; compact header + form on phones.
+- New logo `src/ui/logo.ts` (navy journal, paper edge, terracotta ribbon, star); same art in
+  `public/icons/icon.svg` and regenerated PNGs; used in the login and desk header. Lora loaded on boot.
+- 170 tests pass; desktop/mobile/header/icon screenshots reviewed. Deploy awaits user approval.
+
 ## 2026-11-05 — Gender-neutral character
 - Neutral default look and wording ("Customize character", "Make it yours"); presets Neutral/Masculine/Feminine.
 - New: 3 hair styles, 3 trouser outfits, cap and headphones (9 hair × 3 eyes × 9 outfits × 8 accessories × blush = 3,888 looks, all rendered in tests). API schema widened.

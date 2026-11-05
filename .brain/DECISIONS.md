@@ -198,3 +198,8 @@ User: "neutralize all". App chrome uses warm paper backgrounds with slate-navy a
 charcoal text (`src/styles/tokens.css`). Default cover is navy `#3e5568`; brand mark is ✦, not ✿.
 Pink remains only as an optional user choice (paper tint, cover/desk/frame/hair colors) and in the
 classic red notebook margin rule and crimson bookmark ribbon. Do not reintroduce pink UI defaults.
+
+## 2026-11-05 — Brand: journal-and-ribbon logo, Lora wordmark
+Logo is the journal mark in `MyJournal/src/ui/logo.ts`; keep `public/icons/icon.svg` identical in
+drawing (regenerate PNGs when it changes). Wordmark/headlines use bundled Lora 400 (no bold weight is
+bundled: do not request 600/700). Login layout lives in `src/account/login.css`.

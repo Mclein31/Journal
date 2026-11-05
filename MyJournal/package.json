@@ -7,15 +7,16 @@
     "dev": "vite",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-    "deploy:check": "npm run build && wrangler deploy --dry-run",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy:check": "npm run build && wrangler pages functions build --outdir .wrangler/pages-check --compatibility-date 2026-11-05 --compatibility-flags nodejs_compat && wrangler deploy --config redirect/wrangler.jsonc --dry-run",
+    "deploy": "npm run build && wrangler pages deploy --project-name dear-days --branch main --commit-dirty=true",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.api.json --noEmit && tsc --project tsconfig.sw.json --noEmit",
     "test": "node --experimental-vm-modules --test tests/*.test.mjs",
     "db:plan": "tsx scripts/migrate.ts",
     "db:migrate": "tsx scripts/migrate.ts --apply",
     "test:api": "RUN_BACKEND_TESTS=1 node --import tsx --test tests/backend/*.test.ts",
     "fonts:vendor": "tsx scripts/vendor-fonts.ts",
-    "test:live": "tsx scripts/live-smoke.ts"
+    "test:live": "tsx scripts/live-smoke.ts",
+    "deploy:redirect": "wrangler deploy --config redirect/wrangler.jsonc"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261104.1",

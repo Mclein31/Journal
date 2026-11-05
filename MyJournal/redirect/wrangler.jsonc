@@ -1,0 +1,8 @@
+{
+  // The original Worker address now only forwards visitors to https://dear-days.pages.dev.
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "dear-days",
+  "main": "index.ts",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": true
+}

@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["api/src/**/*.ts"]
+  "include": ["api/src/**/*.ts", "functions/**/*.ts", "redirect/**/*.ts"]
 }

@@ -50,12 +50,12 @@ Gmail supports this on port 465; see
 - R2 access keys must have Object Read & Write access to `journal-assets-prod`.
   A token restricted to a different bucket will not work.
 - `BETTER_AUTH_URL` and `APP_ORIGIN`: both
-  `https://dear-days.mcleinonza0531.workers.dev`, the deployed website origin,
+  `https://dear-days.pages.dev`, the deployed website origin,
   without a trailing path. Update both if a custom domain is added later.
-- `VITE_API_BASE_URL=/api`: the frontend and API will share one Worker origin.
+- `VITE_API_BASE_URL=/api`: the frontend and API share one Cloudflare Pages origin.
 - Keep the existing `BETTER_AUTH_SECRET` private.
 
-The local `.env` file is not deployed automatically. The production Worker already
+The local `.env` file is not deployed automatically. The production Pages project
 has `DATABASE_URL`, `BETTER_AUTH_SECRET`, `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM`
 configured as secrets. Public origin and SMTP connection settings are in
 `wrangler.jsonc`. The direct database URL remains local for migrations; R2 is

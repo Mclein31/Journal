@@ -4,13 +4,13 @@
 .chibi .ch-root{transform-box:view-box;transform-origin:100px 234px}
 .chibi[data-live] .ch-root{animation:ch-breathe 3.6s ease-in-out infinite}
 @keyframes ch-breathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1.6px) scaleY(1.006)}}
-.chibi .ch-eye-blink{transform-box:fill-box;transform-origin:center;transition:transform 70ms ease-in}
+.chibi .ch-eye-blink{transform-box:fill-box;transform-origin:center;transition:transform 70ms cubic-bezier(.22,1,.36,1)}
 .chibi.ch-blinking .ch-eye-blink{transform:scaleY(.08)}
 .chibi .ch-mouth,.chibi .ch-happy-eyes,.chibi .ch-mark{display:none}
 .chibi[data-mood="idle"] .ch-mouth-idle,.chibi[data-mood="happy"] .ch-mouth-happy,.chibi[data-mood="confused"] .ch-mouth-confused,.chibi[data-mood="shy"] .ch-mouth-shy{display:inline}
 .chibi[data-mood="happy"] .ch-eyes{display:none}
 .chibi[data-mood="happy"] .ch-happy-eyes,.chibi[data-mood="happy"] .ch-mark-happy,.chibi[data-mood="confused"] .ch-mark-confused{display:inline}
-.chibi .ch-mark{transform-box:fill-box;transform-origin:center bottom;animation:ch-pop .32s cubic-bezier(.34,1.56,.64,1) both}
+.chibi .ch-mark{transform-box:fill-box;transform-origin:center bottom;animation:ch-pop .32s cubic-bezier(.22,1,.36,1) both}
 @keyframes ch-pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 .chibi .ch-arms-cover{transform-box:view-box;opacity:0;transform:translateY(70px);transition:transform .32s cubic-bezier(.22,1,.36,1),opacity .18s ease}
 .chibi .ch-arms-rest{transition:opacity .18s ease}

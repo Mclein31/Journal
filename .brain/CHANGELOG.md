@@ -8,6 +8,18 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Login audit and polish (Impeccable + tasteskill)
+- Audited with tasteskill inspector/lint (1440/768/390, production build) and the Impeccable detector.
+  Before: 4 FAIL / 8 WARN. After: 1 FAIL / 3 WARN, all defended (user's own desk/paper drawings; the
+  illustration read as "chart colours"; app-wide --bg).
+- Journal and character ~2× (journal 236→~467px, character 220→~403px at 1440×900), sized from the
+  viewport height so they never overlap the headline; character stands on the journal's floor; the
+  Customize pill sits just above the character (own row on tablet/phone).
+- Removed: eyebrow label, ✦/✎ glyphs (drawn star instead), striped overlay, hairline divider,
+  outlined guest button and warning box (tone-step fills), button/panel shadows, blur, bounce easing.
+- One h1 (form title); headline is a statement paragraph. Text ≥13px, inputs 16px, 44px targets,
+  visible focus rings, themed selection/caret. Book page edges drawn as shapes, not offset shadows.
+
 ## 2026-11-05 — Login journal mirrors the user's book
 - `src/login/bookLook.ts` keeps a device copy (`localStorage['dd:book-look']`) of the last opened journal's
   title, cover color/texture, paper type/tint, section tab colors and desk; written at boot and 600 ms after

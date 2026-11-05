@@ -203,3 +203,10 @@ classic red notebook margin rule and crimson bookmark ribbon. Do not reintroduce
 Logo is the journal mark in `MyJournal/src/ui/logo.ts`; keep `public/icons/icon.svg` identical in
 drawing (regenerate PNGs when it changes). Wordmark/headlines use bundled Lora 400 (no bold weight is
 bundled: do not request 600/700). Login layout lives in `src/account/login.css`.
+
+## 2026-11-05 — Login screen design rules
+Follow the tasteskill house rules on the login (`MyJournal/src/account/login.css`): no eyebrows, no
+glyphs as icons, no shadows/blur/outlined boxes on UI, tone steps between surfaces, one h1. The desk,
+cover and paper are illustrations of the user's own journal and may use gradients/patterns. Book and
+character sizes come from `--bw`/`--cw` on `.auth-stage` (viewport-height aware); keep them in sync
+with the pill offset formula. Re-run `inspect.mjs --app` on the production build after changes.

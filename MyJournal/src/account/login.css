@@ -1,62 +1,93 @@
-/* Login: desk scene (brand, pitch, journal + character) beside a paper panel with the form. */
-.auth-screen{--ink:#26303b;--ink-soft:#5c5852;--serif:'Lora',Georgia,'Times New Roman',serif;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(420px,.9fr);height:100dvh;min-height:100dvh;overflow:auto;background:#fbf8f3;color:var(--ink)}
-.auth-scene{position:relative;display:flex;flex-direction:column;gap:clamp(18px,3vh,32px);padding:clamp(28px,4vw,56px) clamp(28px,5vw,80px);overflow:hidden}
-.auth-scene:not([data-bg]){background:radial-gradient(110% 80% at 25% 15%,#f3eadc 0,#e6d7c0 58%,#d9c6a8 100%)}
-.auth-scene[data-bg]::after{display:none}
-.auth-scene::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;background:repeating-linear-gradient(92deg,#ffffff00 0 18px,#ffffff22 18px 19px,#ffffff00 19px 41px,#8a6f4c10 41px 42px)}
-.auth-brand{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:400 25px/1 var(--serif);letter-spacing:-.01em;align-self:flex-start}
-.auth-brand .dd-logo{flex:none;filter:drop-shadow(0 2px 3px #3b2f2226)}
-.auth-pitch{position:relative;z-index:1;max-width:34rem}
-.auth-pitch h2{font:400 clamp(30px,3.3vw,48px)/1.1 var(--serif);letter-spacing:-.015em;margin:0 0 14px;color:var(--ink);max-width:13em}
-.auth-pitch p{font-size:15px;line-height:1.65;color:var(--ink-soft);margin:0;max-width:30em}
-.auth-stage{position:relative;z-index:1;flex:1;min-height:300px;display:grid;grid-template-columns:auto auto;grid-template-areas:'book chibi' 'edit edit';align-content:center;justify-content:center;align-items:end;row-gap:44px;padding-bottom:12px}
-.auth-stage .auth-book{grid-area:book}.auth-stage .auth-chibi{grid-area:chibi}
-.auth-book{position:relative;width:clamp(190px,17vw,236px);aspect-ratio:236/308;border-radius:8px 16px 16px 8px;background:linear-gradient(90deg,color-mix(in srgb,var(--cover,#3e5568) 76%,#000) 0 18px,#ffffff10 18px 19px,transparent 19px),var(--cover,#3e5568);box-shadow:10px 9px 0 -3px var(--paper,#f4ecdf),11px 10px 0 -2px #cdbfa8,18px 26px 40px #3b2f2238;transform:rotate(-5deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--cover-ink,#f3ead9)}
-.auth-book::before{content:'';position:absolute;top:-1px;bottom:-1px;right:16px;width:7px;background:color-mix(in srgb,var(--cover,#3e5568) 62%,#000);box-shadow:inset 1px 0 #ffffff14}
-.auth-book::after{content:'';position:absolute;bottom:-34px;left:58%;width:16px;height:46px;background:#b8324f;clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);z-index:-1}
-.auth-book-star{font-size:22px;line-height:1;opacity:.9}
-.auth-book-title{font:400 clamp(26px,2.4vw,34px)/1.08 var(--serif);letter-spacing:.01em;text-align:center;padding:0 10px 0 22px}
-.auth-chibi{width:clamp(180px,16vw,220px);aspect-ratio:200/240;margin-left:clamp(-64px,-4vw,-40px);margin-bottom:-6px;position:relative;z-index:1;filter:drop-shadow(0 12px 14px #3b2f2224)}
+/* Login: the user's desk (brand, statement, their journal + character, drawn large) beside a
+   stone panel holding the form. Book and character mirror the user's own (see loginLook in ui.ts).
+   Illustration surfaces (desk presets, cover, paper) draw objects, not UI chrome. */
+.auth-screen{--ink:#232b35;--ink-soft:#4f4b46;--stone:#f2f1ee;--stone-2:#e7e4de;--action:#33495c;--action-hover:#26394a;--serif:'Lora',Georgia,'Times New Roman',serif;
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(400px,.7fr);height:100dvh;min-height:100dvh;overflow:auto;background:var(--stone);color:var(--ink)}
+.auth-screen ::selection{background:#33495c33}
+.auth-screen input{caret-color:var(--action)}
+
+/* Scene */
+.auth-scene{position:relative;display:grid;grid-template-rows:auto auto 1fr;gap:clamp(14px,2.4vh,26px);padding:clamp(28px,3.4vw,52px) clamp(28px,4vw,64px) 0;overflow:hidden;min-height:0}
+.auth-scene:not([data-bg]){background:#e2d3bb}
+.auth-brand{position:relative;z-index:1;display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:400 24px/1 var(--serif);letter-spacing:-.01em;justify-self:start;min-height:44px}
+.auth-brand .dd-logo{flex:none}
+.auth-pitch{position:relative;z-index:1;max-width:33rem}
+.auth-statement{font:400 clamp(28px,2.5vw,36px)/1.12 var(--serif);letter-spacing:-.02em;margin:0 0 10px;color:var(--ink);text-wrap:balance}
+.auth-pitch p:not(.auth-statement){font-size:16px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:30em}
+
+/* Stage: journal and character at roughly twice their former size, standing on the scene's floor */
+.auth-stage{--avail:calc(100dvh - 250px);--bw:clamp(220px,min(31vw,calc(var(--avail) * .66)),470px);--cw:clamp(200px,min(28vw,calc(var(--avail) * .68)),420px);position:relative;z-index:1;min-height:0;display:grid;grid-template-columns:auto auto;grid-template-areas:'book chibi';align-items:end;align-content:end;justify-content:center}
+.auth-book{grid-area:book;position:relative;width:var(--bw);aspect-ratio:236/308;margin-bottom:calc(var(--bw) * .13);border-radius:10px 20px 20px 10px;background:var(--cover,#3e5568);transform:rotate(-4deg);transform-origin:50% 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--cover-ink,#f3ead9)}
+.auth-book-pages{position:absolute;inset:8px -14px -12px 10px;border-radius:6px 16px 16px 6px;background:#cdbfa8;z-index:-2}
+.auth-book-pages::before{content:'';position:absolute;inset:-4px 3px 4px -3px;border-radius:inherit;background:var(--paper,#f4ecdf)}
+.auth-book::before{content:'';position:absolute;top:0;bottom:0;left:0;width:7%;border-radius:10px 0 0 10px;background:color-mix(in srgb,var(--cover,#3e5568) 74%,#000);z-index:1}
+.auth-book::after{content:'';position:absolute;bottom:-12%;left:58%;width:7%;height:16%;background:#b8324f;clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);z-index:-1}
+.auth-book .auth-book-tex{position:absolute;inset:0;width:auto;height:auto;border-radius:inherit;box-shadow:none;pointer-events:none;background-color:var(--cover,#3e5568)}
+.auth-book-star{position:relative;width:clamp(18px,1.8vw,26px);height:auto;opacity:.9}
+.auth-book-title{position:relative;font:400 clamp(34px,3.6vw,56px)/1.05 var(--serif);letter-spacing:-.01em;text-align:center;padding:0 9% 0 13%;max-width:100%;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.auth-book-title[data-size='m']{font-size:clamp(26px,2.6vw,40px)}
+.auth-book-title[data-size='s']{font-size:clamp(19px,1.8vw,28px);line-height:1.2}
+.auth-book-tabs{position:absolute;top:12%;right:-34px;display:grid;gap:8px;z-index:-1}
+.auth-book-tabs i{display:block;width:22px;height:clamp(30px,4.6vh,50px);border-radius:0 9px 9px 0}
+.auth-stage .auth-page{grid-area:book;align-self:end;justify-self:center;width:88%;aspect-ratio:3/4;margin-bottom:6%;border-radius:4px;background-color:var(--paper,#fbf4e6);transform:translate(17%,-4%) rotate(6deg);z-index:-1}
+.auth-chibi{grid-area:chibi;align-self:end;width:var(--cw);aspect-ratio:200/240;margin-bottom:calc(var(--bw) * .13 - 10px);margin-left:clamp(-120px,-7vw,-48px);position:relative;z-index:1}
 .auth-chibi .chibi-live{width:100%;height:100%}
-.auth-chibi-edit{grid-area:edit;justify-self:center;display:inline-flex;align-items:center;gap:6px;border:1px solid #c9b79c;background:#fbf8f3e6;color:#3a4654;border-radius:999px;padding:9px 16px;min-height:40px;font:800 12px var(--font-ui);letter-spacing:.2px;cursor:pointer;box-shadow:0 4px 14px #3b2f2214;white-space:nowrap}
-.auth-chibi-edit::before{content:'✎'}
-.auth-chibi-edit:hover{background:#fff;border-color:#8b7a62}
-.auth-panel{display:grid;place-items:center;padding:clamp(28px,5vw,72px) clamp(24px,4vw,64px);background:#fbf8f3;box-shadow:-30px 0 60px -40px #3b2f2255}
-.auth-panel .auth-card{width:100%;max-width:390px;background:none;border:0;box-shadow:none;padding:0;border-radius:0}
-.auth-panel .auth-eyebrow{text-transform:uppercase;color:#7a6a55}
-.auth-panel .auth-card h1{font:400 clamp(30px,2.6vw,38px)/1.12 var(--serif);letter-spacing:-.01em;color:var(--ink)}
-.auth-panel .auth-description{color:var(--ink-soft)}
-.auth-panel .auth-primary{background:#3e5568}.auth-panel .auth-primary:hover{background:#2f4354}
-@media (max-width:900px){
-  .auth-screen{grid-template-columns:1fr;height:auto;min-height:100dvh}
-  .auth-scene{display:grid;grid-template-columns:1fr auto;grid-template-areas:'brand stage' 'pitch stage';align-items:center;gap:6px 12px;padding:18px 20px 14px}
-  .auth-brand{grid-area:brand;font-size:21px}.auth-brand .dd-logo{width:28px;height:28px}
-  .auth-pitch{grid-area:pitch}.auth-pitch h2{font-size:21px;margin:0}.auth-pitch p{display:none}
-  .auth-stage{grid-area:stage;min-height:0;padding:0;flex:none;grid-template-columns:auto;grid-template-areas:'chibi' 'edit';row-gap:6px}
-  .auth-book{display:none}
-  .auth-chibi{width:96px;margin:0}
-  .auth-chibi-edit{padding:6px 10px;min-height:32px;font-size:11px}
-  .auth-panel{padding:26px 20px 40px;place-items:start center;box-shadow:none;border-top:1px solid #e3d6c3}
-}
-@media (min-width:901px) and (max-height:720px){.auth-pitch p{display:none}.auth-stage{min-height:220px}.auth-book{width:170px}.auth-chibi{width:160px}}
-@media (max-width:900px){.auth-edit-long{display:none}}
-/* Mirrored journal details (see loginLook in ui.ts) */
-.auth-book .auth-book-tex{position:absolute;inset:0;width:auto;height:auto;border-radius:inherit;box-shadow:none;pointer-events:none}
-.auth-book-star,.auth-book-title{position:relative}
-.auth-book-title{max-width:78%;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.auth-book-title[data-size='m']{font-size:clamp(20px,1.9vw,26px)}
-.auth-book-title[data-size='s']{font-size:clamp(15px,1.4vw,19px);line-height:1.2}
-.auth-book-tabs{position:absolute;top:13%;right:-27px;display:grid;gap:5px}
-.auth-book-tabs i{display:block;width:15px;height:clamp(22px,2.4vw,32px);border-radius:0 6px 6px 0;box-shadow:inset 3px 0 4px #0000001f,1px 1px 2px #3b2f2226}
-.auth-stage .auth-page{grid-area:book;align-self:end;justify-self:center;width:clamp(170px,15vw,212px);aspect-ratio:3/4;border-radius:3px;background-color:var(--paper,#fbf4e6);box-shadow:0 6px 18px #3b2f2224;transform:translate(34%,-4%) rotate(7deg)}
-.auth-page[data-paper='lined']{background-image:linear-gradient(90deg,transparent 22px,#d77a7a66 22px 23px,transparent 23px),repeating-linear-gradient(transparent 0 15px,#7f9bb84a 15px 16px);background-position:0 0,0 22px}
-.auth-page[data-paper='dotted']{background-image:radial-gradient(circle,#4a556233 1px,transparent 1.6px);background-size:14px 14px}
-.auth-page[data-paper='grid']{background-image:linear-gradient(#7f9bb83d 1px,transparent 1px),linear-gradient(90deg,#7f9bb83d 1px,transparent 1px);background-size:14px 14px}
+.auth-chibi-slot{display:contents}
+.auth-chibi-edit{grid-area:chibi;align-self:start;justify-self:end;position:relative;z-index:2;margin-top:calc(var(--bw) * 1.305 - var(--cw) * 1.115 - 50px);display:inline-flex;align-items:center;gap:.3em;border:0;background:var(--stone);color:var(--ink);border-radius:999px;padding:10px 18px;min-height:44px;font:700 14px var(--font-ui);cursor:pointer;white-space:nowrap;transition:background-color .16s cubic-bezier(.22,1,.36,1),transform .16s cubic-bezier(.22,1,.36,1)}
+.auth-chibi-edit:hover{background:#fff}.auth-chibi-edit:active{transform:scale(.97)}
+.auth-chibi-edit:focus-visible{outline:2.5px solid var(--action);outline-offset:3px}
+
+/* Form panel: one stone surface, no card chrome */
+.auth-panel{display:grid;place-items:center;padding:clamp(32px,5vw,72px) clamp(24px,4vw,56px);background:var(--stone)}
+.auth-screen .auth-card{width:100%;max-width:380px;background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+.auth-screen .auth-card h1{font:400 32px/1.12 var(--serif);letter-spacing:-.015em;color:var(--ink);margin:0 0 10px}
+.auth-screen .auth-description{font-size:15px;color:var(--ink-soft);margin:0}
+.auth-screen .auth-form{margin-top:28px;gap:18px}
+.auth-screen .auth-form label{font-size:14px;font-weight:700;color:var(--ink)}
+.auth-screen .auth-form input{font-size:16px;min-height:48px;border:1px solid #c4bdb1;background:#fff;color:var(--ink);transition:border-color .16s}
+.auth-screen .auth-form input:hover{border-color:#9d958a}
+.auth-screen .auth-form input:focus-visible{outline:2.5px solid var(--action);outline-offset:1px;border-color:var(--action)}
+.auth-screen .password-field{border:1px solid #c4bdb1;background:#fff}
+.auth-screen .password-field:focus-within{outline:2.5px solid var(--action);outline-offset:1px;border-color:var(--action)}
+.auth-screen .password-field input,.auth-screen .password-field input:focus-visible{border:0;outline:0;background:none}
+.auth-screen .password-toggle{min-height:44px;min-width:56px;font-size:13px;color:var(--action);border-radius:8px}
+.auth-screen .password-toggle:focus-visible{outline:2.5px solid var(--action);outline-offset:-4px}
+.auth-screen .auth-primary{background:var(--action);min-height:50px;font-size:15px;border-radius:12px;transition:background-color .16s,transform .16s cubic-bezier(.22,1,.36,1)}
+.auth-screen .auth-primary:hover{background:var(--action-hover)}.auth-screen .auth-primary:active{transform:scale(.985)}
+.auth-screen .auth-primary:focus-visible,.auth-screen .auth-guest:focus-visible,.auth-screen .auth-link:focus-visible{outline:2.5px solid var(--action);outline-offset:3px}
+.auth-screen .auth-link{font-size:14px;min-height:44px;color:var(--action);text-underline-offset:4px}
+.auth-screen .auth-switch{font-size:14px;color:var(--ink-soft);margin:2px 0 0}
+.auth-screen .auth-feedback{font-size:14px}
+.auth-screen .auth-hint,.auth-screen .auth-privacy{font-size:13px;color:var(--ink-soft)}
+.auth-screen .auth-guest{margin:30px 0 12px;border:0;background:var(--stone-2);color:var(--ink);min-height:48px;font-size:14px;border-radius:12px;transition:background-color .16s}
+.auth-screen .auth-guest:hover{background:#dfd9ce}
+.auth-screen .auth-guest-warning{border:0;background:#ebe5d9;color:#463c2e;font-size:13px;line-height:1.55;padding:12px 14px;border-radius:10px}
+
+/* Mirrored paper (a drawing of the user's paper, not decoration) */
+.auth-page[data-paper='lined']{background-image:linear-gradient(90deg,transparent 9%,#d77a7a66 9% calc(9% + 1px),transparent 0),repeating-linear-gradient(transparent 0 19px,#7f9bb84a 19px 20px);background-position:0 0,0 28px} /* taste-skill-ignore: drawn lined paper */
+.auth-page[data-paper='dotted']{background-image:radial-gradient(circle,#4a556233 1.2px,transparent 1.8px);background-size:18px 18px} /* taste-skill-ignore: drawn dot paper */
+.auth-page[data-paper='grid']{background-image:linear-gradient(#7f9bb83d 1px,transparent 1px),linear-gradient(90deg,#7f9bb83d 1px,transparent 1px);background-size:18px 18px} /* taste-skill-ignore: drawn grid paper */
+
+/* The user's desk */
 .auth-scene[data-bg='upload']{background-color:#e9dccd;background-position:center}
 .auth-scene[data-bg='upload'][data-fit='cover']{background-size:cover;background-repeat:no-repeat}
 .auth-scene[data-bg='upload'][data-fit='tile']{background-size:320px auto;background-repeat:repeat}
 .auth-scene[data-tone='dark']{--ink:#f6efe3;--ink-soft:#e2d9cb}
-.auth-scene[data-tone='dark'] :is(.auth-brand,.auth-pitch){text-shadow:0 1px 14px #00000080}
-.auth-scene[data-bg='upload'] .auth-pitch{background:#fbf8f3d9;padding:16px 18px;border-radius:14px;backdrop-filter:blur(6px)}
-.auth-scene[data-bg='upload'][data-tone='dark'] .auth-pitch{background:#1d2126b3;text-shadow:none}
-@media (max-width:900px){.auth-stage .auth-page{display:none}.auth-scene[data-bg='upload'] .auth-pitch{padding:8px 10px}}
+.auth-scene[data-bg='upload'] .auth-pitch{background:#f4f2eeeb;padding:16px 18px;border-radius:14px}
+.auth-scene[data-bg='upload'][data-tone='dark'] .auth-pitch{background:#1d2126e6}
+.auth-scene[data-tone='dark'] .auth-chibi-edit{background:#f4f2eeeb;color:#232b35}
+
+@media (max-width:1099px) and (min-width:901px){.auth-screen{grid-template-columns:minmax(0,1.1fr) minmax(380px,.9fr)}}
+@media (min-width:901px) and (max-height:720px){.auth-pitch p:not(.auth-statement){display:none}}
+@media (max-width:900px){
+  .auth-screen{grid-template-columns:1fr;height:auto}
+  .auth-scene{grid-template-rows:auto auto auto;padding:20px 20px 0;gap:12px}
+  .auth-statement{font-size:26px}
+  .auth-stage{--bw:clamp(150px,36vw,270px);--cw:clamp(140px,33vw,250px);padding:8px 0 16px;grid-template-areas:'book chibi' 'edit edit';row-gap:12px}
+  .auth-book{gap:8px;margin-bottom:0}
+  .auth-book-tabs{right:-20px;gap:5px}.auth-book-tabs i{width:14px;height:26px}
+  .auth-chibi{margin-left:-9vw}
+  .auth-chibi-edit{grid-area:edit;justify-self:center;align-self:start;margin-top:0;font-size:14px;padding:8px 16px}
+  .auth-panel{padding:32px 20px 44px;place-items:start center}
+}
+@media (max-width:560px){.auth-screen .auth-card h1{font-size:26px}.auth-pitch p:not(.auth-statement){display:none}.auth-statement{font-size:23px;margin:0}.auth-edit-long{display:none}}

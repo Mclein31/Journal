@@ -8,6 +8,19 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Smoother, more realistic page turns; phone/tablet login scroll fix
+- Cause of dropped frames (measured with long-animation-frame entries at 4× CPU throttle): every
+  turning face was a clip-path triangle, i.e. a GPU mask per face. Stalls had no script time.
+- Paper model is now developable (cylindrical): curvature varies only across the page, so each
+  full-height strip is flat and renders as one plain rectangle — no clip-path, no masks. Grab height
+  and vertical pull shear the free edge instead of twisting it (`src/book/pageCurl.ts`).
+- 24 strips per turn (10 per riffle leaf); half-Lambert lighting averaged across neighbouring strips
+  (no visible bands); cast shadow follows the leaf's projected edge onto the page beneath; riffled
+  blank pages now show the paper's lines/dots/grid.
+- Before → after at 4× throttle: single turns 6/6 with a 50–77 ms stall → 0; 8 tab jumps 8 stalls
+  (622 ms, worst 101 ms) → 0. Headless Chromium measurement; real-device check still recommended.
+- Login on phones/tablets scrolls itself (body never scrolls), so Continue on this device is reachable.
+
 ## 2026-11-05 — Login audit and polish (Impeccable + tasteskill)
 - Audited with tasteskill inspector/lint (1440/768/390, production build) and the Impeccable detector.
   Before: 4 FAIL / 8 WARN. After: 1 FAIL / 3 WARN, all defended (user's own desk/paper drawings; the

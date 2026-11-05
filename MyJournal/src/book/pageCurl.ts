@@ -1,5 +1,5 @@
 /* Paper surface math, independent of DOM/layout. The spine stays fixed while the
-   bend concentrates around the original grab point, then relaxes onto the stack. */
+   bend concentrates toward the lifted edge, then relaxes onto the stack. */
 export interface Point3 { x: number; y: number; z: number }
 export interface PaperPose {
   progress: number;
@@ -12,29 +12,38 @@ export interface PaperPose {
 
 export const unit = (n: number): number => Math.max(0, Math.min(1, Number.isFinite(n) ? n : 0));
 
+/** Shear of the free edge: a vertical pull plus a small lean toward the grabbed corner. */
+function edgeShear(pose: PaperPose): number {
+  const pull = Math.max(-.35, Math.min(.35, pose.pullY ?? 0));
+  return Math.max(-.35, Math.min(.35, pull - (.5 - unit(pose.grab.y)) * .06));
+}
+
+/** Paper is developable: it bends like a cylinder whose fold lines run the page's full height.
+    Curvature varies only across the page (strongest near the lifted edge), so every full-height
+    strip stays flat. That is how real paper behaves, and it lets the DOM mesh use plain rectangles
+    (no clip-path masks, which made turns drop frames). The grab height and vertical pull shear the
+    free edge instead of twisting it. */
 export function paperPoint(x: number, y: number, pose: PaperPose): Point3 {
   const p = unit(pose.progress);
   const forward = pose.dir === 1;
   if (p === 0 || p === 1) return { x: x * pose.width * ((forward ? p === 0 : p === 1) ? 1 : -1), y: y * pose.height, z: 0 };
   const angle = Math.PI * (forward ? p : 1 - p);
   const flex = Math.sin(Math.PI * p);
-  const nearGrabY = Math.exp(-Math.pow((y - unit(pose.grab.y)) / .38, 2));
+  const gx = unit(pose.grab.x);
   let px = 0, pz = 0;
   const steps = 20;
   const dx = x / steps;
   for (let i = 0; i < steps; i++) {
     const at = (i + .5) * dx;
-    const nearGrabX = Math.exp(-Math.pow((at - unit(pose.grab.x)) / .44, 2));
-    const tangent = angle + pose.dir * .72 * flex * nearGrabY * nearGrabX;
+    const tangent = angle + pose.dir * .72 * flex * Math.exp(-Math.pow((at - gx) / .44, 2));
     px += Math.cos(tangent) * dx * pose.width;
     pz += Math.sin(tangent) * dx * pose.width;
   }
-  const nearGrabX = Math.exp(-Math.pow((x - unit(pose.grab.x)) / .44, 2));
-  const pull = Math.max(-.35, Math.min(.35, pose.pullY ?? 0));
+  const nearGrabX = Math.exp(-Math.pow((x - gx) / .44, 2));
   return {
     x: px,
-    y: y * pose.height + pull * pose.height * flex * Math.pow(x, 1.4) * nearGrabY,
-    z: pz + .07 * pose.width * flex * x * nearGrabX * nearGrabY,
+    y: y * pose.height + edgeShear(pose) * pose.height * flex * Math.pow(x, 1.4),
+    z: pz + .05 * pose.width * flex * x * nearGrabX,
   };
 }
 

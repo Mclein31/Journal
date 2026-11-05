@@ -156,5 +156,9 @@ export function blankPage(doc: BookDoc, side: 'left' | 'right'): HTMLElement {
   const el = document.createElement('div');
   el.className = `page page-${side}`;
   el.dataset.paper = doc.book.paperType;
+  // An empty sheet still carries the paper pattern, so riffled pages show their lines/dots/grid.
+  const sheet = document.createElement('div');
+  sheet.className = 'page-sheet';
+  el.appendChild(sheet);
   return el;
 }

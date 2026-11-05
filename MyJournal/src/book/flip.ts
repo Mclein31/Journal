@@ -124,12 +124,11 @@ function copyPage(source: HTMLElement): HTMLElement {
   return copy;
 }
 
-interface Tile { face: HTMLElement; content: HTMLElement; col: number; row: number; back: boolean; second: boolean }
+interface Tile { face: HTMLElement; content: HTMLElement; col: number; row: number; back: boolean }
 function sizeTile(tile: Tile, width: number, height: number, cols: number, rows: number) {
   const b = TILE_BLEED, w = width / cols, h = height / rows, fw = w + 2 * b, fh = h + 2 * b;
+  // A plain rectangle: the paper model keeps every strip flat, so no clip-path (a GPU mask per face).
   Object.assign(tile.face.style, { inset: 'auto', left: `${-b}px`, top: `${-b}px`, width: `${fw}px`, height: `${fh}px` });
-  const points = tile.second ? [[fw, -2 * b * h / w], [fw, fh], [-2 * b * w / h, fh]] : [[0, 0], [fw + 2 * b * w / h, 0], [0, fh + 2 * b * h / w]];
-  tile.face.style.clipPath = `polygon(${points.map(([x, y]) => `${tile.back ? fw - x : x}px ${y}px`).join(',')})`;
   const sourceCol = tile.back ? cols - 1 - tile.col : tile.col;
   for (const node of [tile.content]) Object.assign(node.style, {
     inset: 'auto', left: `${b - sourceCol * w}px`, top: `${b - tile.row * h}px`, width: `${width}px`, height: `${height}px`,
@@ -141,8 +140,10 @@ const LIGHT = (() => { const l = Math.hypot(-.35, -.25, 1); return { x: -.35 / l
 function lightFor(nx: number, ny: number, nz: number): string {
   if (nz < 0) { nx = -nx; ny = -ny; nz = -nz; } // the back face is the side being seen
   const dot = nx * LIGHT.x + ny * LIGHT.y + nz * LIGHT.z;
-  const b = Math.max(.62, Math.min(1.07, .6 + .4 * (dot / LIGHT.z)));
-  return b > .995 && b < 1.005 ? '' : `brightness(${b.toFixed(2)})`;
+  // Half-Lambert: paper scatters light, so a turning sheet dims softly instead of going grey, and
+  // neighbouring strips differ by a percent or two (no visible bands between them).
+  const b = Math.max(.8, Math.min(1.04, .78 + .24 * (dot / LIGHT.z)));
+  return b > .9985 && b < 1.0015 ? '' : `brightness(${b.toFixed(3)})`;
 }
 
 function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 'in' | 'out' | undefined, options: PaperOptions) {
@@ -154,11 +155,10 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
   let width = Math.max(1, leaf.offsetWidth), height = Math.max(1, leaf.offsetHeight);
   const grab = { x: unit(options.grab?.x ?? .92), y: unit(options.grab?.y ?? .5) };
   leaf.dataset.grabX = String(grab.x); leaf.dataset.grabY = String(grab.y);
-  // Smoothness: full-height strips. The bend runs across the page, so 8 columns keep the curl while
-  // cutting page copies/compositor layers from 72 to 32 (riffle leaves: 16). Each strip is still two
-  // exact affine triangles, so twisted (pulled) poses meet without cracks.
-  const cols = options.riffle ? 4 : 8, rows = 1;
-  const facets: { node: HTMLElement; col: number; row: number; second: boolean; faces: HTMLElement[]; lit: string }[] = [];
+  // Full-height flat strips (see paperPoint): one rectangle per strip, front + back face each.
+  // Many narrow strips keep the curl round and the per-strip lighting steps invisible.
+  const cols = options.riffle ? 10 : 24, rows = 1;
+  const facets: { node: HTMLElement; col: number; row: number; faces: HTMLElement[]; lit: string }[] = [];
   const faceEls: HTMLElement[] = [];
   const tiles: Tile[] = [];
   let shadow: HTMLElement | undefined;
@@ -167,10 +167,9 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
     leaf.style.setProperty('--grab-y', `${grab.y * 100}%`);
     shadow = document.createElement('div');
     shadow.className = 'leaf-floor-shadow'; shadow.setAttribute('aria-hidden', 'true');
-    shadow.style.transformOrigin = dir === 1 ? 'left center' : 'right center';
-    shadow.style.left = stage.closest<HTMLElement>('.book')?.dataset.mode === 'single' ? '0' : dir === 1 ? '50%' : '0';
+    if (stage.closest<HTMLElement>('.book')?.dataset.mode === 'single') shadow.dataset.single = '';
     stage.insertBefore(shadow, leaf);
-    for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) for (const second of [false, true]) {
+    for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
       const facet = document.createElement('div');
       facet.className = 'leaf-facet';
       facet.style.width = `${width / cols}px`; facet.style.height = `${height / rows}px`;
@@ -180,18 +179,18 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
         face.className = `leaf-face leaf-facet-face ${back ? 'leaf-back' : 'leaf-front'}`;
         face.style.transform = back ? 'rotateY(180deg) translateZ(.025px)' : 'translateZ(.025px)';
         const content = copyPage(back ? faces.back : faces.front);
-        const tile = { face, content, col, row, back, second };
+        const tile = { face, content, col, row, back };
         sizeTile(tile, width, height, cols, rows); tiles.push(tile);
         face.append(content); facet.appendChild(face);
         faceEls.push(face); pair.push(face);
       }
-      leaf.appendChild(facet); facets.push({ node: facet, col, row, second, faces: pair, lit: '' });
+      leaf.appendChild(facet); facets.push({ node: facet, col, row, faces: pair, lit: '' });
     }
   } else {
     faceEls.push(...leaf.querySelectorAll<HTMLElement>('.leaf-face'));
     leaf.querySelector<HTMLElement>('.leaf-back')!.style.display = 'none';
   }
-  let lastProgress = 0, lastPull = 0, lastZ = '', lastOpacity = '';
+  let lastProgress = 0, lastPull = 0, lastZ = '', lastOpacity = '', lastSide = '';
   const paint = (progress: number, pullY: number) => {
     lastProgress = progress; lastPull = pullY;
     const p = unit(progress), flex = Math.sin(p * Math.PI);
@@ -207,16 +206,28 @@ function paperRenderer(stage: HTMLElement, faces: LeafFaces, dir: 1 | -1, fade: 
     }
     const pose: PaperPose = { progress: p, dir, width, height, grab, pullY };
     const grid = paperGrid(pose, cols, rows);
+    const normals: number[][] = [];
     for (const facet of facets) {
       const { col, row } = facet;
-      const matrix = facetMatrix([grid[row][col], grid[row][col + 1], grid[row + 1][col], grid[row + 1][col + 1]], facet.second, width / cols, height / rows);
+      const matrix = facetMatrix([grid[row][col], grid[row][col + 1], grid[row + 1][col], grid[row + 1][col + 1]], false, width / cols, height / rows);
       facet.node.style.transform = `matrix3d(${matrix.map((n) => n.toFixed(5)).join(',')})`;
-      // paper lighting from the strip's own angle (light from upper-left): turning-away strips
-      // darken, the curl's crest catches a little highlight. Filter on the face = no repaint.
-      const lit = lightFor(matrix[8], matrix[9], matrix[10]);
-      if (lit !== facet.lit) { facet.lit = lit; for (const f of facet.faces) f.style.filter = lit; }
+      normals.push([matrix[8], matrix[9], matrix[10]]);
     }
-    if (shadow) { shadow.style.opacity = String(.24 * flex); shadow.style.transform = `scaleX(${.3 + .7 * flex})`; }
+    // Paper lighting (light from upper-left). Each strip is lit from its neighbours' averaged angle,
+    // so brightness ramps smoothly across the curl instead of stepping strip by strip.
+    // filter on the composited face = no repaint.
+    facets.forEach((facet, i) => {
+      const a = normals[Math.max(0, i - 1)], b = normals[i], c = normals[Math.min(normals.length - 1, i + 1)];
+      const lit = lightFor(.25 * a[0] + .5 * b[0] + .25 * c[0], .25 * a[1] + .5 * b[1] + .25 * c[1], .25 * a[2] + .5 * b[2] + .25 * c[2]);
+      if (lit !== facet.lit) { facet.lit = lit; for (const f of facet.faces) f.style.filter = lit; }
+    });
+    if (shadow) {
+      // The lifted leaf shades the page it hovers over, from the spine out to its projected edge.
+      const side = (p < .5) === (dir === 1) ? 'right' : 'left';
+      if (side !== lastSide) { shadow.dataset.side = side; lastSide = side; }
+      shadow.style.opacity = (.5 * flex).toFixed(3);
+      shadow.style.transform = `scaleX(${Math.min(1, Math.abs(Math.cos(Math.PI * p)) + .1).toFixed(4)})`;
+    }
     if (fade) {
       const opacity = (fade === 'out' ? 1 - unit((p - .75) / .25) : unit(p / .2)).toFixed(3);
       if (opacity !== lastOpacity) { lastOpacity = opacity; for (const face of faceEls) face.style.opacity = opacity; }

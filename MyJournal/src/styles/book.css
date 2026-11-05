@@ -138,8 +138,9 @@
 .leaf-facet { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform-style: preserve-3d; will-change: transform; pointer-events: none; }
 .leaf-facet-face { overflow: hidden; }
 .leaf-paper .leaf-shade { background: radial-gradient(ellipse at var(--grab-x, 90%) var(--grab-y, 50%), #fff9ed80, transparent 35%), linear-gradient(90deg, #3822151a, #38221573 55%, #3822151a); }
-.leaf-floor-shadow { position: absolute; top: 0; width: 50%; height: 100%; z-index: 40; opacity: 0; pointer-events: none; background: radial-gradient(ellipse at 12% 50%, #2e2924d9, #2e292459 34%, transparent 72%); will-change: transform, opacity; }
-.book[data-mode='single'] .leaf-floor-shadow { width: 100%; }
+.leaf-floor-shadow { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; z-index: 40; opacity: 0; pointer-events: none; transform-origin: left center; background: linear-gradient(to right, #2e292466, #2e292430 62%, #2e292412 88%, transparent); will-change: transform, opacity; }
+.leaf-floor-shadow[data-side='left'] { left: 0; transform-origin: right center; background: linear-gradient(to left, #2e292466, #2e292430 62%, #2e292412 88%, transparent); }
+.leaf-floor-shadow[data-single] { left: 0; width: 100%; transform-origin: left center; background: linear-gradient(to right, #2e292466, #2e292430 62%, #2e292412 88%, transparent); }
 .leaf-reduced .leaf-shade { display: none; }
 
 /* ── Page edges (thickness = pages behind / ahead) ──────── */

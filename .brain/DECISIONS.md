@@ -210,3 +210,8 @@ glyphs as icons, no shadows/blur/outlined boxes on UI, tone steps between surfac
 cover and paper are illustrations of the user's own journal and may use gradients/patterns. Book and
 character sizes come from `--bw`/`--cw` on `.auth-stage` (viewport-height aware); keep them in sync
 with the pill offset formula. Re-run `inspect.mjs --app` on the production build after changes.
+
+## 2026-11-05 — Page-turn mesh: flat strips, never clip-path
+Turning paper is a developable surface: keep `paperPoint` curvature a function of x only so every
+full-height strip stays a parallelogram (tested). Do not reintroduce per-face clip-path triangles or
+y-dependent bending; each clipped face became a GPU mask and caused 50–100 ms stalls per turn.

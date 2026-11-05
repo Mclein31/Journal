@@ -52,14 +52,25 @@ test('the complete spine stays fixed throughout forward and backward bends', () 
   }
 });
 
-test('bending follows the grabbed height and mirrors cleanly for opposite vertical pulls', () => {
+test('paper bends like a developable sheet: full-height strips stay flat, and grab height and pull mirror cleanly', () => {
+  const flat = (a, b, c, d, label) => {
+    // A full-height strip is a parallelogram (d = b + c - a), so it renders as one unclipped rectangle.
+    pointClose(d, { x: b.x + c.x - a.x, y: b.y + c.y - a.y, z: b.z + c.z - a.z }, label);
+  };
+  for (const dir of [1, -1]) for (const progress of [.08, .3, .5, .71, .93]) {
+    const p = pose(progress, dir, { x: .8, y: .2 }, .17);
+    for (let col = 0; col < 24; col++) {
+      const [x0, x1] = [col / 24, (col + 1) / 24];
+      flat(paperPoint(x0, 0, p), paperPoint(x1, 0, p), paperPoint(x0, 1, p), paperPoint(x1, 1, p), `strip ${col}`);
+    }
+    const grid = paperGrid(p, 24, 1);
+    for (let col = 0; col < 24; col++) flat(grid[0][col], grid[0][col + 1], grid[1][col], grid[1][col + 1], `constrained strip ${col}`);
+  }
   for (const dir of [1, -1]) {
     const top = pose(.42, dir, { x: .8, y: .15 }, -.2);
     const bottom = pose(.42, dir, { x: .8, y: .85 }, .2);
-    const nearTop = paperPoint(.9, .15, top);
-    const farFromTop = paperPoint(.9, .15, bottom);
-    assert.ok(Math.hypot(nearTop.x - farFromTop.x, nearTop.z - farFromTop.z) > 1,
-      'changing the grab height must visibly change deformation at the same page point');
+    assert.ok(Math.abs(paperPoint(.9, .15, top).y - paperPoint(.9, .15, bottom).y) > 1,
+      'changing the grab height and pull must visibly move the free edge');
     for (const x of [.1, .5, 1]) for (const y of [0, .2, .5, .8, 1]) {
       const a = paperPoint(x, y, top);
       const b = paperPoint(x, 1 - y, bottom);

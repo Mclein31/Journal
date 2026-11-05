@@ -23,6 +23,7 @@ import { buildLayout, type Layout, type Mode } from './layout';
 import { blankPage, renderPage, renderSpreadCanvas } from './PageView';
 import { renderTabs } from './Tabs';
 import { clearLeaves, dragLeaf, turnLeaves, type DragLeaf, type LeafFaces } from './flip';
+import { dragProgress } from './pageCurl';
 import { addPages, openSectionManager } from './SectionManager';
 import { isMuted, playCover, playFlip, playTab, setMuted } from '../audio/paper';
 
@@ -82,6 +83,7 @@ interface View {
   mode: Mode;
   busy: boolean;
   queued: number | null;
+  target: number | null;
   dirty: boolean;
   layout: Layout;
 }
@@ -110,6 +112,7 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     mode: preferred,
     busy: false,
     queued: null,
+    target: null,
     dirty: false,
     layout: buildLayout(initial),
   };
@@ -118,6 +121,11 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   const page = (i: number | undefined, side: 'left' | 'right', withElements = true) => renderPage(getDoc(), v.layout, i, side, withElements);
   const blank = (side: 'left' | 'right') => blankPage(getDoc(), side);
   const clamp = (k: number) => Math.max(0, Math.min(v.layout.spreadCount(v.mode) - 1, k));
+  const navigationBase = () => v.queued ?? v.target ?? v.spread;
+  function updateNavigationState() {
+    prevBtn.disabled = navigationBase() <= 0;
+    nextBtn.disabled = navigationBase() >= v.layout.spreadCount(v.mode) - 1;
+  }
 
   function currentSection(): Section | undefined {
     const { left, right } = v.layout.spreadPages(v.spread, v.mode);
@@ -173,13 +181,14 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     renderRibbon();
     $<HTMLButtonElement>('[data-act="undo"]').disabled = !canUndo();
     $<HTMLButtonElement>('[data-act="redo"]').disabled = !canRedo();
-    prevBtn.disabled = v.spread === 0;
-    nextBtn.disabled = v.spread >= v.layout.spreadCount(v.mode) - 1;
+    updateNavigationState();
   }
 
   function setBusy(busy: boolean) {
     if (busy) canvas?.commitEditing();
     v.busy = busy;
+    if (!busy) v.target = null;
+    updateNavigationState();
     stage.dataset.turning = String(busy);
     if (busy && v.mode === 'spread') {
       const { left, right } = v.layout.spreadPages(v.spread, v.mode);
@@ -269,13 +278,17 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     return leaves;
   }
 
+  interface Turn { ctl: DragLeaf; dir: 1 | -1; target: number; width: number; height: number; grabX: number }
+  let settlingTurn: Turn | null = null;
+
   async function goTo(target: number) {
     if (desk.dataset.closed === 'true') return;
     canvas?.deselect();
     target = clamp(target);
-    if (v.busy) { v.queued = target; return; }
+    if (v.busy) { v.queued = target; updateNavigationState(); return; }
     navigated = true;
     if (target === v.spread) return;
+    v.target = target;
     setBusy(true);
     root.querySelector<HTMLElement>('.ribbon')!.hidden = true; // back after the turn's render()
     const dir: 1 | -1 = target > v.spread ? 1 : -1;
@@ -297,7 +310,11 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
       for (let i = 0; i < n; i++) playFlip(i * 70, dur, i === 0 || i === n - 1 ? 1 : 0.55);
       // phones: the turned page swings past the book's edge, so fade it instead of letting it vanish
       const fade = v.mode === 'single' ? (dir === 1 ? 'out' : 'in') : undefined;
-      await turnLeaves({ stage, dir, leaves, durationMs: dur, staggerMs: 70, fade });
+      const finished = await turnLeaves({ stage, dir, leaves, durationMs: dur, staggerMs: 70, fade,
+        onLeaf: (ctl) => { settlingTurn = { ctl, dir, target, width: slotR.getBoundingClientRect().width, height: stage.getBoundingClientRect().height, grabX: ctl.grab.x }; },
+      });
+      if (!finished) return; // A fresh drag now owns the same visible page and its eventual landing.
+      settlingTurn = null;
       v.spread = target;
       render();
       clearLeaves(stage);
@@ -339,23 +356,32 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     const s = currentSection();
     if (s) { canvas?.deselect(); addPages(s.id); const pages = v.layout.pages.filter((p) => p.sectionId === s.id); const index = v.layout.pages.findIndex((p) => p.id === pages.at(-2)?.id); if (index >= 0) void goTo(v.layout.spreadOfPage(index, v.mode)); toast('Two fresh pages added'); }
   });
-  prevBtn.addEventListener('click', () => void goTo(v.spread - 1));
-  nextBtn.addEventListener('click', () => void goTo(v.spread + 1));
+  prevBtn.addEventListener('click', () => void goTo(navigationBase() - 1));
+  nextBtn.addEventListener('click', () => void goTo(navigationBase() + 1));
   addEventListener('keydown', (e) => {
     const t = e.target as HTMLElement;
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || t.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(t.tagName) || document.querySelector('dialog[open], .tear-tool, .frame-menu') || stage.querySelector('.el.is-selected')) return;
-    if (e.key === 'ArrowRight') { e.preventDefault(); void goTo(v.spread + 1); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); void goTo(v.spread - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); void goTo(navigationBase() + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); void goTo(navigationBase() - 1); }
   });
   // drag a page to turn it by hand (never when grabbing an element on the page)
-  interface Turn { ctl: DragLeaf; dir: 1 | -1; target: number; width: number }
-  interface Drag { x: number; y: number; id: number; lastX: number; lastT: number; vx: number; turn?: Turn }
+  interface Drag { x: number; y: number; id: number; lastX: number; lastY: number; lastT: number; vx: number; startProgress: number; pullOrigin: number; turn?: Turn }
   let drag: Drag | null = null;
-  const progressOf = (d: Drag, x: number) => d.turn ? Math.min(1, Math.max(0, (-d.turn.dir * (x - d.x)) / (d.turn.width * 1.6))) : 0;
+  const progressOf = (d: Drag, x: number) => d.turn ? dragProgress(-d.turn.dir * (x - d.x), d.turn.width, d.turn.grabX, d.startProgress) : 0;
 
   stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (settlingTurn && v.busy) {
+      const turn = settlingTurn;
+      const held = turn.ctl.hold();
+      settlingTurn = null;
+      drag = { x: e.clientX, y: e.clientY, id: e.pointerId, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp, vx: 0, startProgress: held.progress, pullOrigin: held.pullY, turn };
+      stage.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      return;
+    }
     if (v.busy || (e.target as HTMLElement).closest('.el, .el-ui')) return;
-    drag = { x: e.clientX, y: e.clientY, id: e.pointerId, lastX: e.clientX, lastT: e.timeStamp, vx: 0 };
+    drag = { x: e.clientX, y: e.clientY, id: e.pointerId, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp, vx: 0, startProgress: 0, pullOrigin: 0 };
   });
 
   stage.addEventListener('pointermove', (e) => {
@@ -364,12 +390,20 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     const dt = Math.max(1, e.timeStamp - drag.lastT);
     drag.vx = 0.8 * ((e.clientX - drag.lastX) / dt) + 0.2 * drag.vx; // smoothed px/ms
     drag.lastX = e.clientX;
+    drag.lastY = e.clientY;
     drag.lastT = e.timeStamp;
     if (!drag.turn) {
       if (Math.abs(dx) < 12 || Math.abs(dx) < Math.abs(dy) * 1.2) return; // not a horizontal drag (yet)
       const dir: 1 | -1 = dx < 0 ? 1 : -1;
       const target = v.spread + dir;
       if (v.busy || target < 0 || target > v.layout.spreadCount(v.mode) - 1) { drag = null; return; }
+      const sourceSlot = dir === 1 || v.mode === 'single' ? slotR : slotL;
+      const bounds = sourceSlot.getBoundingClientRect();
+      const grab = {
+        x: Math.max(.12, Math.min(1, dir === 1 || v.mode === 'single' ? (drag.x - bounds.left) / bounds.width : (bounds.right - drag.x) / bounds.width)),
+        y: Math.max(0, Math.min(1, (drag.y - bounds.top) / bounds.height)),
+      };
+      v.target = target;
       setBusy(true);
       canvas?.deselect();
       root.querySelector<HTMLElement>('.ribbon')!.hidden = true;
@@ -379,9 +413,9 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
       if (dir === 1) slotR.replaceChildren(page(dst.right, 'right'));
       else if (v.mode === 'spread') slotL.replaceChildren(page(dst.left, 'left'));
       const fade = v.mode === 'single' ? (dir === 1 ? 'out' : 'in') : undefined;
-      drag.turn = { ctl: dragLeaf(stage, faces, dir, fade), dir, target, width: slotR.getBoundingClientRect().width };
+      drag.turn = { ctl: dragLeaf(stage, faces, dir, fade, { grab }), dir, target, width: bounds.width, height: bounds.height, grabX: grab.x };
     }
-    drag.turn.ctl.set(progressOf(drag, e.clientX));
+    drag.turn.ctl.set(progressOf(drag, e.clientX), drag.pullOrigin + (e.clientY - drag.y) / Math.max(1, drag.turn.height));
   });
 
   async function endDrag(e: PointerEvent) {
@@ -391,10 +425,18 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
     if (!d.turn) return;
     const { ctl, dir, target } = d.turn;
     const progress = progressOf(d, e.clientX);
-    const flick = -dir * d.vx > 0.45; // released while moving fast in the turning direction
-    const complete = e.type !== 'pointercancel' && (progress > 0.5 || flick);
+    // A flick must still be moving at release: a stationary hold sheds its old momentum.
+    const idle = Math.max(0, e.timeStamp - d.lastT);
+    const vx = idle > 100 ? 0 : d.vx * Math.exp(-idle / 80);
+    const velocity = -dir * vx * 1000 / (Math.PI * d.turn.width * Math.max(.12, d.turn.grabX) * Math.max(.18, Math.sin(progress * Math.PI)));
+    const complete = e.type !== 'pointercancel' && progress + velocity * .12 > .5;
+    v.target = complete ? target : v.spread;
+    updateNavigationState();
     if (complete) playFlip(0, Math.max(220, (1 - progress) * 650), 0.9);
-    await ctl.finish(complete);
+    settlingTurn = d.turn;
+    const finished = await ctl.finish(complete, 700, e.type === 'pointercancel' ? 0 : velocity);
+    if (!finished) return;
+    if (settlingTurn === d.turn) settlingTurn = null;
     if (complete) v.spread = target;
     render();
     clearLeaves(stage);
@@ -406,7 +448,21 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
 
+  const resizeTurn = () => {
+    const turn = drag?.turn ?? settlingTurn;
+    if (!turn) return;
+    turn.ctl.resize();
+    turn.width = Math.max(1, slotR.getBoundingClientRect().width);
+    turn.height = Math.max(1, stage.getBoundingClientRect().height);
+    if (drag?.turn) {
+      const pose = turn.ctl.hold();
+      drag.startProgress = pose.progress; drag.pullOrigin = pose.pullY;
+      drag.x = drag.lastX; drag.y = drag.lastY; drag.vx = 0;
+    }
+  };
+  addEventListener('resize', resizeTurn);
   narrow.addEventListener('change', () => {
+    resizeTurn();
     canvas?.deselect();
     if (v.busy) { v.dirty = true; return; }
     render();

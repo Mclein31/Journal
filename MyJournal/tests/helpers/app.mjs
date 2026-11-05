@@ -8,10 +8,18 @@ import vm from 'node:vm';
 
 // DOM integration harness, not a rendering engine. Layout, native image decoding,
 // animations, audio, and install prompts require separate browser/device QA.
-export async function appHarness({ single = false, stored = {} } = {}) {
+export async function appHarness({ single = false, stored = {}, manualFrames = false } = {}) {
   const { document, window } = parseHTML('<html><head></head><body><main id="app"></main></body></html>');
   const storage = new Map(Object.entries(stored));
   const events = new window.EventTarget();
+  const frames = new Map();
+  let frameTime = 0, frameId = 0;
+  const advanceFrames = (ms = 16) => {
+    frameTime += ms;
+    const callbacks = [...frames.values()];
+    frames.clear();
+    for (const callback of callbacks) callback(frameTime);
+  };
   let active = document.body;
   Object.defineProperty(document, 'activeElement', { get: () => active });
   window.HTMLElement.prototype.focus = function () { if (active !== this) { active?.dispatchEvent(new window.Event('blur')); active = this; } };
@@ -41,10 +49,14 @@ export async function appHarness({ single = false, stored = {} } = {}) {
     addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events),
     CustomEvent: window.CustomEvent, HTMLElement: window.HTMLElement, HTMLInputElement: window.HTMLInputElement,
     Blob, File, URL, structuredClone, AbortController, setTimeout, clearTimeout,
-    innerWidth: 1200, innerHeight: 900, performance, matchMedia,
+    innerWidth: 1200, innerHeight: 900, performance: manualFrames ? { now: () => frameTime } : performance, matchMedia,
     getComputedStyle: () => ({ width: '400px' }), getSelection: () => selection,
-    requestAnimationFrame: (fn) => { queueMicrotask(() => fn(performance.now() + 1000)); return 1; }, cancelAnimationFrame() {},
-    ResizeObserver: class { observe() {} },
+    requestAnimationFrame: (fn) => {
+      if (manualFrames) { const id = ++frameId; frames.set(id, fn); return id; }
+      queueMicrotask(() => fn(performance.now() + 1000)); return 1;
+    },
+    cancelAnimationFrame(id) { frames.delete(id); },
+    ResizeObserver: class { observe() {} disconnect() {} },
     localStorage: { getItem: (k) => storage.get(k) ?? null, setItem: (k, v) => storage.set(k, v) },
     sessionStorage: { getItem: (k) => storage.get(`session:${k}`) ?? null, setItem: (k,v) => storage.set(`session:${k}`,v) },
     navigator: { userAgent: 'unit-test', platform: 'test', maxTouchPoints: 0 }, confirm: () => true,
@@ -85,5 +97,5 @@ export async function appHarness({ single = false, stored = {} } = {}) {
     return e;
   };
   const settle = async () => { for (let i=0;i<12;i++) await new Promise((resolve) => setImmediate(resolve)); };
-  return { get, root, store, document, window, storage, fire, settle, media, captured, events };
+  return { get, root, store, document, window, storage, fire, settle, media, captured, events, frames, advanceFrames };
 }

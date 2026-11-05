@@ -12,10 +12,11 @@ last_updated: 2026-11-04
 - `DATABASE_URL` (pooled, runtime) / `DATABASE_URL_UNPOOLED` (migrations) — Neon
 - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_S3_ENDPOINT` — Cloudflare R2
 - `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` — login sessions
-- `RESEND_API_KEY`, `EMAIL_FROM` — verification + password reset emails
+- `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` — planned Gmail verification + password reset emails. `SMTP_PASS` is a Google App Password, not the account login password. See `MyJournal/SMTP_SETUP.md`.
 - R2 bucket must stay private (no public URL)
 - `APP_ORIGIN` (CORS), `VITE_API_BASE_URL` (only var exposed to the browser)
 - Only `VITE_*` vars reach the browser. Never prefix a secret with `VITE_`.
+- Production uses Neon's `production` branch, `R2_BUCKET_NAME=journal-assets-prod`, and `VITE_API_BASE_URL=/api`. Both origin fields use `https://dear-days.mcleinonza0531.workers.dev`. Email/auth/backend services are deployed and verified; see DEPLOYMENT.md. Native R2 bindings handle media; S3 keys remain local for explicit maintenance/test cleanup.
 
 ## v1 facts still relevant
 - v1 localStorage keys: `mlw_t` tasks, `mlw_j` journal entries, `mlw_p` prefs, `mlw_g` gallery meta; IndexedDB `mlw_db` store `photos` holds blobs.

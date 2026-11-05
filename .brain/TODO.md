@@ -8,8 +8,10 @@ last_updated: 2026-11-05
 
 # TODO (details per phase in [PLAN.md](PLAN.md))
 
-## Blocked on user
-- [ ] Fill values in `MyJournal/.env` (Neon + R2 + auth + Resend email) — needed only by Phase 10
+## Production service setup
+- [x] Populate production values in ignored `MyJournal/.env` (Neon `production` + private R2 `journal-assets-prod` + auth + Gmail SMTP + deployed HTTPS origin). Values and deployed runtime secrets are configured; live integration and delivery verified. See `MyJournal/SMTP_SETUP.md`.
+- [x] Deploy the current frontend to https://dear-days.mcleinonza0531.workers.dev using Worker static assets; see [DEPLOYMENT.md](DEPLOYMENT.md).
+- [x] Implement and verify backend wiring, additive migrations, real Gmail email delivery, verified login/reset, private R2 uploads, and CAS cloud sync (Phase 10).
 
 ## Now
 - [x] Phase 0 — scaffold, schema, store, IndexedDB, seed (verified: reload keeps state)
@@ -34,8 +36,8 @@ last_updated: 2026-11-05
 - [x] Carry-over across the spine (user request): items past the spine are drawn on the facing page too (aligned, under the gutter crease); drag across to move an item to the other page
 
 ## Later
-- [ ] Phase 9 — Login screen + eye-tracking customizable chibi
-- [ ] Phase 10 — Neon + R2 + Better Auth + sync
+- [~] Phase 9 — Login/signup/verify/reset screens implemented and browser-tested; eye-tracking customizable chibi remains pending
+- [x] Phase 10 — Neon + private R2 + Better Auth + Gmail verification/reset + conflict-safe sync, backups and account deletion; live-tested
 - [ ] Phase 11 — v1 data import, QA matrix, deploy
 
 ## Backlog
@@ -95,3 +97,11 @@ last_updated: 2026-11-05
 - [x] Resize-safe facets/crops and lifecycle cleanup; delayed uploaded art preserved
 - [x] Reduced-motion dragging uses flat fade; all 152 tests and production/PWA build pass
 - [ ] Native Safari/Chrome motion/compositing/seams, decorated-page performance and real touch/device QA
+
+## Accounts, sync and self-hosted fonts (2026-11-05)
+- [x] Account-scoped storage and draft keys; explicit guest import; remapped conflict copies
+- [x] Revision CAS, idempotent retries, offline reload recovery, independent bookmark/asset sync
+- [x] Owner-scoped media, upload quota/format checks, serialized originals, retryable deletion gate
+- [x] Real Gmail delivery, verification and reset links, session revocation, two-session and two-browser journal sync
+- [x] Desktop/mobile login rendering and closed-book Account access in isolated headless Chromium
+- [x] Bundle all 33 font choices + Korean fallback with licenses; same-origin loader and offline font precache

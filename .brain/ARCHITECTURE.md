@@ -8,6 +8,20 @@ last_updated: 2026-11-05
 
 # Architecture — v2 Customizable 3D Journal
 
+## Current hosting (2026-11-05)
+Dear Days runs at https://dear-days.mcleinonza0531.workers.dev on one Cloudflare
+Worker: Hono API plus Vite static assets. `MyJournal/wrangler.jsonc` binds private
+R2 `journal-assets-prod` as `JOURNAL_FILES`; runtime secrets are separate from the
+public build. `/api/*` runs through the Worker and is excluded from the service
+worker navigation fallback. See [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Fonts
+All 33 selectable families and the Noto Sans KR fallback are self-hosted under
+`public/fonts/`. Local CSS/WOFF2 files, package versions and original licenses are
+committed. `scripts/vendor-fonts.ts` performs explicit build-time refreshes from
+Fontsource npm archives with integrity verification. Runtime uses no font CDN.
+The PWA precaches every font subset, including Korean, for offline selection.
+
 ## Layout of the repo (target)
 ```
 MyJournal/
@@ -23,9 +37,13 @@ MyJournal/
     login/              Login.ts, Chibi.ts, chibi-parts/*.svg, ChibiEditor.ts
     sync/               local.ts (IndexedDB), api.ts, sync.ts (queue)
     styles/             tokens.css, book.css, paper.css, frames.css, login.css
-  api/                  Cloudflare Worker (Hono)
-    src/index.ts        routes
-    src/db/schema.sql   Neon schema + migrations
+  api/                  Cloudflare Worker (Hono + Better Auth)
+    src/index.ts        routes, owner guards, quota/CAS writes
+    src/auth.ts         verified email/password sessions and deletion hooks
+    src/email.ts        bounded Gmail SMTP transport
+    migrations/*.sql    generated auth + application schema
+  scripts/              explicit migrations, live checks, font vendoring
+  public/fonts/         local WOFF2/CSS + licenses/version manifest
   public/stickers/generated/  30 original transparent PNG assets
   .env / .env.example
 ```
@@ -56,35 +74,63 @@ MyJournal/
   plus a white fibrous edge (offset copy of the edge) and a soft shadow. Original image
   is never modified, so “reset tear” always works.
 
-## Data model (Neon, mirrored in IndexedDB)
+## Data model (Neon)
+Better Auth manages `user`, `session`, `account`, `verification`, and `rateLimit`.
+Generated auth SQL is recorded in `api/migrations/000-auth.sql`. Application SQL
+is in `api/migrations/001-journal.sql`:
+
 ```
-users(id, email, name, created_at)            -- managed by Better Auth tables
-books(id, user_id, title, cover_color, cover_texture, paper_type, background, updated_at)
-sections(id, book_id, name, color, icon, position)
-pages(id, section_id, position, paper_override, updated_at)
-elements(id, page_id, type, x, y, w, h, rot, z, data jsonb, updated_at)
-assets(id, user_id, kind[photo|sticker|background], r2_key, mime, bytes, w, h, created_at)
-bookmarks(user_id, book_id, page_id, updated_at)
-chibi_profiles(user_id, config jsonb, updated_at)
+journal_books(user_id, id, doc jsonb, bookmark jsonb, version, mutation_id, updated_at)
+journal_assets(user_id, id, meta jsonb, bytes, r2_key, state[pending|ready], created_at)
+journal_account_state(user_id, deleting)
 ```
-`elements.data` holds type-specific fields (text content/font, photo asset id + frame + tear polygon, sticker id).
+Book and asset keys are composite `(user_id, id)`. User deletion cascades rows.
+Whole `BookDoc` snapshots preserve the existing client model while server CAS
+revisions protect against lost edits and carry deletions without tombstones.
+`book.revision` remains a separate local IndexedDB CAS counter.
 
 ## Storage + sync
-- **Local-first**: every edit writes to IndexedDB immediately (works offline).
-- A sync queue pushes changes to the API (debounced 1.5 s); last-write-wins by `updated_at`.
-- **Images**: client compresses (existing `compressImage`) → asks API for a presigned R2
-  PUT URL → uploads directly to R2 → saves an `assets` row. The browser never sees R2 keys.
+- Guest journals retain `mlw_v2`; accounts use `mlw_v2_user_<immutable-user-id>`.
+  Draft recovery keys are owner-scoped. Login/logout reloads reset module caches.
+- Each edit commits locally first. Cloud metadata stores acknowledged canonical
+  snapshot hash, server version, and a durable mutation ID. Lost responses retry
+  idempotently; server updates compare the submitted base version transactionally.
+- Concurrent device edits return 409; local content is retained. Account controls
+  offer local download, a separately remapped journal, and explicit cloud reload.
+- Clean remote caches refresh before the editor mounts. Background changes prompt
+  reload instead of replacing an active editor. Metadata-only asset and bookmark
+  edits trigger independent sync. Remote image bytes download lazily into IDB.
+- Explicit device-journal import preserves the guest original and includes pending
+  text/caption recovery. Conflicting recovery is retained for export.
+- Uploads are reserved under an owner lock with 10 MB/file and 500 MB/account
+  limits. The authenticated Worker validates size/type and writes immutable R2
+  originals through its native binding. Download routes verify ownership and use
+  private/no-store responses. No public bucket access or browser-held R2 keys.
+- Account deletion durably marks the owner as deleting under the same write lock,
+  removes recorded media, then deletes the account. Failed media deletion leaves
+  the account retryable while rejecting new writes.
 
-## API (Hono on Workers)
+## Authentication and email
+Better Auth handles verified email/password signup, sessions, reset and deletion.
+Gmail SMTP uses TLS on port 465 and a Google App Password. Nodemailer receives a
+request-scoped TLS socket connected directly by hostname; its default IP-resolved
+path was rejected by the Worker proxy. Email tasks use `waitUntil`, bounded socket
+timeouts, and sanitized errors. Database pools close after each API request;
+server-side session identity and an expected-account header prevent stale tabs
+from syncing one user's data under another user's cookies.
+
+## API
 ```
-/api/auth/*                     Better Auth handlers
-GET  /api/books/:id             full book (sections, pages, elements)
-PATCH /api/books/:id            cover/paper/background
-POST /api/sync                  batched element/page upserts + deletes
-POST /api/assets/upload-url     → presigned R2 PUT
-GET  /api/assets/:id            → short-lived signed GET (owner only)
-GET  /api/account/export        all user data
-DELETE /api/account             delete user + R2 objects
-PUT  /api/bookmark              save last page
-GET/PUT /api/chibi              chibi config
+/api/auth/*                        Better Auth handlers
+GET  /api/health                   public liveness
+GET  /api/books                    owner-scoped journal list
+GET  /api/books/:id                snapshot, bookmark, version, mutation ID
+POST /api/sync                     validated snapshot CAS + idempotent mutation
+GET  /api/assets                   owner-scoped media metadata
+POST /api/assets                   reserve quota / update archive metadata
+PUT  /api/assets/:id/content       validated immutable original upload
+GET  /api/assets/:id/content       authenticated private media download
+GET  /api/account/export           journals + media metadata (frontend adds ZIP files)
+POST /api/auth/delete-user         password-confirmed account and media deletion
 ```
+Chibi customization and v1 import remain separate unfinished phases.

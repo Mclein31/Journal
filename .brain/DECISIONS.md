@@ -8,6 +8,32 @@ last_updated: 2026-11-04
 
 # Decisions
 
+## 2026-11-05 — Verified accounts, snapshot CAS, native private media, and local fonts
+**Decision**: finish account login/verification/reset and cloud sync on the existing
+production Worker. Better Auth uses the supplied Neon database and Gmail SMTP.
+Account caches/recovery keys are isolated; guest import is explicit and preserves
+its original. Whole BookDoc JSONB snapshots use independent server revisions and
+idempotent mutation IDs instead of the initially proposed per-record timestamp
+last-write-wins. This preserves deletions and prevents silent offline overwrites.
+**Media**: authenticated Worker upload/download routes use the native R2 binding
+instead of initial presigned URLs. They enforce size/owner/quota checks; serialized
+original commits and a durable account-deleting gate avoid overwrite/orphan races.
+**Email**: direct hostname TLS socket supplied to Nodemailer fixes a verified
+Cloudflare proxy rejection of its default resolved-IP socket. Default Better Auth
+password hashing is retained; real deployed verification/reset delivery passes.
+**Fonts**: user explicitly requires self-hosting. Bundle all 33 catalog families
+plus Noto Sans KR WOFF2 subsets, stylesheets, original licenses and version manifest
+under `public/fonts/`. Remove Google runtime stylesheets/preconnects and retire
+its old caches; preserve existing font IDs and precache every local subset.
+
+
+## 2026-11-05 — Dear Days branding
+**Decision**: user chose **Dear Days** as the app name. Apply it to user-facing text,
+browser/PWA names, default new-book titles, recovery downloads, and setup examples.
+Keep saved journals and custom book titles intact. Internal `mlw:*` event/storage
+keys and `mlw_v2` IndexedDB name remain stable to avoid losing access to existing
+data. Folder/repository names and provisioned cloud resource names are unchanged.
+
 ## 2026-11-04 — Rebuild as a 3D book app (v2)
 **Decision**: Replace the tabbed v1 UI with a single 3D book; sections become pull tabs.
 **Why**: The product goal is now a customizable journal that feels like a real object.
@@ -53,8 +79,8 @@ generically ("Instant film", "Photocard") rather than after camera brands.
 ## 2026-11-04 — Open to the public (supersedes "Jangie only")
 **Decision**: Anyone can sign up with email + password. Every user gets their own private book(s).
 **Consequences**:
-- **Email service required** for verification + "forgot password": **Resend** (HTTP API works on
-  Workers, free tier 3k emails/month). Env: `RESEND_API_KEY`, `EMAIL_FROM`.
+- **Email service required** for verification + "forgot password": originally **Resend**;
+  superseded by the 2026-11-05 Gmail SMTP decision below.
 - Email verification required before first sync; password reset by emailed link.
 - **Private by default**: R2 bucket stays private; images served only via short-lived signed URLs
   scoped to the owner. No public R2 URL (removed `R2_PUBLIC_BASE_URL`).
@@ -118,3 +144,26 @@ The sticker tray permits Delete/Backspace only for the selected placed sticker, 
 Paper uses a shared vertex grid (6 columns × 3 rows; lower resolution for multi-leaf riffles), two affine triangles per cell and full-sized clipped front/back DOM copies. Covers remain rigid and keep their original WAAPI midpoint for board-opening synchronization. No WebGL, DOM screenshots or new dependencies.
 `pageCurl.ts` owns the geometry, projection constraint, drag mapping and analytic critically damped spring. Raw bending alone does not preserve pointer contact: `paperGrid` corrects XY so the actual barycentric grab in the rendered facets projects onto the pointer reference while the spine remains fixed. Keep the 2400px projection synchronized with flip.ts. Fade/clip only terminal faces; preserve3D ancestors must not acquire grouping properties ([CSS Transforms2](https://www.w3.org/TR/css-transforms-2/#grouping-property-values)). Small face overlap suppresses antialias cracks; source pages remain actual full-leaf pixel dimensions so cqh/fonts/wrapping do not change.
 Single paper turns expose an interruptible controller: catching settles returns false to the prior completion, preventing double navigation. Riffles retain queued input. `View.target` plus queued intent determines relative Next/Previous/arrow input and disabled states. Resize refreshes geometry/crops and rebases active drags; destruction cancels frames/observers/shadows. Native rendering/performance still requires device QA.
+
+## 2026-11-05 — Page-turn smoothness over mesh density
+**Decision**: 8 full-height strips (not 6×3 tiles), normal-based brightness instead of per-face shade layers,
+and rAF-coalesced eased pointer following (`DragLeaf.follow`, τ 45 ms).
+**Why**: every mesh face holds a full page copy, so face count drives paint/composite cost; per-frame opacity on
+non-promoted overlays forced repaints; high-rate pointers caused several paints per frame. User priority: smoothness.
+**Trade-off**: the bump around the grab point is no longer sampled vertically (bend is per column, twist from pull remains).
+
+## 2026-11-05 — Production resources and Gmail SMTP (supersedes Resend)
+**Decision**: user explicitly chose Gmail SMTP instead of Resend, Neon’s `production`
+branch, and confirmed creating the private R2 bucket `journal-assets-prod` (not a
+development bucket). Use Gmail `smtp.gmail.com:465` with implicit TLS and a Google
+App Password. Sender address matches the authenticated Gmail account.
+**Configuration**: replace `RESEND_API_KEY` with `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_SECURE`, `SMTP_USER`, and `SMTP_PASS`; retain `EMAIL_FROM`. Production uses
+the same-origin frontend API base `/api`. Do not invent a live origin or change
+user-supplied database/R2 credentials; the actual production HTTPS URL must be
+provided for `BETTER_AUTH_URL` and `APP_ORIGIN`.
+**Status**: configuration/template and `MyJournal/SMTP_SETUP.md` updated; SMTP sender,
+auth handlers, Worker deployment and migrations are still pending. A deployed
+transport/delivery check is required before claiming email works. Create SMTP
+connections within Worker requests/background tasks using a compatible TLS
+transport; port 25 is blocked by default. Keep SMTP secrets out of frontend builds.

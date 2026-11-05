@@ -7,6 +7,22 @@ last_updated: 2026-11-05
 
 # Handoff: continue the v2 3D Journal build
 
+## Production backend (2026-11-05)
+Dear Days is live at **https://dear-days.mcleinonza0531.workers.dev** with Better
+Auth email/password login, real Gmail verification/reset delivery, private R2
+uploads, and cloud sync backed by Neon. Runtime secrets are configured. Current
+live checks cover two independent sessions, browser editing/second-browser
+hydration, stale-write protection, reset/session revocation, and account/media
+deletion. All temporary QA users/files are cleaned up. See [DEPLOYMENT.md](DEPLOYMENT.md).
+
+Storage is owner-scoped; keep guest `mlw_v2` and legacy data untouched. Server
+snapshot versions are independent of local book revisions. Do not revert to
+last-write-wins or remove mutation IDs, draft lifecycle guards, deletion gates,
+or the expected-account header. All fonts are now bundled locally, with Korean
+subsets, versions, and licenses under `public/fonts/`; no Google Fonts runtime.
+Physical-device QA, full accessibility, v1 import, and customizable chibi remain
+pending. Older session notes below are historical and superseded by this section.
+
 ## Read first (in this order)
 1. `/Users/mclein/Documents/Developer/Personal_Projects/AGENTS.md` — workspace rules (stay in this project, keep `.brain/` updated).
 2. `.brain/PROJECT_CONTEXT.md` — what we're building and why.
@@ -16,14 +32,14 @@ last_updated: 2026-11-05
 
 ## Settled decisions (short version)
 - Vite 8 + TypeScript 7, no UI framework. 3D = CSS 3D transforms, not WebGL.
-- Local-first IndexedDB now; backend later (Phase 10): Hono on one Cloudflare Worker (static assets + `/api`), Neon Postgres, private R2 bucket, Better Auth email+password, Resend for verify/reset emails.
+- Local-first IndexedDB plus deployed backend (Phase 10): Hono on one Cloudflare Worker (static assets + `/api`), Neon Postgres, private R2 bucket, Better Auth email+password, Gmail SMTP for verify/reset emails. User chose production setup: Neon `production`, bucket `journal-assets-prod`; setup instructions are in `MyJournal/SMTP_SETUP.md`. SMTP delivery is verified in the deployed Worker.
 - **Public app**: open sign-up, every user's journal is private, 10 MB/upload, 500 MB/user.
 - Default sections: Journal · Schedule · Memories · Notes (user can add/rename/recolor).
 - Art must be original. Stickers now use ChatGPT-generated transparent PNGs, per the user's explicit request (supersedes the earlier SVG-only rule). Name frames generically ("Instant film", not camera brands).
 
 ## What is done
 - Brain rewritten (all files in `.brain/`).
-- `MyJournal/.env` (keys only, empty) + `.env.example`; `.gitignore` covers `.env*`, `.dev.vars`, `node_modules/`, `dist/`.
+- `MyJournal/.env` (private user configuration) + `.env.example`; `.gitignore` covers `.env*`, `.dev.vars`, `node_modules/`, `dist/`. Preserve supplied values; never print or commit credentials.
 - v1 app moved to `MyJournal/legacy/` (reference + source for the Phase 11 importer). **Do not delete.** v1 IndexedDB `mlw_db` is untouched; v2 uses `mlw_v2`.
 - Phase 0 (partial), in `MyJournal/`:
   - `package.json`, `tsconfig.json`, `vite.config.ts`; deps installed (vite, typescript, idb).
@@ -61,7 +77,7 @@ Phase 1 files: `src/book/{Book,layout,flip,Tabs,PageView,SectionManager}.ts`, `s
 - `fsevents` install script is blocked by npm allow-scripts. That's intentional and harmless (optional macOS watcher).
 - TypeScript 7 is the native compiler. If an option errors, use the modern equivalent instead of downgrading.
 - Tear tool (Phase 6): use the `polygon-clipping` npm package for the polygon split. Don't hand-roll it.
-- Only `VITE_*` env vars reach the browser. Never prefix a secret with `VITE_`. `.env` values are empty until Phase 10.
+- Only `VITE_*` env vars reach the browser. Never prefix a secret with `VITE_`. Preserve existing `.env` values; check configuration readiness without printing secrets.
 - User explicitly authorized Git initialization as needed, committing and pushing on 2026-11-05. Use no co-author trailers. The user supplied `https://github.com/Mclein31/Journal.git`; `origin` now uses that URL and `main` tracks `origin/main`.
 
 ## Keep the brain current

@@ -8,6 +8,47 @@ last_updated: 2026-11-04
 
 # Changelog
 
+## 2026-11-05 — Live accounts, private cloud sync, and self-hosted fonts
+- Implemented Hono/Better Auth on the existing Worker, additive Neon schemas,
+  real Gmail verification/reset delivery, sessions, and password-confirmed deletion.
+- Added account-scoped local caches and draft keys, explicit guest imports,
+  canonical snapshot CAS/idempotent retries, offline recovery, safe journal
+  switching, separately remapped conflict copies, and cloud status/account controls.
+- Added native private R2 uploads/downloads, quota reservations, immutable original
+  commits, archive sync, lazy image caching, and durable retryable deletion gates.
+- Live tests pass for actual email links, two sessions, browser editing and
+  second-browser hydration, stale edits, private R2, reset/session revocation, and
+  account/media cleanup. All temporary QA users were removed.
+- User requested local fonts: bundled all 33 choices + Korean fallback with original
+  licenses/version manifest, replaced external font loading, and precached WOFF2.
+- 164 frontend/storage/font/service-worker tests and seven Postgres integration checks pass;
+  type checks/build/dry run pass. Headless desktop/mobile UI checks pass.
+
+
+## 2026-11-05 — First Cloudflare production deployment
+- Published Dear Days to https://dear-days.mcleinonza0531.workers.dev as Worker static assets, version `60619339-b109-4d90-91b8-89c059a81ae8`.
+- Added Wrangler configuration/dependency, build-first deployment and dry-run scripts, service-worker/manifest revalidation headers, immutable bundle caching, and basic security headers.
+- Saved the real HTTPS origin in ignored `.env` and the production template. User credentials remain private; the R2 account matches the authenticated Cloudflare account. Only built frontend files were uploaded, without server secrets or bindings.
+- All 152 frontend tests, TypeScript/PWA build, dry run, credential-leak scan, and whitespace checks pass. Login, SMTP delivery, cloud sync, and database/R2 endpoints remain pending. Native Safari control was denied; live checks use HTTPS requests.
+- Live HTTPS verification passes for the root and all 50 deployed files (byte-for-byte against the build), all 30 stickers, cache/security headers, and 404 responses for private paths and unimplemented APIs.
+
+## 2026-11-05 — Dear Days app name
+- User chose **Dear Days**. Updated visible branding, browser/accessibility and installation metadata, new-book/default titles, recovery download filename, package metadata, and setup examples.
+- Existing storage identifiers, journal content/custom titles, repository/folder names, and cloud resources stay compatible.
+- Validation: all 152 tests and production build pass; built browser/Apple/PWA names and package metadata verified. Dependency audit reports no high/critical findings; six existing low/moderate findings remain in build tooling.
+
+## 2026-11-05 — Production setup and Gmail SMTP configuration
+- Replaced Resend configuration with Gmail SMTP defaults (implicit TLS on port 465), Google App Password instructions, and a production setup guide in `MyJournal/SMTP_SETUP.md`.
+- Set the bucket to the user-created `journal-assets-prod` and the browser API base to `/api`; removed local-only origins from private production settings, consolidated duplicate auth URL entries, and preserved database/R2 credentials.
+- Updated the backend plan and project knowledge. SMTP/auth/backend implementation and deployed delivery checks remain pending. Environment/template validation, TypeScript check, and whitespace checks pass.
+
+## 2026-11-05 — Smooth page-turn drag (perf)
+- Measured in Chromium, slow drag at ~500 pointer events/s over a page with photos: **before** ~300 dropped frames/drag (p95 51 ms, max 67 ms ≈ 20 fps) → **after** 0–1 dropped (p95 17–18 ms, max 18–33 ms ≈ 60 fps), 0 ms long tasks.
+- `flip.ts`: paper mesh 6×3 tiles → 8 full-height strips (still 2 exact triangles each): 72 page copies/layers → 32 (riffle 16).
+- Removed per-face shading overlays (72 opacity writes/frame = repaints); lighting now a per-strip `brightness()` from the strip normal (light from upper-left), written only when it changes.
+- New `DragLeaf.follow()`: pointer moves only set a target; one rAF loop eases the paper toward it (τ 45 ms). `set()` stays immediate (tests). Book.ts live drag uses `follow()`.
+- Change-only writes for z-index / fade opacity. Tests updated for the 8×1 grid (152/152 pass).
+
 ## 2026-11-04 — v2 planning
 - Project brain rewritten for the 3D customizable journal redesign (old brain was outdated).
 - Added `PLAN.md` (12-phase execution plan).
@@ -149,3 +190,6 @@ last_updated: 2026-11-04
 - User reported buggy switching. Independently reproduced and fixed projected grab-point drift (~106.5px before projection in the reviewed half-turn case), stale mesh sizing on resize, dropped rapid Next requests, and blocked Previous input during a forward turn. Native verification of the reported visual bug remains pending.
 - Added subpixel terminal-face overlap to suppress tile cracks without changing full-page source dimensions. Rebind pending uploaded images/masks in cloned faces and disconnect per-leaf observation on cleanup.
 - Validation: all 152 tests (24 new motion/geometry cases) and production/PWA build pass. Static geometry preview inspected; native browser painting/performance remains unverified under the existing access limit. See `QA_REPORT.md`.
+
+## 2026-11-05 — Final offline font verification
+- Deployed version `41c983f4-bc2d-45e7-80af-4821657efb99`: all 34 font families load locally, no Google Fonts requests, Korean fonts work after offline reload. First full cache installation completed in 187 seconds on the test connection. All 164 frontend/service-worker checks, seven database integration checks, and the live account/email/sync/R2/browser workflows pass.

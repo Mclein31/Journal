@@ -1,6 +1,8 @@
-# ✿ My Little World ✿
+# ✿ Dear Days ✿
 
 A cozy, customizable 3D journal built with Vite and TypeScript. Open the cover, pull a section tab, and decorate pages with writing, framed photos, and original stickers.
+
+Live app: **[Dear Days](https://dear-days.mcleinonza0531.workers.dev)**. Create an account, verify your email, and sync private journals across devices. You can also continue with a device-only journal. Localhost and the live website have separate browser storage.
 
 The current app is in `MyJournal/`. Its predecessor is preserved in `MyJournal/legacy/`; `MyLittleWorld/` is the project's Obsidian vault and is excluded from Git along with private source photos.
 
@@ -17,7 +19,7 @@ npm run dev
 - Select a photo and open **Frame** for visual frame previews, custom border colors, and captions. Tears preserve the original photo.
 - Drag empty paper to turn a page: the bend follows the grab point and the release settles with momentum. Catch a settling single turn to reverse it; fast page-button presses queue correctly. Reduced motion uses a flat fade.
 - Drag items to move them; use the corner handle or pinch to resize/rotate. Undo and redo work from the toolbar or keyboard.
-- Changes save on this device using IndexedDB, with text/caption recovery. Conflicting saves from another window are blocked, with a download option for unsaved changes. Older recovered words are kept separately if they conflict with the latest saved text. Cloud accounts and sync are planned and are not implemented yet.
+- Changes save on this device using IndexedDB, with text/caption recovery. Conflicting saves from another window are blocked, with a download option for unsaved changes. Older recovered words are kept separately if they conflict with the latest saved text. Signed-in journals sync through owner-scoped cloud storage with independent server revisions. Conflicting device edits are preserved for review. Account controls support explicit device-journal import, separate copies, backups, and deletion.
 
 Validation (tests use Node 26's built-in TypeScript stripping and VM modules):
 
@@ -29,6 +31,12 @@ npm run build
 
 Project context and outstanding work are in [.brain/PROJECT_CONTEXT.md](.brain/PROJECT_CONTEXT.md) and [.brain/TODO.md](.brain/TODO.md).
 
-All 152 automated checks pass, exercising real application modules using a simulated DOM and IndexedDB, including each sticker's editing workflow, interrupted captions and conflicting saves. The production service-worker manifest includes all 30 PNGs. Local HTTP checks pass for the built shell, manifest, worker and PNGs. Native rendering, touch, offline operation, installation and full accessibility still require browser/device QA. See the [QA report](.brain/QA_REPORT.md).
+Production service configuration uses Neon’s `production` branch, the private R2 bucket `journal-assets-prod`, and Gmail SMTP for account emails. Follow the [Gmail SMTP setup guide](MyJournal/SMTP_SETUP.md). Verification/reset email delivery, private uploads, browser sign-in, and cross-device sync are verified live.
+
+Deploy the current frontend to Cloudflare Workers from `MyJournal/` with `npm run deploy` (builds first). Use `npm run deploy:check` to validate without publishing. Frontend assets come from `dist/`; the Hono backend is bundled separately. Configure private values as Worker secrets, never in frontend builds. See [.brain/DEPLOYMENT.md](.brain/DEPLOYMENT.md) for the current deployment and remaining backend work.
+
+Automated checks cover journal editing, persistence/recovery, account isolation, offline retries, and conflict protection. `npm run test:api` explicitly tests the configured database with synthetic accounts and captured mail; `npm run test:live` uses temporary plus-addressed mail on the configured Gmail sender to verify deployed email/auth/sync/R2 behavior and cleans up its accounts/files. Optional `PLAYWRIGHT_MODULE` enables an isolated real-browser editing/sync pass. Physical-device and complete accessibility checks remain outstanding. See the [QA report](.brain/QA_REPORT.md).
 
 See the [complete sticker preview](MyJournal/validation/generated-sticker-preview.png) and [generation records](MyJournal/validation/sticker-generation.json).
+
+Fonts are bundled under `MyJournal/public/fonts/`, with each original license and a version manifest. `npm run fonts:vendor` refreshes the vendored assets during development; deployed pages use only local font stylesheets and WOFF2 files.

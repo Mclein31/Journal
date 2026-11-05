@@ -2,9 +2,30 @@
 
 ## Result and limits
 
-**152 automated checks pass; TypeScript and the production/PWA build pass.** The functional pass added 47 regressions to the original 81 checks; the paper-motion follow-up added 24 more. The implemented app is the local-first frontend in `MyJournal/`; accounts, cloud sync, migration and deployment are still pending.
+**164 frontend/storage/font/service-worker checks and seven database integration
+checks pass; all three TypeScript targets and the production/PWA build pass.**
+Dear Days is deployed with verified email/password accounts, Gmail verification
+and password reset, private R2 uploads, and revision-protected cloud sync.
 
-This is **not browser/device sign-off**. Computer-use inventory reported the browser host unavailable, and access to Google Chrome was denied. DOM integration uses the actual app modules with simulated geometry, focus, image decoding, animation, audio and native install APIs. The user's Safari screenshot is direct evidence of the original outer-edge overflow. Its CSS fix and the new textures have not been inspected in a running browser.
+Live checks verified actual Gmail delivery and both email links, independent
+sessions, real browser sign-in, edited text reaching another browser, stale-save
+protection, private R2 media, session revocation after reset, and account/media
+cleanup. All temporary QA accounts/files were removed. Isolated headless Chromium
+also checked desktop/mobile login, password visibility, guest access, closed-book
+Account access, and signup navigation.
+
+All 34 bundled font families load from the app origin. Font licenses/files and
+same-origin loader/retries are checked, with bounded/versioned offline-cache unit
+coverage. The live offline installation/reload check passes: zero Google Fonts requests,
+all font requests on the app origin, and Korean fonts loading after offline
+journal reload. The first full cache install took 187 seconds on this connection;
+see `validation/self-hosted-fonts-check.json`.
+
+Physical iOS/Safari/Android touch, installation, and full accessibility remain
+outside this sign-off. Earlier computer-use access denials remain relevant to
+those native checks; isolated headless Chromium was subsequently available for
+the targeted account/browser checks above. Historical findings below describe the
+original frontend pass rather than the current backend status.
 
 ## Coverage matrix
 

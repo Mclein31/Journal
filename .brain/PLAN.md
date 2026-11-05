@@ -160,12 +160,12 @@ Frame picker opens from the selected photo. Each frame is a registry entry, so a
 
 ## Phase 10 — Backend: Neon + R2 + auth + sync
 - `api/` Worker with Hono; Better Auth (email + password) with session cookies, open sign-up.
-- Email verification + password reset emails via Resend (`RESEND_API_KEY`, `EMAIL_FROM`).
+- Email verification + password reset emails via Gmail SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`). Use implicit TLS on port 465, a Google App Password, and a Worker-compatible transport; verify actual delivery in the deployed runtime before public signup. See `MyJournal/SMTP_SETUP.md`.
 - Per-user limits: 10 MB/upload, 500 MB total; rate limits on auth routes.
 - Account page: export all data (JSON + images zip), delete account (Neon rows + R2 objects).
 - Neon schema + migrations from ARCHITECTURE.md. Every query scoped by `user_id`.
 - R2 (private bucket): presigned PUT for uploads, short-lived signed GET for display; 10 MB per file limit; images only.
-- Sync: `POST /api/sync` with batched upserts; local queue retries with backoff when offline.
+- Sync: `POST /api/sync` with validated whole-book JSONB snapshots, independent server CAS revisions and durable mutation IDs; local changes survive offline/reload and conflicting copies require review. This supersedes the initial timestamp/upsert proposal.
 - First login on a device with local v2 data → offer "upload this book to my account".
 - Fill in `MyJournal/.env` (keys already listed there).
 **Done when**: log in on two browsers, edit in one, the other shows the change after refresh.

@@ -16,6 +16,7 @@ import { attachCanvas, type CanvasApi } from '../canvas/Canvas';
 import { openTearTool } from '../frames/TearTool';
 import { clearBookmark, getBookmark, setBookmark } from './bookmark';
 import { toast } from '../ui/toast';
+import { showSaveConflict } from '../ui/saveConflict';
 import type { Bookmark } from '../state/schema';
 import { getMeta, setMeta } from '../sync/local';
 import { buildLayout, type Layout, type Mode } from './layout';
@@ -522,6 +523,11 @@ export function mountBook(root: HTMLElement, initial: BookDoc): void {
   addEventListener('mlw:saving', () => { status.textContent = 'Saving…'; status.dataset.state = 'saving'; });
   addEventListener('mlw:saved', () => { status.textContent = 'Saved on this device'; status.dataset.state = 'saved'; });
   addEventListener('mlw:save-error', () => { status.textContent = 'Could not save · check storage'; status.dataset.state = 'error'; });
+  addEventListener('mlw:save-conflict', () => {
+    status.textContent = 'Unsaved · changed in another window';
+    status.dataset.state = 'error';
+    showSaveConflict();
+  });
   setClosed(true);
 
   render();

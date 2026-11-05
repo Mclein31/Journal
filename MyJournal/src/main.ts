@@ -5,7 +5,8 @@ import { getDoc, initStore, flush } from './state/store';
 import { getMeta, loadBook, setMeta } from './sync/local';
 import { mountBook } from './book/Book';
 import { initPWA } from './pwa/install';
-import { applyDrafts } from './book/bookmark';
+import { applyDrafts, getDraftConflicts } from './book/bookmark';
+import { showSaveConflict } from './ui/saveConflict';
 import { lastFont, loadFonts } from './fonts/fonts';
 
 const ACTIVE_BOOK = 'activeBookId';
@@ -21,13 +22,14 @@ async function boot() {
     await setMeta(ACTIVE_BOOK, doc.book.id);
   } else {
     const restored = await applyDrafts(doc); // recovery remains until flush confirms a durable book snapshot
-    initStore(doc);
+    initStore(doc, { dirty: restored });
     if (restored) await flush();
   }
   // only the fonts this book actually uses (plus the last picked) load at startup
   loadFonts([lastFont(), ...getDoc().elements.map((e) => e.data.text?.font).filter((f): f is string => !!f)]);
   mountBook(app, getDoc());
   initPWA(app.querySelector<HTMLButtonElement>('[data-act="install"]'));
+  if (Object.keys(getDraftConflicts()).length) showSaveConflict(true);
 }
 
 void boot().catch(() => {

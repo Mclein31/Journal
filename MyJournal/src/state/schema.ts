@@ -23,6 +23,8 @@ export interface Book {
   paperTint: PaperTint;
   background: Background;
   updatedAt: number;
+  /** Local save revision; absent on books created before conflict protection. */
+  revision?: number;
 }
 
 export interface Section {

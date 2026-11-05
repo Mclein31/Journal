@@ -31,32 +31,49 @@ function db() {
 
 export async function loadBook(bookId: ID): Promise<BookDoc | null> {
   const d = await db();
-  const book = await d.get('books', bookId);
+  const tx = d.transaction(['books', 'sections', 'pages', 'elements'], 'readonly');
+  const book = await tx.objectStore('books').get(bookId);
   if (!book) return null;
-  const sections = (await d.getAllFromIndex('sections', 'byBook', bookId)).sort((a, b) => a.position - b.position);
+  const sections = (await tx.objectStore('sections').index('byBook').getAll(bookId)).sort((a, b) => a.position - b.position);
   const pages: Page[] = [];
-  for (const s of sections) pages.push(...(await d.getAllFromIndex('pages', 'bySection', s.id)));
+  for (const s of sections) pages.push(...(await tx.objectStore('pages').index('bySection').getAll(s.id)));
   const elements: PageElement[] = [];
-  for (const p of pages) elements.push(...(await d.getAllFromIndex('elements', 'byPage', p.id)));
+  for (const p of pages) elements.push(...(await tx.objectStore('elements').index('byPage').getAll(p.id)));
+  await tx.done;
   return { book, sections, pages, elements };
 }
 
 export interface RemovedRecords { sections?: ID[]; pages?: ID[]; elements?: ID[] }
 
 /** Deletions and their replacement snapshot commit together, so a failed save cannot leave half a book. */
-export async function saveDoc(doc: BookDoc, removed: RemovedRecords = {}): Promise<void> {
+export class SaveConflictError extends Error {
+  constructor() {
+    super('This journal changed in another window. Save a copy of your changes and reload the latest version.');
+    this.name = 'SaveConflictError';
+  }
+}
+
+export async function saveDoc(doc: BookDoc, removed: RemovedRecords = {}, expectedRevision = doc.book.revision ?? 0): Promise<number> {
   const d = await db();
   const tx = d.transaction(['books', 'sections', 'pages', 'elements'], 'readwrite');
+  const current = await tx.objectStore('books').get(doc.book.id);
+  if ((current?.revision ?? 0) !== expectedRevision) {
+    tx.abort();
+    await tx.done.catch(() => {});
+    throw new SaveConflictError();
+  }
+  const revision = expectedRevision + 1;
   await Promise.all([
     ...(removed.sections ?? []).map((id) => tx.objectStore('sections').delete(id)),
     ...(removed.pages ?? []).map((id) => tx.objectStore('pages').delete(id)),
     ...(removed.elements ?? []).map((id) => tx.objectStore('elements').delete(id)),
-    tx.objectStore('books').put(doc.book),
+    tx.objectStore('books').put({ ...doc.book, revision }),
     ...doc.sections.map((s) => tx.objectStore('sections').put(s)),
     ...doc.pages.map((p) => tx.objectStore('pages').put(p)),
     ...doc.elements.map((e) => tx.objectStore('elements').put(e)),
   ]);
   await tx.done;
+  return revision;
 }
 
 export async function deleteRecords(ids: { sections?: ID[]; pages?: ID[]; elements?: ID[] }): Promise<void> {

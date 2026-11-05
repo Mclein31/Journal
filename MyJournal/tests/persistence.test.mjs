@@ -136,6 +136,7 @@ test('snapshot deletion and insertion use one IndexedDB transaction', async () =
   const fakeDb = { transaction(stores, mode) {
     transactions.push({ stores, mode });
     return { done: Promise.resolve(), objectStore: (name) => ({
+      get: async () => undefined,
       put: async (value) => operations.push(['put', name, value.id]),
       delete: async (id) => operations.push(['delete', name, id]),
     }) };

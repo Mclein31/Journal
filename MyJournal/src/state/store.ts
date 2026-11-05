@@ -11,15 +11,19 @@ const SAVE_DELAY_MS = 400;
 
 let doc: BookDoc | null = null;
 let lastSaved: BookDoc | null = null;
+let savedRevision = 0;
+let hasSaved = false;
 const listeners = new Set<Listener>();
 const undoStack: BookDoc[] = [];
 const redoStack: BookDoc[] = [];
 let saveTimer: number | undefined;
 let saving: Promise<void> | null = null;
 
-export function initStore(initial: BookDoc): void {
+export function initStore(initial: BookDoc, opts: { dirty?: boolean } = {}): void {
   doc = initial;
   lastSaved = initial;
+  savedRevision = initial.book.revision ?? 0;
+  hasSaved = initial.book.revision !== undefined && !opts.dirty;
   undoStack.length = redoStack.length = 0;
   emit('init');
 }
@@ -91,22 +95,25 @@ export function flush(): Promise<void> {
   window.clearTimeout(saveTimer);
   if (saving) return saving;
   if (!doc || !lastSaved) return Promise.resolve();
+  if (hasSaved && doc === lastSaved) return Promise.resolve();
   saving = (async () => {
     do {
       const snapshot = getDoc();
       const previous = lastSaved!;
       window.dispatchEvent(new CustomEvent('mlw:saving'));
-      await saveDoc(snapshot, {
+      savedRevision = await saveDoc(snapshot, {
         sections: missing(previous.sections, snapshot.sections),
         pages: missing(previous.pages, snapshot.pages),
         elements: missing(previous.elements, snapshot.elements),
-      });
+      }, savedRevision);
+      hasSaved = true;
       lastSaved = snapshot;
       window.dispatchEvent(new CustomEvent('mlw:saved', { detail: snapshot }));
       // Edits made during the transaction must be saved against the snapshot just committed.
     } while (doc !== lastSaved);
   })().catch((error: unknown) => {
-    window.dispatchEvent(new CustomEvent('mlw:save-error', { detail: error }));
+    const conflict = error instanceof Error && error.name === 'SaveConflictError';
+    window.dispatchEvent(new CustomEvent(conflict ? 'mlw:save-conflict' : 'mlw:save-error', { detail: error }));
     throw error;
   }).finally(() => { saving = null; });
   return saving;

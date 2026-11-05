@@ -2,17 +2,39 @@
 import './styles/tokens.css';
 import { createSeedBook } from './state/seed';
 import { getDoc, initStore, flush } from './state/store';
-import { getMeta, loadBook, setMeta } from './sync/local';
+import { getMeta, loadBook, setMeta, setStorageOwner } from './sync/local';
 import { mountBook } from './book/Book';
 import { initPWA } from './pwa/install';
 import { applyDrafts, getDraftConflicts } from './book/bookmark';
 import { showSaveConflict } from './ui/saveConflict';
 import { lastFont, loadFonts } from './fonts/fonts';
+import { mountAccountControls, mountLogin, readSession, rememberAccount, rememberedAccount, watchAccountChanges } from './account/ui';
+import { useAccount, type Account } from './account/api';
+import { prepareCloud, startSync } from './sync/cloud';
 
 const ACTIVE_BOOK = 'activeBookId';
 
 async function boot() {
   const app = document.getElementById('app')!;
+  let account: Account | null = null;
+  if (typeof fetch === 'function') {
+    watchAccountChanges();
+    const params = new URLSearchParams(location.search);
+    if (params.has('token') || params.has('reset') || params.has('error')) { mountLogin(app, params.has('error') ? 'forgot' : 'reset'); return; }
+    try {
+      account = (await readSession())?.user ?? null;
+      rememberAccount(account);
+    } catch {
+      // A cached identity unlocks only its existing offline cache, never a cloud request as another user.
+      if (navigator.onLine === false) account = rememberedAccount();
+      if (!account && sessionStorage.getItem('dd:guest') !== '1') { mountLogin(app); return; }
+    }
+    if (account && !account.emailVerified) { mountLogin(app, 'verify', account.email); return; }
+    if (!account && sessionStorage.getItem('dd:guest') !== '1') { mountLogin(app); return; }
+  }
+  useAccount(account?.id);
+  setStorageOwner(account?.id);
+  if (account) await prepareCloud();
   const activeId = await getMeta<string>(ACTIVE_BOOK);
   let doc = activeId ? await loadBook(activeId) : null;
   if (!doc) {
@@ -29,11 +51,13 @@ async function boot() {
   loadFonts([lastFont(), ...getDoc().elements.map((e) => e.data.text?.font).filter((f): f is string => !!f)]);
   mountBook(app, getDoc());
   initPWA(app.querySelector<HTMLButtonElement>('[data-act="install"]'));
+  mountAccountControls(app, account);
+  if (account) startSync();
   if (Object.keys(getDraftConflicts()).length) showSaveConflict(true);
 }
 
 void boot().catch(() => {
   const app = document.getElementById('app')!;
-  app.innerHTML = `<div class="boot-error" role="alert"><span aria-hidden="true">✿</span><h1>Your little world needs a moment</h1><p>We couldn’t open your journal’s storage. Make sure this browser allows site storage, then try again.</p><button type="button">Try again</button></div>`;
+  app.innerHTML = `<div class="boot-error" role="alert"><span aria-hidden="true">✿</span><h1>Dear Days needs a moment</h1><p>We couldn’t open your journal’s storage. Make sure this browser allows site storage, then try again.</p><button type="button">Try again</button></div>`;
   app.querySelector('button')!.addEventListener('click', () => location.reload());
 });

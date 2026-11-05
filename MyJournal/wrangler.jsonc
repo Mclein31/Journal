@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dear-days",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": true,
+  "main": "api/src/index.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*"]
+  },
+  "r2_buckets": [{ "binding": "JOURNAL_FILES", "bucket_name": "journal-assets-prod" }],
+  "vars": {
+    "BETTER_AUTH_URL": "https://dear-days.mcleinonza0531.workers.dev",
+    "APP_ORIGIN": "https://dear-days.mcleinonza0531.workers.dev",
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "465",
+    "SMTP_SECURE": "true"
+  }
+}

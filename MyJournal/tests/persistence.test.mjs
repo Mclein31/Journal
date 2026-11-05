@@ -26,10 +26,11 @@ async function harness({ meta = {}, recovery = null, save = async () => {} } = {
     localStorage: { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     window: { setTimeout: () => 1, clearTimeout() {}, dispatchEvent: events.dispatchEvent.bind(events) },
   });
-  const local = new vm.SyntheticModule(['saveDoc', 'getMeta', 'setMeta'], function () {
+  const local = new vm.SyntheticModule(['saveDoc', 'getMeta', 'setMeta', 'storageKey'], function () {
     this.setExport('saveDoc', save);
     this.setExport('getMeta', async (key) => structuredClone(savedMeta[key]));
     this.setExport('setMeta', async (key, value) => { savedMeta[key] = structuredClone(value); });
+    this.setExport('storageKey', (key) => key);
   }, { context });
   const modules = new Map([['sync/local', local]]);
   async function load(name) {
@@ -143,9 +144,10 @@ test('snapshot deletion and insertion use one IndexedDB transaction', async () =
   } };
   const context = vm.createContext({});
   const idb = new vm.SyntheticModule(['openDB'], function () { this.setExport('openDB', async () => fakeDb); }, { context });
+  const api = new vm.SyntheticModule(['mediaBlob'], function () { this.setExport('mediaBlob', async () => { throw new Error('Snapshot saves must not fetch media'); }); }, { context });
   const source = stripTypeScriptTypes(await readFile(new URL('sync/local.ts', sourceRoot), 'utf8'));
   const local = new vm.SourceTextModule(source, { context });
-  await local.link(() => idb);
+  await local.link((specifier) => specifier === 'idb' ? idb : api);
   await local.evaluate();
   await local.namespace.saveDoc({ ...seed(), elements: [text()] }, { elements: ['removed'] });
   assert.equal(transactions.length, 1);

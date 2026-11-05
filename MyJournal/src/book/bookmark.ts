@@ -1,12 +1,12 @@
 /* Bookmark + unsaved-text drafts (Phase 8). Stored in IndexedDB meta (synced in Phase 10). */
 import type { Bookmark, BookDoc } from '../state/schema';
-import { getMeta, setMeta } from '../sync/local';
+import { getMeta, setMeta, storageKey } from '../sync/local';
 import { getDoc, subscribe } from '../state/store';
 
 const key = (bookId: string) => `bookmark:${bookId}`;
 export const getBookmark = (bookId: string) => getMeta<Bookmark>(key(bookId));
-export const setBookmark = (bookId: string, pageId: string) => setMeta(key(bookId), { bookId, pageId, updatedAt: Date.now() } satisfies Bookmark);
-export const clearBookmark = (bookId: string) => setMeta(key(bookId), null);
+export const setBookmark = async (bookId: string, pageId: string) => { await setMeta(key(bookId), { bookId, pageId, updatedAt: Date.now() } satisfies Bookmark); window.dispatchEvent(new CustomEvent('mlw:bookmark-changed')); };
+export const clearBookmark = async (bookId: string) => { await setMeta(key(bookId), null); window.dispatchEvent(new CustomEvent('mlw:bookmark-changed')); };
 
 /* Active text is outside the committed document until blur. Keep an immediate recovery
    copy as well as IndexedDB; mobile browsers need not finish async work on pagehide. */
@@ -17,6 +17,7 @@ let drafts: Record<string, string> = {};
 let bases: Record<string, string> = {};
 let conflicts: Record<string, string> = {};
 let loading: Promise<void> | null = null;
+let loaded = false;
 let writes: Promise<void> = Promise.resolve();
 let persisted: BookDoc | null = null;
 
@@ -31,7 +32,7 @@ function decodeRecovery(value: unknown) {
 
 function readRecovery() {
   try {
-    const raw = localStorage.getItem(RECOVERY);
+    const raw = localStorage.getItem(storageKey(RECOVERY));
     if (raw === null) return null;
     return decodeRecovery(JSON.parse(raw));
   } catch { return null; }
@@ -45,7 +46,7 @@ function snapshotDrafts() {
 }
 
 function writeRecovery() {
-  try { localStorage.setItem(RECOVERY, JSON.stringify(snapshotDrafts())); } catch { /* IndexedDB still saves when localStorage is unavailable/full. */ }
+  try { localStorage.setItem(storageKey(RECOVERY), JSON.stringify(snapshotDrafts())); } catch { /* IndexedDB still saves when localStorage is unavailable/full. */ }
 }
 
 function loadDrafts(): Promise<void> {
@@ -56,6 +57,7 @@ function loadDrafts(): Promise<void> {
       drafts = { ...source?.drafts, ...drafts };
       bases = { ...source?.bases, ...bases };
       conflicts = { ...source?.conflicts, ...conflicts };
+      loaded = true;
       writeRecovery();
     });
   }
@@ -166,7 +168,10 @@ function reportDraftError(error: unknown) {
 }
 
 function saveDraftsOnLeave() {
-  writeRecovery();
+  // Auth-only screens have not selected an owner or opened a journal. Never
+  // initialize guest storage or overwrite its recovery while session lookup runs.
+  if (!loading) return;
+  if (loaded || Object.keys(drafts).length) writeRecovery();
   void loadDrafts().then(persistDrafts).catch(reportDraftError);
 }
 addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDraftsOnLeave(); });

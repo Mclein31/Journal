@@ -1,18 +1,31 @@
 {
-  "name": "my-little-world",
+  "name": "dear-days",
   "private": true,
   "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "test": "node --experimental-vm-modules --test tests/*.test.mjs"
+    "deploy:check": "npm run build && wrangler deploy --dry-run",
+    "deploy": "npm run build && wrangler deploy",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.api.json --noEmit",
+    "test": "node --experimental-vm-modules --test tests/*.test.mjs",
+    "db:plan": "tsx scripts/migrate.ts",
+    "db:migrate": "tsx scripts/migrate.ts --apply",
+    "test:api": "RUN_BACKEND_TESTS=1 node --import tsx --test tests/backend/*.test.ts",
+    "fonts:vendor": "tsx scripts/vendor-fonts.ts",
+    "test:live": "tsx scripts/live-smoke.ts"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261104.1",
+    "@types/mailparser": "^3.9.0",
+    "@types/nodemailer": "^8.0.2",
     "fake-indexeddb": "^6.2.7",
+    "imapflow": "^2.10.2",
     "linkedom": "^0.18.15",
+    "mailparser": "^3.14.2",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",
@@ -21,10 +34,18 @@
     "workbox-expiration": "^7.4.1",
     "workbox-precaching": "^7.4.1",
     "workbox-routing": "^7.4.1",
-    "workbox-strategies": "^7.4.1"
+    "workbox-strategies": "^7.4.1",
+    "wrangler": "^4.158.0"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "aws4fetch": "^1.0.20",
+    "better-auth": "^1.7.17",
+    "fflate": "^0.8.3",
+    "hono": "^4.13.16",
     "idb": "^8.0.4",
-    "polygon-clipping": "^0.15.7"
+    "nodemailer": "^10.3.1",
+    "polygon-clipping": "^0.15.7",
+    "zod": "^4.6.7"
   }
 }

@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { emailOTP } from 'better-auth/plugins';
 import type { Pool } from '@neondatabase/serverless';
 import type { Env } from './env';
 import { sendEmail } from './email';
@@ -10,22 +11,30 @@ export function createAuth(env: Env, pool: Pool, schedule: (task: Promise<unknow
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     trustedOrigins: [env.APP_ORIGIN],
+    // Password sign-in stays unchanged; only verification and recovery use codes.
+    disabledPaths: ['/sign-in/email-otp', '/request-password-reset', '/forget-password/email-otp', '/email-otp/check-verification-otp'],
+    plugins: [emailOTP({
+      otpLength: 6,
+      expiresIn: 600,
+      allowedAttempts: 5,
+      storeOTP: 'hashed',
+      disableSignUp: true,
+      overrideDefaultEmailVerification: true,
+      rateLimit: { window: 60, max: 5 },
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        schedule(deliver(env, email, type === 'forget-password' ? 'Reset your password' : 'Verify your email', otp));
+      },
+    })],
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
       minPasswordLength: 10,
       revokeSessionsOnPasswordReset: true,
-      sendResetPassword: async ({ user, url }) => {
-        schedule(deliver(env, user.email, 'Reset your password', url));
-      },
     },
     emailVerification: {
       sendOnSignUp: true,
+      sendOnSignIn: true,
       autoSignInAfterVerification: true,
-      expiresIn: 3600,
-      sendVerificationEmail: async ({ user, url }) => {
-        schedule(deliver(env, user.email, 'Verify your email', url));
-      },
     },
     session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
     rateLimit: {
@@ -38,6 +47,10 @@ export function createAuth(env: Env, pool: Pool, schedule: (task: Promise<unknow
         '/sign-in/email': { window: 60, max: 10 },
         '/send-verification-email': { window: 60, max: 3 },
         '/request-password-reset': { window: 60, max: 3 },
+        '/email-otp/send-verification-otp': { window: 60, max: 3 },
+        '/email-otp/request-password-reset': { window: 60, max: 3 },
+        '/email-otp/verify-email': { window: 60, max: 10 },
+        '/email-otp/reset-password': { window: 60, max: 10 },
       },
     },
     advanced: {

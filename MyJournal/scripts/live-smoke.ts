@@ -7,7 +7,7 @@ import { AwsClient } from 'aws4fetch';
 import { createSeedBook } from '../src/state/seed.ts';
 
 // Explicit live integration check: only the configured sender's plus-addressed
-// test mail is read. Links/passwords/cookies never enter logs or saved artifacts.
+// test mail is read. Codes/passwords/cookies never enter logs or saved artifacts.
 process.loadEnvFile('.env');
 const origin = process.env.APP_ORIGIN!;
 const run = crypto.randomUUID();
@@ -19,6 +19,8 @@ let cookie = '';
 const started = new Date(Date.now() - 60_000);
 const imap = new ImapFlow({ host:'imap.gmail.com', port:993, secure:true, logger:false, auth:{user:process.env.SMTP_USER!,pass:process.env.SMTP_PASS!.replace(/\s/g,'')}, connectionTimeout:15_000, greetingTimeout:15_000, socketTimeout:45_000 });
 let connected = false;
+let authBrowser: any;
+let authPage: any;
 
 async function request(path: string, options: { method?: string; body?: unknown; cookie?: string; account?: string; binary?: Uint8Array } = {}) {
   const headers = new Headers({Origin:origin});
@@ -31,7 +33,7 @@ async function request(path: string, options: { method?: string; body?: unknown;
   return {status:response.status,data,bytes,headers:response.headers,cookie:response.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ')};
 }
 
-async function emailLink(subject: string): Promise<URL> {
+async function emailCode(subject: string): Promise<string> {
   if(!connected){await imap.connect();connected=true;}
   const folders=await imap.list();
   const paths=[...new Set(folders.filter(f=>['\\All','\\Junk','\\Inbox'].includes(f.specialUse??'')||f.path==='INBOX').map(f=>f.path))];
@@ -46,8 +48,9 @@ async function emailLink(subject: string): Promise<URL> {
         if(!message||!message.source)continue;
         const parsed=await simpleParser(message.source);
         if(!parsed.subject?.includes(subject))continue;
-        const link=(parsed.text??'').match(/https:\/\/[^\s]+/)?.[0];
-        if(link){const url=new URL(link);assert.equal(url.origin,origin);return url;}
+        const code=(parsed.text??'').match(/\b[0-9]{6}\b/)?.[0];
+        assert.ok(!/https?:\/\//.test(parsed.text??''), 'Email contains a code instead of a link');
+        if(code)return code;
       }
     }
     await new Promise(resolve=>setTimeout(resolve,3000));
@@ -73,12 +76,31 @@ async function cleanup() {
 }
 
 try {
-  const signup=await request('/api/auth/sign-up/email',{method:'POST',body:{email,password,name:'Temporary Dear Days QA',callbackURL:origin}});
+  let signup;
+  if(process.env.PLAYWRIGHT_MODULE){
+    const {chromium}=await import(process.env.PLAYWRIGHT_MODULE);
+    authBrowser=await chromium.launch({headless:true});
+    const context=await authBrowser.newContext({serviceWorkers:'block'}); authPage=await context.newPage();
+    await authPage.goto(origin);await authPage.getByRole('button',{name:'Create an account',exact:true}).click();
+    await authPage.locator('[name=name]').fill('Temporary Dear Days QA');
+    await authPage.locator('[name=email]').fill(email);await authPage.locator('[name=password]').fill(password);
+    const response=authPage.waitForResponse((r:any)=>r.url().endsWith('/api/auth/sign-up/email'));
+    await authPage.getByRole('button',{name:'Create my account',exact:true}).click();
+    const result=await response;signup={status:result.status(),data:await result.json()};
+    await authPage.locator('[name=otp]').waitFor();
+  }else signup=await request('/api/auth/sign-up/email',{method:'POST',body:{email,password,name:'Temporary Dear Days QA',callbackURL:origin}});
   assert.equal(signup.status,200,'Live signup');owner=signup.data.user.id;
   console.log('PASS live signup; waiting for the actual verification email.');
-  const verify=await emailLink('Verify your email');
-  const verified=await request(verify.pathname+verify.search);assert.ok([200,302].includes(verified.status),'Live email verification');
-  console.log('PASS verification email delivered and verification link accepted.');
+  const verify=await emailCode('Verify your email');
+  if(authPage){
+    await authPage.locator('[name=otp]').fill(verify);await authPage.getByRole('button',{name:'Verify email',exact:true}).click();
+    await authPage.getByRole('button',{name:'Account',exact:true}).waitFor();await authPage.context().close();
+    console.log('PASS real browser signup, email code entry, and automatic sign-in.');
+  }else{
+    const verified=await request('/api/auth/email-otp/verify-email',{method:'POST',body:{email,otp:verify}});assert.equal(verified.status,200,'Live email verification');
+  }
+  assert.equal((await request('/api/auth/email-otp/verify-email',{method:'POST',body:{email,otp:verify}})).status,400,'Verification code cannot be reused');
+  console.log('PASS verification code delivered, accepted once, and replay rejected.');
   const login=()=>request('/api/auth/sign-in/email',{method:'POST',body:{email,password}});
   const first=await login();assert.equal(first.status,200,'First session login');cookie=first.cookie;
   const second=await login();assert.equal(second.status,200,'Second session login');assert.notEqual(cookie,second.cookie);
@@ -101,7 +123,7 @@ try {
   result=await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:look});assert.equal(result.status,200,'Chibi saved to account');
   result=await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:{...look,outfit:0,updatedAt:look.updatedAt-1}});assert.equal(result.data.chibi.outfit,4,'Older chibi retry never replaces a newer look');
   result=await request('/api/account/chibi',{cookie:second.cookie,account:owner});assert.deepEqual(result.data.chibi,look);
-  assert.equal((await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:{...look,outfit:9}})).status,400,'Invalid chibi rejected');
+  assert.equal((await request('/api/account/chibi',{method:'PUT',cookie,account:owner,body:{...look,outfit:999}})).status,400,'Invalid chibi rejected');
   console.log('PASS chibi look saved to the account and read from another session.');
   if(process.env.PLAYWRIGHT_MODULE){
     const {chromium}=await import(process.env.PLAYWRIGHT_MODULE);
@@ -128,18 +150,30 @@ try {
       console.log('PASS real browser sign-in, editable journal sync, second-browser hydration, and sign-out.');
     }finally{await browser.close();}
   }
-  result=await request('/api/auth/request-password-reset',{method:'POST',body:{email,redirectTo:`${origin}/?reset=1`}});assert.equal(result.status,200);
-  const reset=await emailLink('Reset your password');
-  const callback=await request(reset.pathname+reset.search);assert.equal(callback.status,302);
-  const redirect=new URL(callback.headers.get('location')!,origin);assert.equal(redirect.origin,origin);
-  const token=redirect.searchParams.get('token');assert.ok(token);
+  if(authBrowser){
+    const context=await authBrowser.newContext({serviceWorkers:'block'});authPage=await context.newPage();
+    await authPage.goto(origin);await authPage.locator('[name=email]').fill(email);
+    await authPage.getByRole('button',{name:'Forgot password?',exact:true}).click();
+    await authPage.getByRole('button',{name:'Send reset code',exact:true}).click();await authPage.locator('[name=otp]').waitFor();
+  }else{
+    result=await request('/api/auth/email-otp/request-password-reset',{method:'POST',body:{email}});assert.equal(result.status,200);
+  }
+  const reset=await emailCode('Reset your password');
   password=`New-${crypto.randomUUID()}!`;
-  result=await request('/api/auth/reset-password',{method:'POST',body:{token,newPassword:password}});assert.equal(result.status,200);
+  if(authBrowser){
+    await authPage.locator('[name=otp]').fill(reset);await authPage.locator('[name=password]').fill(password);
+    await authPage.getByRole('button',{name:'Save new password',exact:true}).click();
+    await authPage.getByText('Password updated. Sign in with your new password.',{exact:true}).waitFor();
+    await authPage.context().close();console.log('PASS real browser password reset with the emailed code.');
+  }else{
+    result=await request('/api/auth/email-otp/reset-password',{method:'POST',body:{email,otp:reset,password}});assert.equal(result.status,200);
+  }
+  assert.equal((await request('/api/auth/email-otp/reset-password',{method:'POST',body:{email,otp:reset,password}})).status,400,'Reset code cannot be reused');
   assert.equal((await request('/api/books',{cookie,account:owner})).status,401,'Password reset revokes old sessions');
-  console.log('PASS password reset email, browser redirect, new password, and session revocation.');
+  console.log('PASS password reset code, replay rejection, new password, and session revocation.');
   const finalLogin=await login();assert.equal(finalLogin.status,200);cookie=finalLogin.cookie;
   result=await request('/api/auth/delete-user',{method:'POST',cookie,body:{password}});assert.equal(result.status,200,'Account deletion');
   console.log('PASS account deletion; temporary account and owned uploads removed.');
 } catch(error) {
-  console.error('Live smoke failed:',error instanceof Error?error.message:'unknown error');process.exitCode=1;
-} finally {await cleanup();}
+  console.error('Live smoke failed:',error instanceof Error?error.message.replaceAll(email,'[address]').replaceAll(password,'[password]').replace(/\b[0-9]{6}\b/g,'[code]'):'unknown error');process.exitCode=1;
+} finally {await authBrowser?.close();await cleanup();}

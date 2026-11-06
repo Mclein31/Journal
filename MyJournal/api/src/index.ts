@@ -35,7 +35,13 @@ app.use('/api/*', async (c, next) => {
   try { await next(); }
   finally { c.executionCtx.waitUntil(pool.end()); }
 });
-app.on(['GET', 'POST'], '/api/auth/*', (c) => c.get('auth').handler(c.req.raw));
+app.on(['GET', 'POST'], '/api/auth/*', async (c) => {
+  if (c.req.path === '/api/auth/email-otp/send-verification-otp' && c.req.method === 'POST') {
+    const body = await c.req.raw.clone().json() as { type?: string } | null;
+    if (body?.type !== 'email-verification') return c.json({ error: 'Use email verification or password recovery to request a code' }, 400);
+  }
+  return c.get('auth').handler(c.req.raw);
+});
 app.use('/api/*', async (c, next) => {
   const session = await c.get('auth').api.getSession({ headers: c.req.raw.headers });
   if (!session) return c.json({ error: 'Sign in to continue' }, 401);

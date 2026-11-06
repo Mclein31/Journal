@@ -7,9 +7,9 @@ import { createSeedBook } from '../../src/state/seed.ts';
 
 // Explicit integration command only. Uses the configured database, creates isolated
 // synthetic accounts, captures email in memory, and removes only its own test rows.
-test('real Postgres auth, account isolation, revision conflicts, uploads, reset and deletion', { skip: process.env.RUN_BACKEND_TESTS !== '1', timeout: 180_000 }, async (t) => {
+test('real Postgres auth, account isolation, revision conflicts, uploads, reset and deletion', { skip: process.env.RUN_BACKEND_TESTS !== '1', timeout: 240_000 }, async (t) => {
   process.loadEnvFile('.env');
-  const messages: { to: string; subject: string; url: string }[] = [];
+  const messages: { to: string; subject: string; code: string }[] = [];
   const objects = new Map<string, Uint8Array>();
   let failDelete = false;
   const env = { ...process.env, JOURNAL_FILES: {
@@ -17,15 +17,18 @@ test('real Postgres auth, account isolation, revision conflicts, uploads, reset 
     async get(key: string) { const bytes = objects.get(key); return bytes ? { body: bytes, size: bytes.byteLength } : null; },
     async delete(keys: string | string[]) { if (failDelete) throw new Error('simulated storage outage'); for (const key of [keys].flat()) objects.delete(key); },
   } } as unknown as Env;
-  const app = createApp(async (_env, to, subject, url) => { messages.push({ to, subject, url }); });
+  const app = createApp(async (_env, to, subject, code) => { messages.push({ to, subject, code }); });
   const origin = env.APP_ORIGIN;
   const run = crypto.randomUUID();
   const password = `Test-Only-${crypto.randomUUID()}!`;
   const ids: string[] = [];
+  const emails: string[] = [];
   const admin = new Pool({ connectionString: process.env.DATABASE_URL_UNPOOLED });
   const ip = `198.51.100.${Math.floor(Math.random() * 240) + 1}`;
-  async function req(path: string, opts: { method?: string; body?: unknown; cookie?: string; owner?: string; origin?: string; binary?: Uint8Array } = {}) {
-    const headers = new Headers({ Origin: opts.origin ?? origin, 'CF-Connecting-IP': ip });
+  let ipIndex = 1;
+  const nextIp = () => `198.18.${parseInt(run.slice(0, 2), 16)}.${ipIndex++}`;
+  async function req(path: string, opts: { method?: string; body?: unknown; cookie?: string; owner?: string; origin?: string; binary?: Uint8Array; ip?: string } = {}) {
+    const headers = new Headers({ Origin: opts.origin ?? origin, 'CF-Connecting-IP': opts.ip ?? ip });
     if (opts.cookie) headers.set('Cookie', opts.cookie);
     if (opts.owner) headers.set('X-Dear-Days-Account', opts.owner);
     if (opts.body !== undefined) headers.set('Content-Type', 'application/json');
@@ -41,16 +44,23 @@ test('real Postgres auth, account isolation, revision conflicts, uploads, reset 
   }
   async function register(label: string) {
     const email = `dear-days-qa-${run}-${label}@example.invalid`;
+    emails.push(email);
     const signed = await req('/auth/sign-up/email', { method: 'POST', body: { email, password, name: 'QA writer', callbackURL: origin } });
     assert.equal(signed.status, 200, 'signup succeeds');
     ids.push(signed.data.user.id);
     const unverified = await req('/auth/sign-in/email', { method: 'POST', body: { email, password } });
     assert.equal(unverified.status, 403, 'unverified accounts cannot sign in');
-    const mail = messages.find((message) => message.to === email && message.subject.includes('Verify'));
-    assert.ok(mail, 'signup dispatches verification');
-    const url = new URL(mail.url);
-    const verified = await req(url.pathname.replace(/^\/api/, '') + url.search);
-    assert.ok([200,302].includes(verified.status), 'verification link succeeds');
+    const mail = messages.findLast((message) => message.to === email && message.subject.includes('Verify'));
+    assert.ok(mail && /^\d{6}$/.test(mail.code), 'signup dispatches a six-digit verification code');
+    const stored = await admin.query('SELECT value, "expiresAt" FROM verification WHERE identifier=$1 ORDER BY "createdAt" DESC', [`email-verification-otp-${email}`]);
+    assert.ok(stored.rows.length >= 1, 'a verification challenge is persisted');
+    assert.ok(stored.rows.every(row => !/^\d{6}:/.test(row.value) && !row.value.includes(mail.code)), 'OTP is hashed in Postgres');
+    const remaining = new Date(stored.rows[0].expiresAt).getTime() - Date.now();
+    assert.ok(remaining > 540_000 && remaining <= 600_000, 'verification expires after ten minutes');
+    const verified = await req('/auth/email-otp/verify-email', { method:'POST', ip:nextIp(), body:{email,otp:mail.code} });
+    assert.equal(verified.status, 200, 'verification code succeeds');
+    assert.ok(verified.cookie.includes('session_token'), 'verification signs the writer in');
+    assert.equal((await req('/auth/email-otp/verify-email', { method:'POST', ip:nextIp(), body:{email,otp:mail.code} })).status, 400, 'verification code is single-use');
     const signedIn = await req('/auth/sign-in/email', { method: 'POST', body: { email, password } });
     assert.equal(signedIn.status, 200, 'verified account can sign in');
     assert.ok(signedIn.cookie.includes('session_token'));
@@ -100,16 +110,66 @@ test('real Postgres auth, account isolation, revision conflicts, uploads, reset 
       const huge={...asset,id:crypto.randomUUID(),bytes:10485761};
       assert.equal((await req('/assets',{...a,method:'POST',body:huge})).status,400);
     });
-    await t.test('password reset changes the password, revokes sessions, and cannot be reused', async () => {
-      assert.equal((await req('/auth/request-password-reset',{method:'POST',body:{email:b.email,redirectTo:origin}})).status,200);
-      const mail=messages.find((message)=>message.to===b.email&&message.subject.includes('Reset'))!;
-      assert.ok(mail);
-      const token = new URL(mail.url).pathname.split('/').at(-1)!;
+    await t.test('verification rejects wrong, replaced, expired and exhausted codes', async () => {
+      const email = `dear-days-qa-${run}-otp@example.invalid`;
+      emails.push(email);
+      const signup = await req('/auth/sign-up/email', {method:'POST', body:{email,password,name:'OTP QA'}});
+      assert.equal(signup.status, 200); ids.push(signup.data.user.id);
+      const latest = () => messages.findLast(message => message.to === email && message.subject.includes('Verify'))!.code;
+      const verify = (otp: string) => req('/auth/email-otp/verify-email', {method:'POST',ip:nextIp(),body:{email,otp}});
+      const resend = () => req('/auth/email-otp/send-verification-otp', {method:'POST',ip:nextIp(),body:{email,type:'email-verification'}});
+      const first = latest();
+      const wrong = first === '000000' ? '111111' : '000000';
+      assert.equal((await verify(wrong)).status, 400, 'incorrect code rejected');
+      assert.equal((await resend()).status, 200);
+      // A random generator may repeat a six-digit value. Rotate once more if so.
+      if (latest() === first) assert.equal((await resend()).status, 200);
+      assert.ok(latest() !== first, 'resending replaces the prior code');
+      assert.equal((await verify(first)).status, 400, 'replaced code rejected');
+      const identifier = `email-verification-otp-${email}`;
+      await admin.query(`UPDATE verification SET "expiresAt"=now()-interval '1 second' WHERE identifier=$1`, [identifier]);
+      assert.equal((await verify(latest())).status, 400, 'expired code rejected');
+      assert.equal((await resend()).status, 200);
+      const lockedCode = latest();
+      const bad = lockedCode === '000000' ? '111111' : '000000';
+      for (let attempt=0; attempt<5; attempt++) assert.equal((await verify(bad)).status, 400, 'incorrect attempt rejected');
+      assert.equal((await verify(lockedCode)).status, 403, 'five wrong attempts lock out even the correct code');
+      assert.equal((await resend()).status, 200);
+      assert.equal((await verify(latest())).status, 200, 'a fresh code recovers after lockout');
+      assert.equal((await req('/auth/sign-in/email-otp', {method:'POST',body:{email,otp:latest()}})).status, 404, 'passwordless login is not exposed');
+      assert.equal((await req('/auth/request-password-reset', {method:'POST',body:{email}})).status, 404, 'legacy reset-link requests are disabled');
+    });
+    await t.test('OTP sender rejects malformed purposes and limits repeated requests per IP', async () => {
+      const endpoint = '/auth/email-otp/send-verification-otp';
+      const before = messages.length;
+      for (const body of [null, {}, {email:a.email,type:'sign-in'}, {email:a.email,type:'forget-password'}, {email:a.email,type:'change-email'}]) {
+        assert.equal((await req(endpoint, {method:'POST',ip:nextIp(),body})).status, 400, 'unsupported sender input is rejected');
+      }
+      assert.equal(messages.length, before, 'invalid requests dispatch no email');
+      const limitedIp = nextIp();
+      const sendCode = () => req(endpoint, {method:'POST',ip:limitedIp,body:{email:a.email,type:'email-verification'}});
+      for (let request=0; request<3; request++) assert.equal((await sendCode()).status, 200);
+      const delivered = messages.length;
+      assert.equal(delivered, before+3, 'permitted test requests dispatch captured messages');
+      assert.equal((await sendCode()).status, 429, 'fourth send in one minute is throttled');
+      assert.equal(messages.length, delivered, 'throttled requests dispatch no email');
+    });
+    await t.test('password reset codes are purpose-bound, single-use and revoke sessions', async () => {
+      assert.equal((await req('/auth/email-otp/request-password-reset',{method:'POST',body:{email:b.email}})).status,200);
+      const mail=messages.findLast((message)=>message.to===b.email&&message.subject.includes('Reset'))!;
+      assert.ok(mail && /^\d{6}$/.test(mail.code), 'password recovery sends a six-digit code');
       const replacement = `New-${crypto.randomUUID()}!`;
-      assert.equal((await req('/auth/reset-password',{method:'POST',body:{token,newPassword:replacement}})).status,200);
-      assert.equal((await req('/auth/reset-password',{method:'POST',body:{token,newPassword:replacement}})).status,400);
+      assert.equal((await req('/auth/email-otp/verify-email',{method:'POST',ip:nextIp(),body:{email:b.email,otp:mail.code}})).status,400, 'reset code cannot verify an email');
+      const wrong = mail.code === '000000' ? '111111' : '000000';
+      assert.equal((await req('/auth/email-otp/reset-password',{method:'POST',body:{email:b.email,otp:wrong,password:replacement}})).status,400);
+      assert.equal((await req('/auth/email-otp/reset-password',{method:'POST',body:{email:b.email,otp:mail.code,password:replacement}})).status,200);
+      assert.equal((await req('/auth/email-otp/reset-password',{method:'POST',body:{email:b.email,otp:mail.code,password:replacement}})).status,400);
       assert.equal((await req('/books',b)).status,401);
       assert.equal((await req('/auth/sign-in/email',{method:'POST',body:{email:b.email,password:replacement}})).status,200);
+      const before = messages.length;
+      const absent = `dear-days-qa-${run}-missing@example.invalid`;
+      assert.equal((await req('/auth/email-otp/request-password-reset',{method:'POST',body:{email:absent}})).status,200, 'unknown recovery email has the same response');
+      assert.equal(messages.length, before, 'unknown address receives no email');
     });
     await t.test('failed account deletion blocks new writes, remains retryable, and finally removes owned media', async () => {
       failDelete=true;
@@ -123,6 +183,7 @@ test('real Postgres auth, account isolation, revision conflicts, uploads, reset 
     });
   } finally {
     if(ids.length) await admin.query('DELETE FROM "user" WHERE id=ANY($1::text[])',[ids]);
+    if(emails.length) await admin.query('DELETE FROM verification WHERE identifier=ANY($1::text[])', [emails.flatMap(email => [`email-verification-otp-${email}`, `forget-password-otp-${email}`])]);
     await admin.end();
   }
 });

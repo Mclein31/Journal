@@ -3,7 +3,7 @@ import { connect } from 'node:tls';
 import type { Env } from './env';
 
 /** One bounded, encrypted SMTP connection per delivery; credentials stay in the Worker. */
-export async function sendEmail(env: Env, to: string, subject: string, url: string): Promise<void> {
+export async function sendEmail(env: Env, to: string, subject: string, code: string): Promise<void> {
   const transport = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: Number(env.SMTP_PORT),
@@ -31,7 +31,7 @@ export async function sendEmail(env: Env, to: string, subject: string, url: stri
       from: env.EMAIL_FROM,
       to,
       subject: `${subject} · Dear Days`,
-      text: `${subject}\n\nOpen this link to continue:\n${url}\n\nIf you didn't request this, you can ignore this email.\n\nDear Days`,
+      text: `${subject}\n\nYour Dear Days code is:\n\n${code}\n\nEnter this six-digit code in Dear Days. It expires in 10 minutes and can only be used once. If you request another code, use the newest one.\n\nNever share this code. If you didn't request this, you can ignore this email.\n\nDear Days`,
     });
   } finally { transport.close(); }
 }

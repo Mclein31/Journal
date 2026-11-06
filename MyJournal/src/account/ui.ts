@@ -56,7 +56,11 @@ function loginLook(): { scene: string; book: string } {
 /** Native labelled inputs work with paste, browser autofill, and password managers. */
 export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialEmail = ''): void {
   const params = new URLSearchParams(location.search);
-  let mode: Mode = params.get('token') ? 'reset' : initial;
+  let legacyReset = params.has('token');
+  let mode: Mode = legacyReset ? 'reset' : initial;
+  let busy = false;
+  let resendAt = 0;
+  let resendTimer: ReturnType<typeof setTimeout> | undefined;
   let email = initialEmail;
   let password = '';
   let name = '';
@@ -73,21 +77,24 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
   });
   root.addEventListener('focusin', syncHands); root.addEventListener('focusout', syncHands);
   function render() {
+    if (resendTimer) clearTimeout(resendTimer);
     const look = loginLook();
-    const heading = { signin: 'Welcome back.', signup: 'A place for your days.', forgot: 'Let’s get you back in.', reset: 'A fresh start.', verify: 'A little note in your inbox.' }[mode];
-    root.innerHTML = `<section class="auth-screen"><div class="auth-scene"${look.scene}><a class="auth-brand" href="/">${logoMark(34)}<span>Dear Days</span></a><div class="auth-pitch"><p class="auth-statement">A journal that feels like paper.</p><p>Write, add photos, tear and decorate your pages. Saved on your device and synced privately to your account.</p></div><div class="auth-stage">${look.book}<div class="auth-chibi-slot"></div><button type="button" class="auth-chibi-edit">Customize<span class="auth-edit-long"> character</span></button></div></div><div class="auth-panel"><div class="auth-card"><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Open the verification link we sent to <strong>${escapeHTML(email)}</strong>. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a link to reset your password.' : mode === 'reset' ? 'Choose a new password for your account.' : 'Write a little. Keep a memory. Make these pages yours.'}</p>
+    const heading = { signin: 'Welcome back.', signup: 'A place for your days.', forgot: 'Let’s get you back in.', reset: 'A fresh start.', verify: 'Check your inbox.' }[mode];
+    root.innerHTML = `<section class="auth-screen"><div class="auth-scene"${look.scene}><a class="auth-brand" href="/">${logoMark(34)}<span>Dear Days</span></a><div class="auth-pitch"><p class="auth-statement">A journal that feels like paper.</p><p>Write, add photos, tear and decorate your pages. Saved on your device and synced privately to your account.</p></div><div class="auth-stage">${look.book}<div class="auth-chibi-slot"></div><button type="button" class="auth-chibi-edit">Customize<span class="auth-edit-long"> character</span></button></div></div><div class="auth-panel"><div class="auth-card"><h1>${heading}</h1><p class="auth-description">${mode === 'verify' ? `Enter the six-digit code we sent to <strong>${escapeHTML(email)}</strong>. It expires in 10 minutes. Check Spam if it isn’t in your inbox.` : mode === 'forgot' ? 'We’ll email you a six-digit code to reset your password.' : mode === 'reset' ? (legacyReset ? 'Choose a new password for your account.' : `Enter the code sent to <strong>${escapeHTML(email)}</strong> and choose a new password. The code expires in 10 minutes.`) : 'Write a little. Keep a memory. Make these pages yours.'}</p>
       <form class="auth-form">
       ${mode === 'signup' ? `<label>Your name<input name="name" autocomplete="name" maxlength="100" required value="${escapeHTML(name)}"></label>` : ''}
       ${!['verify','reset'].includes(mode) ? `<label>Email address<input name="email" type="email" autocomplete="email" required value="${escapeHTML(email)}"></label>` : ''}
+      ${mode === 'verify' || (mode === 'reset' && !legacyReset) ? '<label>Six-digit code<input name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required></label>' : ''}
       ${['signin','signup','reset'].includes(mode) ? `<label>Password<span class="password-field"><input name="password" type="password" autocomplete="${mode === 'signin' ? 'current-password' : 'new-password'}" minlength="${mode === 'signin' ? 1 : 10}" maxlength="128" required value="${escapeHTML(password)}"><button type="button" class="password-toggle" aria-label="Show password">Show</button></span></label>${mode !== 'signin' ? '<p class="auth-hint">Use at least 10 characters. A password manager can help.</p>' : ''}` : ''}
       <p class="auth-feedback" role="status" aria-live="polite"></p>
-      <button class="auth-primary" type="submit">${{ signin: 'Open my journal', signup: 'Create my account', forgot: 'Send reset link', reset: 'Save new password', verify: 'Send another email' }[mode]}</button>
+      <button class="auth-primary" type="submit">${{ signin: 'Open my journal', signup: 'Create my account', forgot: 'Send reset code', reset: 'Save new password', verify: 'Verify email' }[mode]}</button>
       </form>
+      ${mode === 'verify' || (mode === 'reset' && !legacyReset) ? '<button type="button" class="auth-link auth-resend">Send another code</button>' : ''}
       ${mode === 'signin' ? '<button class="auth-link" data-mode="forgot">Forgot password?</button><p class="auth-switch">New here? <button class="auth-link" data-mode="signup">Create an account</button></p>' : '<button class="auth-link" data-mode="signin">Back to sign in</button>'}
       ${mode === 'signup' ? '<p class="auth-privacy">Your journal is private to your account. Your email is used for sign-in, verification, and password recovery. You can export your journals or delete your account in Account.</p>' : ''}
       <button class="auth-guest" type="button">Continue on this device</button><p class="auth-hint auth-guest-warning" role="note"><strong>Heads up:</strong> ${GUEST_WARNING} Create an account to keep them safe.</p>
       </div></div></section>`;
-    root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => { saveFields(); mode = button.dataset.mode as Mode; password = ''; render(); }));
+    root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => { if (busy) return; saveFields(); mode = button.dataset.mode as Mode; password = ''; render(); }));
     root.querySelector('.auth-chibi-slot')!.appendChild(chibiHost);
     root.querySelector('.auth-chibi-edit')!.addEventListener('click', () => openChibiEditor(false));
     root.querySelector('.auth-guest')!.addEventListener('click', () => { sessionStorage.setItem('dd:guest', '1'); history.replaceState(null, '', '/'); location.reload(); });
@@ -98,6 +105,8 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
       (event.currentTarget as HTMLButtonElement).setAttribute('aria-label', `${input.type === 'password' ? 'Show' : 'Hide'} password`);
       syncHands();
     });
+    root.querySelector('.auth-resend')?.addEventListener('click', () => { void resend(); });
+    updateResend();
     root.querySelector('form')!.addEventListener('submit', (event) => { event.preventDefault(); void submit(); });
     root.querySelector<HTMLInputElement>('input')?.focus();
   }
@@ -106,42 +115,73 @@ export function mountLogin(root: HTMLElement, initial: Mode = 'signin', initialE
     name = root.querySelector<HTMLInputElement>('[name="name"]')?.value.trim() ?? name;
     password = root.querySelector<HTMLInputElement>('[name="password"]')?.value ?? password;
   }
-  async function submit() {
-    saveFields();
-    const button = root.querySelector<HTMLButtonElement>('[type="submit"]')!;
+  function updateResend() {
+    if (resendTimer) clearTimeout(resendTimer);
+    const button = root.querySelector<HTMLButtonElement>('.auth-resend');
+    if (!button) return;
+    const seconds = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
+    button.disabled = busy || seconds > 0;
+    button.textContent = seconds > 0 ? `Send another code in ${seconds}s` : 'Send another code';
+    if (seconds > 0) resendTimer = setTimeout(updateResend, 1000);
+  }
+  function setBusy(value: boolean) {
+    busy = value;
+    root.querySelectorAll<HTMLButtonElement>('button').forEach((button) => { button.disabled = value; });
+    updateResend();
+  }
+  async function resend() {
+    if (busy || Date.now() < resendAt) return;
     const feedback = root.querySelector<HTMLElement>('.auth-feedback')!;
-    button.disabled = true; feedback.textContent = 'One moment…';
+    setBusy(true);
     try {
-      if (mode === 'signin') {
-        await post('/auth/sign-in/email', { email, password, callbackURL: location.origin });
+      await post(mode === 'verify' ? '/auth/email-otp/send-verification-otp' : '/auth/email-otp/request-password-reset',
+        mode === 'verify' ? { email, type: 'email-verification' } : { email });
+      resendAt = Date.now() + 60_000;
+      feedback.textContent = 'A new code has been requested. Use the newest email and check Spam.';
+      root.querySelector<HTMLInputElement>('[name="otp"]')!.value = '';
+      root.querySelector<HTMLInputElement>('[name="otp"]')!.focus();
+    } catch (error) {
+      feedback.textContent = error instanceof Error ? error.message : 'Could not resend the code. Try again.';
+      feedback.setAttribute('role', 'alert');
+    } finally { setBusy(false); }
+  }
+  async function submit() {
+    if (busy) return;
+    saveFields();
+    const otp = root.querySelector<HTMLInputElement>('[name="otp"]')?.value.trim();
+    const feedback = root.querySelector<HTMLElement>('.auth-feedback')!;
+    setBusy(true); feedback.textContent = 'One moment…';
+    try {
+      if (mode === 'signin' || mode === 'verify') {
+        if (mode === 'signin') await post('/auth/sign-in/email', { email, password, callbackURL: location.origin });
+        else await post('/auth/email-otp/verify-email', { email, otp });
         sessionStorage.removeItem('dd:guest'); accountChanged();
         chibi.setHands('rest'); chibi.setMood('happy');
         const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-        await new Promise((resolve) => setTimeout(resolve, reduce ? 200 : 650)); // a quick smile before the book opens
+        await new Promise((resolve) => setTimeout(resolve, reduce ? 200 : 650));
         location.assign('/'); return;
       }
       if (mode === 'signup') {
         await post('/auth/sign-up/email', { email, password, name: name || 'Dear Days writer', callbackURL: location.origin });
-        password = ''; mode = 'verify'; render(); chibi.setHands('rest'); chibi.setMood('happy', 2400); return;
+        password = ''; resendAt = Date.now() + 60_000; mode = 'verify'; render(); chibi.setHands('rest'); chibi.setMood('happy', 2400); return;
       }
       if (mode === 'forgot') {
-        await post('/auth/request-password-reset', { email, redirectTo: `${location.origin}/?reset=1` });
-        feedback.textContent = 'If an account uses this address, a reset link is on its way. Check your inbox and Spam folder.';
-      }
-      if (mode === 'verify') {
-        await post('/auth/send-verification-email', { email, callbackURL: location.origin });
-        feedback.textContent = 'Another verification email has been requested. Check your inbox and Spam folder.';
+        await post('/auth/email-otp/request-password-reset', { email });
+        legacyReset = false; password = ''; resendAt = Date.now() + 60_000; mode = 'reset'; render();
+        root.querySelector<HTMLElement>('.auth-feedback')!.textContent = 'If an account uses this address, a code is on its way. Check your inbox and Spam folder.';
+        return;
       }
       if (mode === 'reset') {
-        await post('/auth/reset-password', { token: params.get('token'), newPassword: password });
-        history.replaceState(null, '', '/'); mode = 'signin'; password = ''; render();
+        if (legacyReset) await post('/auth/reset-password', { token: params.get('token'), newPassword: password });
+        else await post('/auth/email-otp/reset-password', { email, otp, password });
+        history.replaceState(null, '', '/'); legacyReset = false; mode = 'signin'; password = ''; render();
         root.querySelector<HTMLElement>('.auth-feedback')!.textContent = 'Password updated. Sign in with your new password.';
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not complete this request. Try again.';
-      if (mode === 'signin' && /verif/i.test(message)) { mode = 'verify'; password = ''; render(); }
+      if (mode === 'signin' && /verif/i.test(message)) { mode = 'verify'; password = ''; resendAt = Date.now() + 60_000; render(); }
       else { feedback.textContent = message; feedback.setAttribute('role', 'alert'); chibi.setHands('rest'); chibi.setMood('confused', 2600); }
-    } finally { button.disabled = false; }
+    } finally { setBusy(false); }
   }
   render();
   if (params.has('error')) root.querySelector<HTMLElement>('.auth-feedback')!.textContent = 'That link is invalid or expired. Request a new email to continue.';

@@ -8,15 +8,16 @@
 - Production R2 bucket: `journal-assets-prod`.
 - First frontend deployment: 2026-11-05 (`60619339-b109-4d90-91b8-89c059a81ae8`).
 - Verified backend deployment before font update: `5efaaf48-ce9e-4326-b486-c35fcd4b47e9`.
-- Current deployment with parallel offline font caching: `41c983f4-bc2d-45e7-80af-4821657efb99`.
+- Current Pages deployment: `b1197300` (2026-11-06, email OTP verification/recovery).
+- Previous Worker deployment with parallel offline font caching: `41c983f4-bc2d-45e7-80af-4821657efb99`.
 - Configuration: `MyJournal/wrangler.jsonc` (Pages: `pages_build_output_dir`, R2 binding, vars);
   `functions/api/[[path]].ts` mounts the Hono/Better Auth app for `/api/*`; static assets use `_headers`.
 - Pre-Pages Worker deployments (history): `60619339…`, `5efaaf48…`, `41c983f4…`.
 
 ## Live capabilities
 
-Email/password signup, required email verification, login/logout, password reset
-with old-session revocation, owner-scoped cloud journals, private R2 media,
+Email/password signup, required email verification by six-digit code, login/logout,
+password reset by code with old-session revocation, owner-scoped cloud journals, private R2 media,
 revision-safe synchronization, explicit guest-journal import, conflict copies,
 account backup ZIPs, and password-confirmed account deletion are deployed.
 
@@ -95,18 +96,26 @@ errors. DB pools are request-scoped and closed after handler work.
 
 ## Verification and limits
 
+- 2026-11-06, Pages `b1197300`: real Gmail sends codes instead of links. Headless
+  Chromium completed signup → code entry → automatic login, and forgot password →
+  code + new password → sign-in. Used codes were rejected; old sessions were revoked.
+  Existing two-session cloud sync, private R2, chibi, browser editing/hydration, and
+  account/media deletion also pass. Temporary test account/files were cleaned up.
+  OTP regression coverage includes hashes, expiry, wrong guesses, lockout, rotated
+  resends, purpose separation, malformed inputs and server send throttling.
+
 - 2026-11-05 on https://dear-days.pages.dev: full `npm run test:live` (with browser) passes —
   real Gmail verification/reset delivery through Pages Functions, two sessions, CAS conflicts, private R2,
   chibi account save/read/newest-wins/validation, browser sign-in/sync/hydration, reset revocation, deletion.
   Old address redirect and retiring service worker verified. Migration `002-chibi.sql` applied.
 
-- 164 frontend/storage/font/service-worker checks pass; TypeScript, production/PWA build and
+- 180 frontend/storage/font/service-worker checks pass; TypeScript, production/PWA build and
   Wrangler dry run pass.
-- Seven real-Postgres integration checks pass: verification/login, session and
+- Nine real-Postgres integration checks pass: verification/login, session and
   owner isolation, idempotence/CAS conflict, document/media validation, private
-  immutable uploads/archive changes, reset/token reuse/session revocation, and
+  immutable uploads/archive changes, reset/code reuse/session revocation, and
   failed deletion gate/retry/cascade cleanup.
-- Live Gmail email delivery and links, two sessions, browser input/second-browser
+- Live Gmail email delivery and codes, two sessions, browser input/second-browser
   hydration, stale-write rejection, real R2 upload/download and account/file
   deletion pass. Temporary QA accounts remaining: zero.
 - Isolated headless Chromium verified desktop/mobile login rendering, password

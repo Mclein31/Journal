@@ -64,15 +64,19 @@ connected through the native `JOURNAL_FILES` binding.
 ## Implementation status
 
 The deployed backend supports signup, email verification, password reset, private
-media and cloud sync. Real Gmail delivery and verification/reset links have been
-tested, including session revocation after reset. The temporary test accounts and
-uploads are removed after the check.
+media and cloud sync. Verification and password recovery now send six-digit codes
+instead of links. Enter the code inside Dear Days; it expires after 10 minutes.
+Only the latest code works, with five incorrect attempts allowed per challenge.
+Codes are stored hashed, consumed once, and password resets revoke old sessions.
+The UI offers a resend after 60 seconds; server request limits also apply.
+Real Gmail delivery and both code-entry browser flows passed on 2026-11-06;
+temporary test accounts and uploads were removed.
 
 The Worker uses a direct TLS hostname connection supplied to Nodemailer; the
 ordinary pre-resolved IP connection was rejected by Cloudflare's socket proxy.
 Credentials are unchanged. Connections are request-scoped, use TLS on port 465,
 and have bounded timeouts inside `waitUntil` tasks. No passwords or verification
-links are printed in logs.
+codes are printed in logs.
 
 `npm run test:live` explicitly sends verification/reset emails to a unique
 plus-address of the configured Gmail sender, reads only those test messages via

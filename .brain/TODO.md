@@ -112,6 +112,6 @@ last_updated: 2026-11-05
 - [x] Account-scoped storage and draft keys; explicit guest import; remapped conflict copies
 - [x] Revision CAS, idempotent retries, offline reload recovery, independent bookmark/asset sync
 - [x] Owner-scoped media, upload quota/format checks, serialized originals, retryable deletion gate
-- [x] Real Gmail delivery, verification and reset links, session revocation, two-session and two-browser journal sync
+- [x] Real Gmail delivery, verification and reset codes, session revocation, two-session and two-browser journal sync
 - [x] Desktop/mobile login rendering and closed-book Account access in isolated headless Chromium
 - [x] Bundle all 33 font choices + Korean fallback with licenses; same-origin loader and offline font precache

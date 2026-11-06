@@ -112,6 +112,11 @@ revisions protect against lost edits and carry deletions without tombstones.
 
 ## Authentication and email
 Better Auth handles verified email/password signup, sessions, reset and deletion.
+The emailOTP plugin replaces new verification/reset links with six-digit codes: hashed
+storage, 600-second expiry, five guesses, rotated resends, and one-time consumption.
+Password sign-in remains the login method; passwordless OTP login is disabled.
+The existing verification table stores challenges; no schema migration is needed.
+New link reset requests are disabled; outstanding legacy reset tokens remain usable.
 Gmail SMTP uses TLS on port 465 and a Google App Password. Nodemailer receives a
 request-scoped TLS socket connected directly by hostname; its default IP-resolved
 path was rejected by the Worker proxy. Email tasks use `waitUntil`, bounded socket

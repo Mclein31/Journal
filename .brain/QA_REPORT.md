@@ -1,13 +1,13 @@
-# Journal functional QA — 2026-11-05
+# Journal functional QA — updated 2026-11-06
 
 ## Result and limits
 
-**164 frontend/storage/font/service-worker checks and seven database integration
+**180 frontend/storage/font/service-worker checks and nine database integration
 checks pass; all three TypeScript targets and the production/PWA build pass.**
 Dear Days is deployed with verified email/password accounts, Gmail verification
 and password reset, private R2 uploads, and revision-protected cloud sync.
 
-Live checks verified actual Gmail delivery and both email links, independent
+Live checks verified actual Gmail delivery and both email code flows, independent
 sessions, real browser sign-in, edited text reaching another browser, stale-save
 protection, private R2 media, session revocation after reset, and account/media
 cleanup. All temporary QA accounts/files were removed. Isolated headless Chromium

@@ -215,3 +215,13 @@ with the pill offset formula. Re-run `inspect.mjs --app` on the production build
 Turning paper is a developable surface: keep `paperPoint` curvature a function of x only so every
 full-height strip stays a parallelogram (tested). Do not reintroduce per-face clip-path triangles or
 y-dependent bending; each clipped face became a GPU mask and caused 50–100 ms stalls per turn.
+
+## 2026-11-06 — SMTP verification and recovery codes
+User requested email OTP instead of links. Keep the Gmail SMTP transport and use
+Better Auth's emailOTP plugin for verification and password reset. Six digits,
+10-minute expiry, hashed challenge storage, five incorrect attempts, one-time
+consumption and rotated resends. Verification signs in automatically; password
+reset revokes existing sessions. UI supports paste/autofill and 60-second resends;
+server rate limits sends and guesses. Keep password login, disable passwordless
+OTP endpoints and new reset-link issuance, and retain outstanding reset-token
+compatibility. Production stays at https://dear-days.pages.dev.

@@ -2,53 +2,68 @@
 type: project-brain
 title: Jangie's Website — Project Context
 project: Jangie's Website
-status: backend-live
+status: live
 tags: [project, journal, 3d-book, pwa, neon, r2]
-last_updated: 2026-11-05
+last_updated: 2026-11-15
 ---
 
-# Jangie's Website (✿ Dear Days ✿) — Project Context
+# Jangie's Website (Dear Days) — Project Context
 
-> The v1 brain (Aug 2026) described a tabbed journal/schedule/gallery PWA.
-> It was replaced on 2026-11-04 by this redesign brief. v1 code still lives in `MyJournal/`.
+> The v1 brain (Aug 2026) described a tabbed journal/schedule/gallery PWA. It was replaced on
+> 2026-11-04 by the v2 redesign below. v1 code is preserved in `MyJournal/legacy/`.
 
 ## Vision
-Aesthetic journal app name: **Dear Days**, chosen by the user on 2026-11-05.
-A **customizable 3D journal**. The whole app is one physical-feeling book on a desk.
-You change sections by pulling the **tabs** that stick out of the pages, the pages
-**flip**, and every page is a free canvas for writing, photos and stickers.
+**Dear Days** (name chosen by the user on 2026-11-05) is a customizable 3D journal. The whole app
+is one physical-feeling book on a desk: pull the **tabs** sticking out of the pages to change
+section, pages **flip**, and every page is a free canvas for writing, photos and stickers.
+Open to the public: anyone can sign up, and every user's journal is private.
 
-## Core features (the brief)
-1. **3D book** with cover, spine, page stack, and **pull tabs** per section. Tabs are the
-   only section navigation. Next/Prev page also flips.
-2. **Book customization**: cover color, cover texture, paper type (dotted, lined, plain).
-3. **Backgrounds** (the desk behind the book): preset choices + user uploads.
-4. **Draggable photos**: drop a photo on a page, drag it anywhere, rotate, resize.
-5. **Photo frames**: polaroid, instant-film card, photocard, torn paper, tape, film strip, stamp, and more.
-6. **Freehand tear tool**: user drags across a photo to draw exactly where it tears.
-7. **Stickers** to decorate pages (built-in packs + user uploads).
-8. **Page-flip animation** for tab jumps and next/prev.
-9. **Bookmark**: ribbon bookmark + autosave so users continue where they stopped.
-10. **Login screen** with a **gender-neutral chibi character** whose eyes follow the cursor; fully customizable (masculine, feminine or neutral).
+## Core features
+1. **3D book** (cover, spine, page stack) with **pull tabs** per section; next/prev, swipe and
+   drag-to-turn also flip pages. Default view is a two-page spread; one-page view is a toolbar toggle.
+2. **Book customization**: cover color/texture/title, paper type and tint (per book or per page).
+3. **Desk backgrounds**: presets plus user uploads.
+4. **Page canvas**: photos, text and stickers you can drag, rotate, resize and pinch; undo/redo.
+5. **Photo frames** (12 styles) with captions and colors, plus a non-destructive **freehand tear tool**.
+6. **Stickers**: 30 image-generated transparent PNGs plus user uploads.
+7. **Bookmark** ribbon and autosave with text/caption recovery.
+8. **Login screen** with a gender-neutral, customizable chibi whose eyes follow the cursor/caret,
+   and a login journal that mirrors the user's own book look.
+9. **Accounts and cloud sync**: verified email/password accounts (six-digit email codes),
+   private R2 media, revision-protected sync, backups, account deletion. Guest (device-only) mode remains.
 
-## Sections (tabs) — default set
-Journal · Schedule · Memories (photos) · Notes. Users can rename, recolor, add, and reorder tabs.
-Existing v1 features (tasks, journal entries, Korean title translation, gallery) move *into* the book.
+Default sections: Journal · Schedule · Memories · Notes (users can rename, recolor, add, reorder).
 
-## Status
-Dear Days is live at **https://dear-days.pages.dev** with email/password accounts, Gmail verification/reset codes, private R2 uploads, account-scoped offline caches, and revision-protected cloud sync. Live tests verified real email delivery, two sessions, browser editing/second-browser hydration, password reset/session revocation, and account/media deletion. Login screens render on desktop/mobile. The customizable eye-tracking chibi is implemented and verified locally (2026-11-05). Since 2026-11-05 it is hosted on Cloudflare Pages (URL without the account name); the old workers.dev address redirects. Physical-device, full accessibility, and v1 import remain pending. See [DEPLOYMENT.md](DEPLOYMENT.md), [TODO.md](TODO.md), and [HANDOFF.md](HANDOFF.md).
+## Status (verified 2026-11-15)
+- **Live** at **https://dear-days.pages.dev** (Cloudflare Pages project `dear-days`); the old
+  workers.dev address only redirects. Current deployment: Pages `b1197300` (2026-11-06, email codes).
+- Phases 0–10 of the original plan are done and deployed. Remaining: v1 data import, physical
+  device/native browser QA, and full accessibility sign-off. See [TODO.md](TODO.md).
+- 180 frontend/storage/font/service-worker tests pass (`npm test`, re-run 2026-11-15).
+- Repo: `https://github.com/Mclein31/Journal.git` (`main`); last code commit 2026-11-06,
+  last brain commit 2026-11-11 (FLOW.json project map).
 
-## Stack (target)
-- **Frontend**: Vite + TypeScript, no UI framework. 3D is CSS 3D transforms (not WebGL).
-- **API**: Hono in a Cloudflare Pages Function (`/api/*`).
-- **Database**: Neon Postgres (`DATABASE_URL`).
-- **File storage**: private Cloudflare R2 through authenticated Worker upload/download routes; native R2 binding enforces owner scope and upload size.
-- **Auth**: Better Auth, email + password, open public sign-up, email verification + reset via Gmail SMTP (TLS on port 465, Google App Password). Each user's journal is private. SMTP delivery is verified in the deployed Worker.
-- **Hosting**: Cloudflare Pages project `dear-days` (static assets + `/api` function).
-- **Offline**: owner-scoped IndexedDB cache + service worker; whole-book JSONB snapshots synchronize using server revisions and idempotent mutations. Conflicts preserve both copies.
-- Production setup: Neon `production` branch and the user-created private R2 bucket `journal-assets-prod`; no development bucket is required. Preserve user-supplied credentials in ignored `MyJournal/.env`. All configured keys are populated; database, SMTP, R2, and auth are live-tested. Template: `MyJournal/.env.example`; Gmail instructions: `MyJournal/SMTP_SETUP.md`. Runtime secrets are configured on the Pages project; server credentials never enter frontend assets. All 33 font choices and Korean fallback are bundled locally as WOFF2 with licenses and offline caching; no Google Fonts runtime requests.
+## Stack
+- **Frontend**: Vite 8 + TypeScript 7, no UI framework; 3D via CSS 3D transforms (not WebGL).
+  PWA via `vite-plugin-pwa` (injectManifest, hand-written `src/sw.ts`).
+- **API**: Hono 4 + Better Auth 1.7 (email/password + emailOTP plugin) in a Cloudflare Pages
+  Function (`functions/api/[[path]].ts`) serving `/api/*`.
+- **Database**: Neon Postgres (`production` branch), via `@neondatabase/serverless`.
+- **Media**: private Cloudflare R2 bucket `journal-assets-prod` through the native `JOURNAL_FILES` binding.
+- **Email**: Gmail SMTP (port 465, TLS, Google App Password) via Nodemailer.
+- **Offline**: owner-scoped IndexedDB cache + service worker; all 33 font choices and the Korean
+  fallback are self-hosted WOFF2.
+
+Details: [ARCHITECTURE.md](ARCHITECTURE.md), [DEPLOYMENT.md](DEPLOYMENT.md), [NOTES.md](NOTES.md),
+[DECISIONS.md](DECISIONS.md), [QA_REPORT.md](QA_REPORT.md).
 
 ## Constraints
 - Must feel good on a phone (touch drag, pinch, no hover-only controls).
-- Respect `prefers-reduced-motion` (flips become crossfades).
-- All art (chibi, stickers, textures) is original — no copied characters or brand logos.
+- Respect `prefers-reduced-motion` (page turns become flat fades/crossfades).
+- Art must be original; no copied characters or brand logos. Frames use generic names.
+- Neutral visual identity: no pink UI defaults (see DECISIONS).
+- Server secrets never enter frontend assets (only `VITE_*` vars reach the browser).
+
+## Repository layout
+`MyJournal/` is the app (frontend, `api/`, `functions/`, `redirect/`, tests). `MyLittleWorld/` is
+the project's Obsidian vault (git-ignored). `MyJournal/assets/` holds private source photos (git-ignored).

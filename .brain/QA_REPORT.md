@@ -1,8 +1,8 @@
-# Journal functional QA — updated 2026-11-06
+# Journal functional QA — updated 2026-11-06 (stale lines corrected 2026-11-15)
 
 ## Result and limits
 
-**180 frontend/storage/font/service-worker checks and nine database integration
+**180 frontend/storage/font/service-worker checks (re-run 2026-11-15: 180 pass) and nine database integration
 checks pass; all three TypeScript targets and the production/PWA build pass.**
 Dear Days is deployed with verified email/password accounts, Gmail verification
 and password reset, private R2 uploads, and revision-protected cloud sync.
@@ -86,11 +86,11 @@ P1 = potential data loss. P2 = broken or misleading interaction. Every functiona
 
 - Actual Chrome/Safari/Firefox painting, especially Safari clipping, masks, wrapped backgrounds and CSS 3D.
 - Real iOS Safari and Android Chrome: portrait/landscape, pinch/drag/cancel, virtual keyboard, page turns and installation.
-- First-install/offline/update operation and storage quotas on devices. The roughly 42 MiB initial precache needs a real device check.
+- First-install/offline/update operation and storage quotas on devices. The roughly 63 MiB initial precache (stickers + fonts; was ~42 MiB before font bundling) needs a real device check.
 - Complete keyboard-only selection/move/resize of canvas items and keyboard alternatives for drawing/selecting tears. Section-manager focus and inspector keyboard ownership are covered, but this is not full accessibility sign-off.
 - Screen-reader walkthrough, zoom/reflow, forced-colors rendering and reduced-motion rendering.
 - Real codec/EXIF/large-file handling and actual downloaded recovery-file behavior.
-- Login/chibi (Phase 9), backend/auth/sync (Phase 10), v1 import and deployment (Phase 11) are not implemented and cannot be marked tested.
+- v1 import (Phase 11) is not implemented and cannot be marked tested. (Login/chibi, backend/auth/sync and deployment have since shipped and are covered by the live checks summarized at the top; updated 2026-11-15.)
 
 Dependency audit passes the high threshold: **0 high/critical**, 2 low and 4 moderate transitive build-tool findings. The suggested forced fix downgrades the PWA plugin across a major version and was not applied. The PWA build still emits its existing nonblocking `inlineDynamicImports` deprecation warning.
 

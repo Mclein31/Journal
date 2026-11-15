@@ -120,8 +120,8 @@ errors. DB pools are request-scoped and closed after handler work.
   deletion pass. Temporary QA accounts remaining: zero.
 - Isolated headless Chromium verified desktop/mobile login rendering, password
   visibility, guest boot, closed-book Account access and signup navigation.
-- Phone/Safari touch/install checks, complete accessibility, v1 import and the
-  customizable chibi remain separate unfinished work.
+- Phone/Safari touch/install checks, complete accessibility and v1 import remain
+  separate unfinished work. (The customizable chibi has since shipped; see the 2026-11-05 entry above.)
 - Dependency audit: no high/critical findings; six existing low/moderate findings
   remain in build tooling.
 

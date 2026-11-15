@@ -5,6 +5,8 @@ project: Jangie's Website
 last_updated: 2026-11-05
 ---
 
+> Archived 2026-11-15 during brain cleanup. Historical document, kept verbatim below; current state lives in the core brain files (PROJECT_CONTEXT, ARCHITECTURE, TODO, NOTES, DEPLOYMENT).
+
 # Handoff: continue the v2 3D Journal build
 
 ## 2026-11-05 — Chibi done; app moved to https://dear-days.pages.dev (read first)
@@ -23,7 +25,7 @@ Auth email/password login, real Gmail verification/reset delivery, private R2
 uploads, and cloud sync backed by Neon. Runtime secrets are configured. Current
 live checks cover two independent sessions, browser editing/second-browser
 hydration, stale-write protection, reset/session revocation, and account/media
-deletion. All temporary QA users/files are cleaned up. See [DEPLOYMENT.md](DEPLOYMENT.md).
+deletion. All temporary QA users/files are cleaned up. See [DEPLOYMENT.md](../DEPLOYMENT.md).
 
 Storage is owner-scoped; keep guest `mlw_v2` and legacy data untouched. Server
 snapshot versions are independent of local book revisions. Do not revert to

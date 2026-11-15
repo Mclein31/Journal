@@ -6,6 +6,8 @@ tags: [plan, roadmap]
 last_updated: 2026-11-04
 ---
 
+> Archived 2026-11-15 during brain cleanup. Historical document, kept verbatim below; current state lives in the core brain files (PROJECT_CONTEXT, ARCHITECTURE, TODO, NOTES, DEPLOYMENT).
+
 # v2 Execution Plan — Customizable 3D Journal
 
 ## How the work is ordered

@@ -3,7 +3,7 @@ type: architecture
 title: Jangie's Website — Architecture (v2 3D Journal)
 project: Jangie's Website
 tags: [architecture, 3d-book, neon, r2, cloudflare-pages]
-last_updated: 2026-11-15
+last_updated: 2026-11-16
 ---
 
 # Architecture — v2 Customizable 3D Journal (Dear Days)
@@ -16,7 +16,7 @@ for `/api/*`. `MyJournal/wrangler.jsonc` is the Pages config; it binds private R
 `/api/*` is excluded from the service-worker navigation fallback. The old workers.dev Worker is
 `MyJournal/redirect/` (302 redirect + retiring `sw.js`). See [DEPLOYMENT.md](DEPLOYMENT.md).
 
-## Repository layout (actual, 2026-11-15)
+## Repository layout (actual, 2026-11-16)
 ```
 MyJournal/
   index.html              app shell
@@ -57,7 +57,6 @@ MyJournal/
   public/                 fonts/, icons/, sounds/, stickers/generated/ (30 PNGs), _headers
   validation/             evidence: previews, HTTP/font checks, sticker generation records
   legacy/                 v1 app (source for the pending v1 importer). Do not delete.
-  netlify.toml, vercel.json   v1-era leftovers, unused (see TODO)
 ```
 
 ## The 3D book (CSS 3D, not WebGL)

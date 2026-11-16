@@ -3,7 +3,7 @@ type: todo-list
 title: Jangie's Website — TODO
 project: Jangie's Website
 tags: [todo]
-last_updated: 2026-11-15
+last_updated: 2026-11-16
 ---
 
 # TODO
@@ -39,10 +39,10 @@ Release-check details are in [QA_REPORT.md](QA_REPORT.md).
 - [ ] View jumped to spread 0 twice during early scripted tests (Phase 1); never reproduced on demand.
 
 ### Housekeeping
-- [ ] Remove the unused v1-era `MyJournal/netlify.toml` and `MyJournal/vercel.json` (hosting is Cloudflare
-  Pages; both mark every `*.js` immutable, which would also catch `sw.js`).
-- [ ] `MyJournal/.env.example` comment still says images are served via signed URLs; media actually go through
-  authenticated Worker routes with the native R2 binding.
+- [x] Remove the unused v1-era `MyJournal/netlify.toml` and `MyJournal/vercel.json` (hosting is Cloudflare
+  Pages; both mark every `*.js` immutable, which would also catch `sw.js`). *(Done 2026-11-16: confirmed Cloudflare Pages hosting in `MyJournal/wrangler.jsonc`, `MyJournal/public/_headers` and `.brain/`; verified no script, workflow or active doc references them; deleted both files and removed the layout entry in `ARCHITECTURE.md`.)*
+- [x] `MyJournal/.env.example` comment still says images are served via signed URLs; media actually go through
+  authenticated Worker routes with the native R2 binding. *(Done 2026-11-16: verified `PUT`/`GET /api/assets/:id/content` in `MyJournal/api/src/index.ts` and `mediaBlob` in `MyJournal/src/account/api.ts`; updated `MyJournal/.env.example` comment to describe authenticated `/api/assets/:id/content` routes over the native `JOURNAL_FILES` R2 binding.)*
 - [ ] Optional: `/impeccable init` to capture PRODUCT.md for future design work.
 
 ## Backlog

@@ -31,7 +31,7 @@ Release-check details are in [QA_REPORT.md](QA_REPORT.md).
   gzipped excluding images (not yet measured).
 
 ### Accessibility sign-off
-- [ ] Keyboard-only canvas manipulation (select/move/resize) and keyboard alternatives for the tear tool.
+- [x] Keyboard-only canvas manipulation (select/move/resize) and keyboard alternatives for the tear tool. *(Done 2026-11-16: implemented focusable elements with `:focus-visible` ring, non-trapping `Tab`/arrow selection, `Arrow`/`Shift+Arrow` move, `Alt+Arrow` resize preserving `w=1` text invariant, `[`/`]` rotate, `F10`/toolbar navigation, `Delete`/`Escape`, `.canvas-live` polite announcements, `T` shortcut + `TearTool` `Tear edge`/`Keep piece 1`/`2` keyboard controls; pointer behavior and `prefers-reduced-motion` preserved; verified with `npm run typecheck`, `npm test` (188/188), and `npm run build`.)*
 - [ ] Screen-reader walkthrough (tabs as named buttons, page turns announced), zoom/reflow, forced-colors and
   reduced-motion rendering.
 

@@ -3,12 +3,27 @@ type: changelog
 title: Jangie's Website — Changelog
 project: Jangie's Website
 tags: [changelog]
-last_updated: 2026-11-15
+last_updated: 2026-11-16
 ---
 
 # Changelog
 
 Newest first. Entries before 2026-11-05 "Production setup and Gmail SMTP configuration" (the v2 frontend build, phases 0–8 and QA passes, plus v1.2.0) are archived verbatim in [archive/CHANGELOG_ARCHIVE.md](archive/CHANGELOG_ARCHIVE.md).
+
+## 2026-11-16 — Keyboard canvas manipulation and tear-tool accessibility
+- Completed keyboard canvas accessibility in `Canvas.ts`, `PageView.ts`, and `canvas.css`: visible
+  non-ghost elements expose `tabindex="0"`, `role="group"`, descriptive `aria-label`, `aria-selected`,
+  and `.el:focus-visible` focus rings while excluding `[data-ghost]` and single-mode `.slot-left` peeks.
+- Added non-trapping `Tab`/`Shift+Tab` and arrow selection, `Arrow`/`Shift+Arrow` move, `Alt+Arrow`
+  (and `Cmd/Ctrl+Arrow`) resize preserving `w=1` text width, `[`/`]` rotate, `F10`/toolbar keyboard
+  navigation, `Delete`/`Backspace` removal, `Escape` deselection/editor exit, `Cmd/Ctrl+D` duplicate,
+  and `.canvas-live` polite status announcements without changing pointer interactions.
+- Added keyboard tear workflow in `Canvas.ts` (`T` opens `TearTool`), `TearTool.ts`, `tear.ts`, and
+  `frames.css`: bounding-box `presetCut`, `✂ Tear edge` (`T` cycles angles), numbered `1`/`2` SVG piece
+  labels, `Keep piece 1`/`2` (`1`/`2` keys) with focus/hover preview highlights, `Escape` single-step
+  cancel (deduplicated listener), and focus restoration.
+- Verified with `npm run typecheck`, `npm test` (188/188 pass, including `tests/keyboard-canvas-a11y.test.mjs`
+  and `tests/tear.test.mjs`), and `npm run build`; ticked the keyboard TODO item.
 
 ## 2026-11-15 — Brain cleanup
 - Verified the brain against the code, git log and a fresh `npm test` run (180 pass).

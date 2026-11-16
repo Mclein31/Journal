@@ -38,7 +38,8 @@ original frontend pass rather than the current backend status.
 | Photo button/drop/paste handlers, mixed/invalid files, target removed during import | `ui.test.mjs`, `navigation-qa.test.mjs`, `editing-qa.test.mjs` | Automated pass; native clipboard/drop unverified |
 | Move, pinch, rotation, resize, cross-spine ownership and layers | `elements.test.mjs`, `ui.test.mjs`, `generated-stickers.test.mjs` | Automated pass; native gestures unverified |
 | All 12 frames, frame color, caption edits/lifecycle/Undo/recovery | `ui.test.mjs`, `editing-qa.test.mjs` | Automated pass; native painting unverified |
-| Tear geometry, retained piece, repeat tear, cancel/reset/Undo | `tear.test.mjs`, `ui.test.mjs` | Automated pass; touch and keyboard completeness pending |
+| Tear geometry, retained piece, repeat tear, cancel/reset/Undo | `tear.test.mjs`, `ui.test.mjs`, `keyboard-canvas-a11y.test.mjs` | Automated pass; native touch/painting pending |
+| Keyboard canvas selection, move, resize, rotate, delete, deselect, live announcements, and TearTool keyboard controls | `keyboard-canvas-a11y.test.mjs`, `tear.test.mjs` | Automated pass (188 total suite checks); live screen-reader walkthrough pending |
 | All 30 generated stickers: placement → spine drag → transform → duplicate → effects → delete/Undo → reload | `generated-stickers.test.mjs` | Automated pass for every PNG |
 | Sticker search/categories, old saved IDs, upload alpha, remove/restore, Delete/Backspace and Undo/Redo with tray open | `generated-stickers.test.mjs`, `image.test.mjs`, `ui.test.mjs`, `sticker-delete-qa.test.mjs` | Automated pass; real codec support unverified |
 | Cover/paper/page override/desk, successful/failed upload batches and removal/Undo | `ui.test.mjs`, `upload-backgrounds-qa.test.mjs` | Automated pass |
@@ -87,8 +88,7 @@ P1 = potential data loss. P2 = broken or misleading interaction. Every functiona
 - Actual Chrome/Safari/Firefox painting, especially Safari clipping, masks, wrapped backgrounds and CSS 3D.
 - Real iOS Safari and Android Chrome: portrait/landscape, pinch/drag/cancel, virtual keyboard, page turns and installation.
 - First-install/offline/update operation and storage quotas on devices. The roughly 63 MiB initial precache (stickers + fonts; was ~42 MiB before font bundling) needs a real device check.
-- Complete keyboard-only selection/move/resize of canvas items and keyboard alternatives for drawing/selecting tears. Section-manager focus and inspector keyboard ownership are covered, but this is not full accessibility sign-off.
-- Screen-reader walkthrough, zoom/reflow, forced-colors rendering and reduced-motion rendering.
+- Keyboard-only canvas manipulation and TearTool keyboard controls now have automated DOM/geometry coverage (`keyboard-canvas-a11y.test.mjs`, `tear.test.mjs`); live screen-reader walkthrough (tabs as named buttons, page turns and canvas actions announced in VoiceOver/NVDA), zoom/reflow, forced-colors rendering and device reduced-motion rendering still require manual/native verification.
 - Real codec/EXIF/large-file handling and actual downloaded recovery-file behavior.
 - v1 import (Phase 11) is not implemented and cannot be marked tested. (Login/chibi, backend/auth/sync and deployment have since shipped and are covered by the live checks summarized at the top; updated 2026-11-15.)
 

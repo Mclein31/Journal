@@ -43,12 +43,37 @@ export function renderPage(doc: BookDoc, layout: Layout, index: number | undefin
   return el;
 }
 
+export function elementLabel(e: PageElement): string {
+  if (e.type === 'text') {
+    const snippet = e.data.text?.content.replace(/\s+/g, ' ').trim().slice(0, 40);
+    return snippet ? `Text: ${snippet}` : 'Empty text box';
+  }
+  if (e.type === 'photo') {
+    const cap = e.data.photo?.caption?.trim();
+    const frame = e.data.photo?.frame && e.data.photo.frame !== 'none' ? ` (${frameDef(e.data.photo.frame).label})` : '';
+    return cap ? `Photo: ${cap}${frame}` : `Photo${frame}`;
+  }
+  if (e.type === 'sticker') {
+    const label = stickerDef(e.data.sticker?.stickerId ?? '')?.label ?? 'Uploaded sticker';
+    return `Sticker: ${label}`;
+  }
+  return e.type;
+}
+
 function renderElement(e: PageElement, offset = 0): HTMLElement {
   const node = document.createElement('div');
   node.className = `el el-${e.type}`;
   node.dataset.elId = e.id;
   node.dataset.ownerPage = e.pageId;
-  if (offset) node.dataset.ghost = String(offset); // the carried-over half on the facing page
+  if (offset) {
+    node.dataset.ghost = String(offset); // the carried-over half on the facing page
+    node.tabIndex = -1;
+    node.setAttribute('aria-hidden', 'true');
+  } else {
+    node.tabIndex = 0;
+    node.setAttribute('role', 'group');
+    node.setAttribute('aria-label', elementLabel(e));
+  }
   node.style.left = `${(e.x + offset) * 100}%`;
   node.style.top = `${e.y * 100}%`;
   node.style.width = `${(e.type === 'text' ? 1 : e.w) * 100}%`;

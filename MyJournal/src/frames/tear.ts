@@ -102,3 +102,58 @@ export function split(shape: Pt[], cut: Pt[]): [Pt[], Pt[]] | null {
   const b = biggest(polygonClipping.difference(poly, [side]));
   return a && b ? [a, b] : null;
 }
+
+const PRESET_CUTS: [Pt, Pt][] = [
+  [[0.62, 0], [1, 0.38]],
+  [[0, 0.64], [0.36, 1]],
+  [[0, 0.34], [0.34, 0]],
+  [[0.64, 1], [1, 0.64]],
+  [[0, 0.16], [1, 0.12]],
+  [[0, 0.86], [1, 0.82]],
+];
+
+const ringArea = (ring: Pt[]) =>
+  Math.abs(ring.reduce((sum, p, i) => { const q = ring[(i + 1) % ring.length]; return sum + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
+
+/** Deterministic keyboard-friendly cut across `shape`'s bounding box. */
+export function presetCut(shape: Pt[] = FULL, roughness = 0.55, step = 0): { smooth: Pt[]; seed: number; pieces: [Pt[], Pt[]] } | null {
+  const baseArea = ringArea(shape);
+  const xs = shape.map((p) => p[0]);
+  const ys = shape.map((p) => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const spanX = Math.max(1e-4, maxX - minX);
+  const spanY = Math.max(1e-4, maxY - minY);
+  const mapPt = ([x, y]: Pt): Pt => [minX + x * spanX, minY + y * spanY];
+  const minPiece = Math.max(0.002, baseArea * 0.04);
+
+  for (let i = 0; i < PRESET_CUTS.length; i++) {
+    const idx = (step + i) % PRESET_CUTS.length;
+    const smooth = PRESET_CUTS[idx].map(mapPt);
+    const seed = (101 + idx * 97) >>> 0;
+    const pieces = split(shape, roughen(smooth, roughness, seed));
+    if (pieces) {
+      const a0 = ringArea(pieces[0]), a1 = ringArea(pieces[1]);
+      if (Math.min(a0, a1) > minPiece && Math.max(a0, a1) < baseArea - 0.002) return { smooth, seed, pieces };
+    }
+  }
+
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  for (const [k, smooth] of ([
+    [[minX, cy], [maxX, cy]],
+    [[cx, minY], [cx, maxY]],
+  ] as [Pt, Pt][]).entries()) {
+    const seed = (701 + ((step + k) % 6) * 97) >>> 0;
+    const pieces = split(shape, roughen(smooth, roughness, seed));
+    if (pieces) return { smooth, seed, pieces };
+  }
+  return null;
+}
+
+/** Apply a non-destructive ragged tear to `shape` and keep the larger piece. */
+export function presetTear(shape: Pt[] = FULL, roughness = 0.55, step = 0): Pt[] {
+  const cut = presetCut(shape, roughness, step);
+  if (!cut) return shape;
+  const [a, b] = cut.pieces;
+  return ringArea(a) >= ringArea(b) ? a : b;
+}

@@ -15,7 +15,7 @@ const geometry = new vm.SourceTextModule(stripTypeScriptTypes(
 ), { context });
 await geometry.link(() => clipping);
 await geometry.evaluate();
-const { FULL, simplify, roughen, split } = geometry.namespace;
+const { FULL, simplify, roughen, split, presetCut, presetTear } = geometry.namespace;
 
 const area = (ring) => Math.abs(ring.reduce((sum, [x, y], i) => {
   const next = ring[(i + 1) % ring.length];
@@ -68,4 +68,26 @@ test('missed cuts and insufficient paths do not alter the photo', () => {
   assert.equal(split(FULL, [[.5, .5]]), null);
   const straight = [[0, .5], [.25, .5001], [.5, .5], [.75, .4999], [1, .5]];
   assert.equal(simplify(straight).length, 2);
+});
+
+test('keyboard preset tears split the photo non-destructively across repeated steps', () => {
+  let shape = FULL;
+  for (let step = 0; step < 6; step++) {
+    const cut = presetCut(shape, 0.55, step);
+    assert.ok(cut, `preset cut ${step} produces two valid pieces`);
+    assert.ok(area(cut.pieces[0]) > 0.002 && area(cut.pieces[1]) > 0.002);
+    const next = presetTear(shape, 0.55, step);
+    assert.notDeepEqual(next, shape);
+    assert.ok(area(next) > 0.2 && area(next) < 1);
+    shape = next;
+  }
+});
+
+test('presetCut continues cutting a heavily torn sliver inside its remaining shape instead of resetting to FULL', () => {
+  const sliver = [[0.02, 0.02], [0.22, 0.02], [0.22, 0.24], [0.02, 0.24]];
+  const before = area(sliver);
+  const cut = presetCut(sliver, 0.4, 0);
+  assert.ok(cut);
+  assert.ok(area(cut.pieces[0]) < before && area(cut.pieces[1]) < before);
+  assert.ok(Math.abs(area(cut.pieces[0]) + area(cut.pieces[1]) - before) < 1e-6);
 });

@@ -3,12 +3,30 @@ type: decisions-log
 title: Jangie's Website — Decisions
 project: Jangie's Website
 tags: [decisions]
-last_updated: 2026-11-15
+last_updated: 2026-11-16
 ---
 
 # Decisions
 
 Newest first. Superseded decisions are kept and marked; the newer, code-verified decision wins.
+
+## 2026-11-16 — Keyboard canvas manipulation and tear-tool alternatives
+**Decision**: Provide full keyboard-only canvas manipulation and a non-destructive keyboard tear
+workflow while leaving pointer behavior and `.el-bar [data-cmd="tear"]` untouched.
+- **Shortcuts**: `Tab`/`Shift+Tab` (and `Arrow` keys when deselected) cycle visible elements in
+  reading order without trapping focus (`Tab` at the end enters `.el-bar` then exits `.stage`;
+  `Shift+Tab` at the start exits backward; `Tab` outside `.stage` is never intercepted). `Arrows`
+  move (`Shift` 8% vs 2%); `Alt+Arrows` (and `Cmd/Ctrl+Arrows`, plus `Shift`) resize photos/stickers
+  or scale text `data.text.size` (keeping `w=1`); `[`/`]` rotate; `F10` (or `Enter` on
+  stickers/plain photos) focuses `.el-bar`; `Delete`/`Backspace` deletes; `Escape` deselects while
+  keeping focus on the element; `T` on a photo opens `TearTool`.
+- **Focus vs pointer isolation**: `.el:focus-visible` shows the `2.5px` slate focus ring on keyboard
+  focus without altering mouse selection outlines, and pointer-initiated `focusin` does not enable
+  keyboard focus-restoration onto the canvas when clicking external toolbar buttons like Undo.
+- **Live feedback & tear presets**: `.canvas-live` (`role="status"`, `aria-live="polite"`) announces
+  selection, coordinates, size/rotation, boundaries, deletion/deselection, undo/redo, and tears.
+  `presetCut` maps cuts to the remaining polygon's bounding box so repeated tears never reset a torn
+  photo to `FULL`, and `TearTool` renders numbered `1`/`2` piece labels and highlights on button focus.
 
 ## 2026-11-06 — SMTP verification and recovery codes
 User requested email OTP instead of links. Keep the Gmail SMTP transport and use

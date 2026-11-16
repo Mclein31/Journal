@@ -76,11 +76,36 @@ MyJournal/
 - Elements: `text`, `photo`, `sticker` (and tape/drawing in the schema). Each has `x, y, w, rot, z`.
 - One transform controller (pointer events) for drag / corner scale+rotate / pinch; selection
   controls live on a stage overlay. Items crossing the spine change owner page by center position.
+- Keyboard canvas accessibility (`Canvas.ts`, `PageView.ts`, `canvas.css`):
+  - Visible non-ghost elements have `tabindex="0"`, `role="group"`, `aria-label` (`elementLabel`), and
+    `aria-selected`, with a `.el:focus-visible` ring (`2.5px solid var(--accent-deep)`). Decorative
+    `.slot-left` peek items in single-page mode and `[data-ghost]` copies are `tabindex="-1"` / `aria-hidden="true"`.
+  - **Select**: `Tab` / `Shift+Tab` (or `Arrow` keys when deselected on stage; `ArrowUp`/`ArrowDown`
+    from idle) cycles visible elements without trapping focus (`Tab` moves past the last element into
+    `.el-bar` and out to book navigation; `Shift+Tab` on the first element exits back out). `Enter` or
+    `Space` selects a focused deselected element.
+  - **Move**: `Arrow` keys move by 2% of page size (`Shift+Arrow` by 8%), clamping at page boundaries
+    and transferring spine ownership in spread mode.
+  - **Resize & rotate**: `Alt+Arrow` (or `Cmd/Ctrl+Arrow`, plus `Shift` for bigger steps) resizes
+    photo/sticker width (`4%`/`12%`) or scales `data.text.size` (`10%`/`25%`) while preserving `w=1`.
+    `[` / `]` rotates by 5° (`Shift` 15°).
+  - **Actions, delete, deselect, history**: `Enter` edits text/caption (or opens `.el-bar` for
+    stickers/plain photos), `F10` focuses `.el-bar` (`ArrowLeft`/`ArrowRight` between buttons, `Escape`
+    returns to element), `Delete`/`Backspace` deletes, `Escape` deselects while keeping element focus,
+    `Cmd/Ctrl+D` duplicates, `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` / `Cmd/Ctrl+Y` undoes/redoes, and `T` on
+    a photo opens the tear tool.
+  - Every action updates a polite live region (`.canvas-live`, `role="status"`, `aria-live="polite"`).
 
 ## Frames and the tear tool
 - A frame is a registry entry in `frames.ts`; 12 styles.
 - Tear is non-destructive: drag path → RDP simplify → seeded midpoint roughening → split via
   `polygon-clipping` → kept polygon stored as `data.photo.clip`; rendered with clip-path and a fiber rim.
+- Keyboard tear alternative (`TearTool.ts`, `tear.ts`): `T` on a selected photo (or `Frame` → `Torn ✂`,
+  or `.el-bar [data-cmd="tear"]` on a torn photo) opens `TearTool`. Inside the modal, `✂ Tear edge`
+  (`T`) generates deterministic `presetCut` angles across the remaining shape's bounding box with
+  numbered SVG piece labels (`1` / `2`), `Keep piece 1` / `Keep piece 2` (`1` / `2` keys) choose a
+  piece, `Roughness` adjusts jaggedness, `Escape` cancels preview then closes, and `Done` commits one
+  undoable `photo:tear` update and restores element focus.
 
 ## Data model (Neon)
 Better Auth manages `user`, `session`, `account`, `verification`, `rateLimit`
